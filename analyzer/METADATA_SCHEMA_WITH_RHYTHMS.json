@@ -1,0 +1,233 @@
+{
+  "_schema_version": "2.0",
+  "_description": "Enhanced metadata schema with temporal rhythm tracking for understanding work patterns, project churn, and thinking rhythms",
+
+  "conversation_metadata": {
+    "id": "string (UUID)",
+    "source_file": "string (filename)",
+    "analyzed_by": "string (instance_id)",
+    "batch": "string (batch identifier)",
+    "analysis_date": "ISO-8601 date"
+  },
+
+  "temporal_data": {
+    "created_at": "ISO-8601 timestamp (FULL timestamp with time)",
+    "updated_at": "ISO-8601 timestamp",
+    "date_only": "YYYY-MM-DD",
+    "time_of_day": {
+      "hour": "0-23",
+      "period": "morning|afternoon|evening|night",
+      "timezone": "string (if available)"
+    },
+    "day_of_week": "Monday|Tuesday|...|Sunday",
+    "position_in_corpus": "number/total (e.g., 1758/3517)",
+    "days_since_previous": "number (gap between this and previous conversation)",
+    "days_until_next": "number (gap to next conversation)"
+  },
+
+  "conversation_context": {
+    "title": "string",
+    "source": "chatgpt|claude|other",
+    "message_count": "number",
+    "conversation_length_estimate": "short|medium|long|very_long",
+    "session_type": "single|multi-session",
+    "continuation_of": "conversation_id (if this continues previous topic)"
+  },
+
+  "substantive_content": {
+    "user_questions": [
+      {
+        "text": "string",
+        "sequence": "number",
+        "type": "string (exploration|technical|decision|reflection)",
+        "topic": "string"
+      }
+    ],
+    "user_statements": [
+      {
+        "text": "string",
+        "sequence": "number",
+        "significance": "string (CORE_VALUE|BELIEF|DECISION|REFLECTION)",
+        "values_revealed": ["array of value IDs"],
+        "confidence": "0.0-1.0"
+      }
+    ],
+    "documents_provided": [
+      {
+        "type": "string (code|book_proposal|specification|data)",
+        "length_estimate": "number (words/lines)",
+        "significance": "string"
+      }
+    ]
+  },
+
+  "entities_extracted": {
+    "people": [
+      {
+        "id": "person.identifier",
+        "name": "string",
+        "relationship": "string",
+        "roles": ["array"],
+        "organizations": ["array"],
+        "known_since": "YYYY or YYYY-MM-DD (first mention or stated date)",
+        "last_mentioned": "YYYY-MM-DD",
+        "mention_frequency": "number (times mentioned in corpus)",
+        "confidence": "0.0-1.0"
+      }
+    ],
+    "projects": [
+      {
+        "id": "project.identifier",
+        "name": "string",
+        "type": "string (product|book|tool|organization|research)",
+        "status": "ideation|active_development|launched|paused|abandoned|completed",
+        "first_mentioned": "YYYY-MM-DD",
+        "last_mentioned": "YYYY-MM-DD",
+        "status_changes": [
+          {
+            "date": "YYYY-MM-DD",
+            "from_status": "string",
+            "to_status": "string",
+            "evidence": "string"
+          }
+        ],
+        "lifespan_days": "number (last_mentioned - first_mentioned)",
+        "confidence": "0.0-1.0",
+        "notes": "string"
+      }
+    ],
+    "organizations": [
+      {
+        "id": "org.identifier",
+        "name": "string",
+        "role": "founder|co-founder|employee|advisor|member",
+        "founded": "YYYY or YYYY-MM-DD",
+        "status": "active|inactive|unknown",
+        "first_mentioned": "YYYY-MM-DD",
+        "last_mentioned": "YYYY-MM-DD",
+        "confidence": "0.0-1.0"
+      }
+    ],
+    "concepts": [
+      {
+        "id": "concept.identifier",
+        "name": "string",
+        "definition": "string",
+        "source": "string (origin/influence)",
+        "first_mentioned": "YYYY-MM-DD",
+        "last_mentioned": "YYYY-MM-DD",
+        "evolution": "string (how concept evolved over time)",
+        "confidence": "0.0-1.0"
+      }
+    ],
+    "values": [
+      {
+        "id": "value.identifier",
+        "name": "string",
+        "score": "0.0-1.0",
+        "evidence": ["array of evidence strings"],
+        "quotes": ["array of supporting quotes"],
+        "context": "string",
+        "source_message_sequence": "number",
+        "first_observed": "YYYY-MM-DD",
+        "persistence": "stable|emerging|declining|fluctuating"
+      }
+    ],
+    "tensions": [
+      {
+        "id": "tension.identifier",
+        "type": "string (career_choice|technical|philosophical|time_management)",
+        "description": "string",
+        "status": "unresolved|resolved|ongoing",
+        "first_observed": "YYYY-MM-DD",
+        "last_observed": "YYYY-MM-DD",
+        "resolution_date": "YYYY-MM-DD (if resolved)",
+        "values_in_conflict": ["array of value IDs"],
+        "evidence": "string",
+        "evolution": "string (how tension changed over time)"
+      }
+    ]
+  },
+
+  "theory_of_mind": {
+    "beliefs": ["array of belief statements"],
+    "assumptions": ["array of assumptions identified"],
+    "mental_models": ["array of frameworks/models used"],
+    "decision_making_patterns": {
+      "approach": "string (values-driven|analytical|intuitive|collaborative)",
+      "seeks_clarity_on": "string",
+      "uses_tools": ["array"]
+    },
+    "communication_style": {
+      "tone": "string",
+      "complexity": "string",
+      "typos_present": "boolean",
+      "formality": "string (formal|informal|mixed)",
+      "examples": ["array of example patterns"]
+    },
+    "work_patterns": {
+      "focus_areas": ["array of topics"],
+      "typical_session_length": "string (quick|moderate|deep_dive)",
+      "multitasking_evident": "boolean",
+      "follows_up": "boolean (does user return to topics)"
+    }
+  },
+
+  "temporal_context": {
+    "date": "YYYY-MM-DD",
+    "position_in_corpus": "string (e.g., 'middle', 'early', 'recent')",
+    "temporal_significance": "string (inflection_point|typical|transition|milestone)",
+    "concurrent_projects": ["array of project IDs active at this time"],
+    "concurrent_tensions": ["array of tension IDs active at this time"],
+    "life_events": ["array (if mentioned: pregnancy|move|job_change|etc)"]
+  },
+
+  "rhythm_analysis": {
+    "_description": "Patterns in work, thinking, and project engagement",
+
+    "conversation_clustering": {
+      "cluster_start": "YYYY-MM-DD (if this is start of active period)",
+      "cluster_end": "YYYY-MM-DD (if this is end of active period)",
+      "is_cluster_member": "boolean",
+      "cluster_intensity": "low|medium|high (conversations per day in cluster)",
+      "gap_before": "number (days since previous conversation)",
+      "gap_after": "number (days until next conversation)"
+    },
+
+    "project_activity": {
+      "new_projects_mentioned": ["array of project IDs first mentioned here"],
+      "abandoned_projects": ["array of project IDs last mentioned/marked abandoned here"],
+      "active_projects": ["array of project IDs discussed/advanced here"],
+      "project_density": "number (total active projects at this point in time)"
+    },
+
+    "topic_shifts": {
+      "primary_topic": "string",
+      "topic_change_from_previous": "boolean",
+      "new_domain_introduced": "boolean",
+      "returning_to_previous_topic": "boolean"
+    },
+
+    "work_intensity_signals": {
+      "urgency_detected": "boolean (based on language: 'need to', 'urgent', 'asap')",
+      "deadline_mentioned": "boolean",
+      "stress_signals": ["array: 'overwhelmed'|'behind'|'struggling'|etc"],
+      "flow_signals": ["array: 'excited'|'absorbed'|'thrilled'|etc"],
+      "energy_level": "high|medium|low (inferred from language)"
+    }
+  },
+
+  "cross_instance_questions": {
+    "for_instance_1_origins": ["array of questions about origins/emergence"],
+    "for_instance_2_outcomes": ["array of questions about outcomes/future"],
+    "for_instance_3_transitions": ["array of questions about inflection points"]
+  },
+
+  "tags": [
+    "array of tags: substantive_user_input|user_question|user_code|project_mention|domain_expertise|core_value|theory_of_mind|blindspot|opportunity|etc"
+  ],
+
+  "extraction_confidence": "0.0-1.0",
+
+  "notes": "string (analyst observations, patterns, significance)"
+}

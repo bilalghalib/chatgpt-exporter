@@ -157,12 +157,14 @@ For each conversation, I (Claude) extract:
 
 ---
 
-**Last Updated**: 2025-11-23 00:05 UTC
-**Conversations Analyzed**: 10/10 (Batch 1) - ✅ 100% COMPLETE!
-**Beliefs Extracted**: 84 total (avg 8.4 per conversation)
-**Values Cards**: 32 total (avg 3.2 per conversation)
+**Last Updated**: 2025-11-22 23:35 UTC
+**Batch 1**: 10/10 conversations - ✅ COMPLETE
+**Batch 2**: 4/10 conversations - 🔄 IN PROGRESS (40% complete)
+**Total Analyzed**: 14 conversations
+**Beliefs Extracted**: 114 total (avg 8.1 per conversation)
+**Values Cards**: 40 total (avg 2.9 per conversation)
 **Questions Compiled**: 100+ in QUESTIONS_FOR_BILAL.md
-**Book-Worthy Items**: 56 total across all conversations
+**Book-Worthy Items**: 68 total across all conversations
 
 ### Completed Analyses:
 
@@ -225,3 +227,47 @@ For each conversation, I (Claude) extract:
    - 2 values cards: Integrating Assessment Frameworks, Attention Pivots from Curiosity
    - 4 book-worthy items (FRAMEWORK BUILDING)
    - **Key Insight**: Bilal researching assessment frameworks (PERMAH, Universal Skills, Habits of Mind, Skills Builder) to build Bloom methodology. Designing digital+human assessment. Mapping activities to skills. Then suddenly pivots to mushroom cultivation (mycelium question), then Mac scanning - classic ADHD attention switching. Shows methodology being BUILT (Feb 2023) before being USED (March 2023 self-analysis in Conv 6&7).
+
+---
+
+## Batch 2 (Random Selection)
+
+**Target**: 10 conversations
+**Strategy**: Random selection across all sizes/dates (complementing Batch 1's largest-first approach)
+**Status**: 4/10 complete (40%)
+**Progress**: Conversations 11-14 analyzed
+
+### Completed Analyses:
+
+11. ✅ **Optimizing Chat UI for Mobile** (2024-12-30, 315K)
+   - 6 beliefs: 2 knowledge, 2 values, 1 goal
+   - 2 values cards: Building Values Tech Tools, Systematic Debugging
+   - 3 book-worthy items
+   - **Key Insight**: Building values reflection web app with chat UI that extracts values cards - PRODUCTIZING Come Alive framework (Conv 3 Parliaments, Conv 6 meaning cards). Mobile-first UX, passwordless auth (magic links), reflection-first-account-later design. Next.js + Supabase, debugging session management.
+
+12. ✅ **Organizational Capacity and Delivery Metrics** (2024-12-01, 194K)
+   - 6 beliefs: 3 knowledge, 2 values, 1 goal
+   - 2 values cards: Data-Driven Organizational Selection, Iterative Data Exploration
+   - 3 book-worthy items
+   - **Key Insight**: Evaluating 10 organizations for program partnership using structured framework (capacity, experience, alignment, reach, delivery, collaboration) + quantitative metrics (social media reach, team size, projects per team member efficiency ratio). Spider charts, interactive tables, static HTML deployment for stakeholders.
+
+13. ✅ **Baraka Economics Check-in** (2025-04-28, 144K)
+   - 10 beliefs: 3 knowledge, 3 values, 2 goals, 2 needs
+   - 3 values cards: Integrating Fragmented Life's Work, Epistemology Beyond Western Materialism, Voice AI Coaching
+   - 6 book-worthy items (MOST VULNERABLE 2025 CONVERSATION)
+   - **Key Insight**: 30-minute voice conversation about Baraka Economics book crisis. Started with economics, ended up in meaning/epistemology about "Western world missing faculty of perception that includes the heart." Bloom vision crisis: 8 years in, can't pitch it anymore, handed out "kindness kiwis" at impact conference instead. Postmodern meaning crisis diagnosis. Trying to articulate "inner knowing" for academic context. "I don't want to just dream big. I want to actually do something."
+
+14. ✅ **BEIT Project Curriculum Review** (2024-09-30, 101K)
+   - 8 beliefs: 4 knowledge, 3 values, 1 goal
+   - 2 values cards: Contextual Curriculum Design for Iraq, International Development Ecosystem
+   - 3 book-worthy items
+   - **Key Insight**: Sustainable construction curriculum for Iraq (ITC/UN-Habitat/ILO BEIT project). 4 modules: Sustainable Foundations, Site Analysis, Materials, Climate-Resilient Design. Target: young people and women. Iraq-specific relevance prioritized ("relevant for iraq in specific - this is important"). Creating expert validation forms, seeking government certification. Shows Bloom methodology applied to international development consulting.
+
+### Pending (6 more):
+
+- Conv 15: Technology Promotion in Iraq (90K, 2023-12-16)
+- Conv 16: Resolve Hive and Pigeon Issues (89K, 2024-06-03)
+- Conv 17: Lab Equipment for Projects (41K, 2024-02-24)
+- Conv 18: Digital Journaling App with AI (36K, 2025-05-06)
+- Conv 19: Trip Coordination (34K, 2024-03-02)
+- Conv 20: Ukulele Singalong Progressions (5K, 2025-01-29)
