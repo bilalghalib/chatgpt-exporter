@@ -12,6 +12,26 @@
 
 ---
 
+## Extended Analysis Tools (NEW)
+
+This repository now includes comprehensive analysis tools for exported conversations:
+
+### Analysis Pipeline
+1. **Thematic Analysis** - Categorize conversations across 16 themes with temporal patterns
+2. **Multi-Dimensional Clustering** - Analyze across 6 dimensions (work domains, activities, tech stack, etc.)
+3. **Voice Extraction** - Extract substantive user messages organized by theme
+4. **LLM-Based Theory of Mind** - SAREC-based belief extraction using Claude API
+5. **Structured Organization** - Individual folders for each conversation with metadata
+
+### Key Files
+- **Analysis Tools**: `analyze_themes.py`, `deep_theme_analyzer.py`, `extract_your_voice.py`, `organize_conversations.py`, `build_llm_theory_of_mind.py`
+- **Documentation**: `PROCESS_DOCUMENTATION.md`, `COMPREHENSIVE_THEME_ANALYSIS.md`, `ANALYSIS_COMPLETE.md`
+- **Outputs**: `theme_analysis.json`, `deep_theme_analysis.json`, `your_voice/`, `conversations/`
+
+See `PROCESS_DOCUMENTATION.md` for complete pipeline details.
+
+---
+
 ## Architecture Overview
 
 ### Directory Structure
