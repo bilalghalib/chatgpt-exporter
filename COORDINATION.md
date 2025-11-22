@@ -84,6 +84,93 @@ If multiple instances analyze the same conversation:
 
 ## Communication Protocol
 
+### **Extraction Requirements**
+
+**CRITICAL**: All instances must extract the following from each conversation:
+
+#### 1. **SAREC Beliefs** (Theory of Mind)
+Extract beliefs in 4 categories with full SAREC structure:
+
+```json
+{
+  "belief_id": "bilal.category.specific_topic",
+  "category": "knowledge|values|goals|needs",
+  "subcategory": "domain",
+  "claim": "Clear statement of what Bilal knows/values/wants/needs",
+  "score": 0.0-1.0,
+  "reasoning": "Why you believe this (2-3 sentences)",
+  "evidence": [
+    {"quote": "exact quote from conversation", "speaker": "user|assistant"}
+  ],
+  "confidence": 0.0-1.0,
+  "book_worthy": true|false,
+  "tags": ["tag1", "tag2"]
+}
+```
+
+**Categories**:
+- **Knowledge**: What Bilal knows (skills, expertise, experience)
+- **Values**: What Bilal cares about (priorities, passions, principles)
+- **Goals**: What Bilal is trying to do (projects, aspirations)
+- **Needs**: What Bilal needs (gaps, challenges, support)
+
+#### 2. **Come Alive Values Cards**
+Extract sources of meaning using Come Alive framework:
+
+```json
+{
+  "id": "vc_unique_id",
+  "title": "Name of source of meaning",
+  "cap_indicators": ["quotes showing intrinsic motivation"],
+  "attention_policies": ["what Bilal consistently notices"],
+  "ground_truth": {
+    "quotes": ["exact quotes"],
+    "stories": ["narrative examples"],
+    "recurring_themes": ["patterns"]
+  },
+  "tensions": ["contradictions that reveal values"],
+  "energy_level": 0.0-1.0,
+  "status": "emerging|active|confirmed",
+  "conversation_id": "conv_id"
+}
+```
+
+**Look for**:
+- **CAPs** (Constitutive Actions): Activities that feel intrinsically meaningful
+- **IAPs** (Instrumental Actions): Activities done as means to an end
+- **Tensions**: Contradictions reveal what matters most
+
+#### 3. **Book Material Flagging**
+Mark beliefs as `book_worthy: true` if they are:
+- Compelling insights or frameworks
+- Unique perspectives or methodologies
+- Vulnerable admissions or struggles
+- Core identity or life work
+- Cross-cultural or interdisciplinary integration
+
+Track separately for book planning:
+```json
+{
+  "claim": "belief claim",
+  "category": "knowledge|values|goals|needs",
+  "confidence": 0.0-1.0,
+  "why_book_worthy": "Explanation of why this belongs in a book"
+}
+```
+
+**Target books**:
+- **Book D**: Islamic Values in Secular/Tech Work
+- **Book F**: Cross-Cultural Education Design
+- **Book G**: Portfolio Approach (blog posts, case studies)
+- **Book E**: AI for Social Good
+- **Book A**: The Integrated Approach
+
+#### 4. **Tags & Themes**
+Extract and cluster thematic tags:
+- Use canonical forms (lowercase, underscores, no plurals)
+- Check `tag_aliases.json` before creating new tags
+- Track: themes, projects, people, locations, skills
+
 ### **Cross-Instance Notes**
 
 File: `cross_instance_notes.md`
