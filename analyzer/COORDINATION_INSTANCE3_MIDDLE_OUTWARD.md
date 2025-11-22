@@ -144,8 +144,48 @@ analyzer/
 │   ├── ...
 │   ├── knowledge_graph_batch_M0_middle.json
 │   ├── extraction_batch_M0_middle.md
+│   ├── middle_baseline_M0.md
 │   └── temporal_analysis_middle_outward.json
+│
+└── exported_conversations/
+    ├── [conversation_file].json (original)
+    ├── [conversation_file]_metadata.json (✨ NEW: structured extraction)
+    └── [conversation_file]_metadata.md (✨ NEW: human-readable summary)
 ```
+
+### **NEW: Per-Conversation Metadata Files** ✨
+
+For EACH conversation analyzed, create TWO metadata files:
+
+#### **1. `[conversation_file]_metadata.json`** (Structured Data)
+
+Contains:
+- Conversation metadata (ID, date, source, title)
+- Substantive user inputs (questions, statements, documents)
+- Entities extracted (people, projects, organizations, concepts, values, tensions)
+- Theory of mind insights (beliefs, mental models, communication style)
+- Temporal context (date, position in corpus, significance)
+- Cross-instance questions (for Instance 1 origins, Instance 2 outcomes)
+- Tags, confidence scores, analyst notes
+
+**Why**: Preserves ALL rich qualitative insights in queryable format. Not lost in summaries.
+
+**Example**: `2024-12-30_chatgpt_Barakanomics_Business_Philosophy_67729919_metadata.json`
+
+#### **2. `[conversation_file]_metadata.md`** (Human-Readable)
+
+Ordered markdown mirroring JSON structure:
+- Document provided
+- Core concepts
+- Entities
+- Values extracted
+- Cross-instance questions
+- Significance
+- Tags
+
+**Why**: Easy browsing, readable without parsing JSON.
+
+**Example**: `2024-12-30_chatgpt_Barakanomics_Business_Philosophy_67729919_metadata.md`
 
 ### **Temporal Analysis Output:**
 

@@ -70,6 +70,28 @@ Each instance updates this file after completing a batch:
 - Knowledge graph: `knowledge_graph_batch_[N]_reverse.json`
 - Extraction log: `extraction_batch_[N]_reverse.md`
 
+**Instance 3** (middle→outward):
+- Checkpoint files: `checkpoint_batch_M[N]-[B|F]_[direction].json`
+- Knowledge graph: `knowledge_graph_batch_M[N]-[B|F]_[direction].json`
+- Extraction log: `extraction_batch_M[N]-[B|F]_[direction].md`
+
+### **NEW: Per-Conversation Metadata** ✨ (Instance 3 Innovation)
+
+**ALL INSTANCES should adopt this pattern:**
+
+For each conversation analyzed, create:
+- `[conversation_file]_metadata.json` - Structured extraction (entities, values, theory of mind, cross-instance questions)
+- `[conversation_file]_metadata.md` - Human-readable summary
+
+**Location**: Same directory as original conversation (`exported_conversations/`)
+
+**Why**: Preserves rich qualitative insights that would be lost in batch summaries. Makes individual conversations searchable and cross-referenceable.
+
+**Example**:
+- Original: `2024-12-30_chatgpt_Barakanomics_Business_Philosophy_67729919.json`
+- Metadata: `2024-12-30_chatgpt_Barakanomics_Business_Philosophy_67729919_metadata.json`
+- Summary: `2024-12-30_chatgpt_Barakanomics_Business_Philosophy_67729919_metadata.md`
+
 ### **3. Checkpoint Frequency**
 
 - ✅ **Every 50 conversations** = 1 batch checkpoint
