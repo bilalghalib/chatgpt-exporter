@@ -23,12 +23,12 @@
 ---
 
 ### **Instance 2 (Newest→Oldest)**
-**Status**: ⏳ NOT STARTED
+**Status**: 🟢 ACTIVE
 **Direction**: Backward (reverse chronological)
 **Range**: Conversations 3517 → 1759 (second half)
-**Current Progress**: Not started
-**Last Checkpoint**: N/A
-**Next Checkpoint**: After conversation 3517-3468 (first batch)
+**Current Progress**: Batch 71 starting (conversations 3517-3468)
+**Last Checkpoint**: 2025-11-22
+**Next Checkpoint**: After conversation 3468 (Batch 71 complete)
 
 **Batches Assigned**: 37-71 (batches of 50 each, numbered in reverse)
 - Batch 71: Conversations 3517-3468 ⏳ Start here
@@ -130,6 +130,27 @@ Each instance updates this file after completing a batch:
 - Allows other instances to see detailed context
 
 **Update Frequency**: Create metadata file immediately after analyzing each conversation
+**Instance 3** (middle→outward):
+- Checkpoint files: `checkpoint_batch_M[N]-[B|F]_[direction].json`
+- Knowledge graph: `knowledge_graph_batch_M[N]-[B|F]_[direction].json`
+- Extraction log: `extraction_batch_M[N]-[B|F]_[direction].md`
+
+### **NEW: Per-Conversation Metadata** ✨ (Instance 3 Innovation)
+
+**ALL INSTANCES should adopt this pattern:**
+
+For each conversation analyzed, create:
+- `[conversation_file]_metadata.json` - Structured extraction (entities, values, theory of mind, cross-instance questions)
+- `[conversation_file]_metadata.md` - Human-readable summary
+
+**Location**: Same directory as original conversation (`exported_conversations/`)
+
+**Why**: Preserves rich qualitative insights that would be lost in batch summaries. Makes individual conversations searchable and cross-referenceable.
+
+**Example**:
+- Original: `2024-12-30_chatgpt_Barakanomics_Business_Philosophy_67729919.json`
+- Metadata: `2024-12-30_chatgpt_Barakanomics_Business_Philosophy_67729919_metadata.json`
+- Summary: `2024-12-30_chatgpt_Barakanomics_Business_Philosophy_67729919_metadata.md`
 
 ### **3. Checkpoint Frequency**
 
@@ -369,9 +390,9 @@ Every 200 conversations, both instances should check:
 - **NEXT UPDATE**: After completing Batch 1 (conversations 43-50)
 
 ### Instance 2 Updates:
-- **[WAITING TO START]**
-- Instance 2 should begin with: `ls -1 ./exported_conversations/*.json | sort -r | head -50`
-- First batch: Conversations 3517-3468 (Batch 71)
+- **2025-11-22 20:30 UTC**: Instance 2 ACTIVATED - Batch 71 starting (conversations 3517-3468)
+- **Direction**: Newest→Oldest (reverse chronological)
+- **Next update**: After completing Batch 71
 
 ---
 
