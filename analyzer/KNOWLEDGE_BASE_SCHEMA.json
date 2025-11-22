@@ -1,0 +1,329 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bilal's Knowledge Base Schema",
+  "description": "Structured extraction of insights from 3,517 conversations",
+  "type": "object",
+  "required": ["metadata", "extractions", "theory_of_mind", "projects", "patterns", "checkpoints"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "total_conversations": {"type": "number"},
+        "analyzed_count": {"type": "number"},
+        "current_batch": {"type": "number"},
+        "last_updated": {"type": "string", "format": "date-time"},
+        "analyzer": {"type": "string"},
+        "extraction_version": {"type": "string"},
+        "date_range": {
+          "type": "object",
+          "properties": {
+            "earliest": {"type": "string", "format": "date"},
+            "latest": {"type": "string", "format": "date"}
+          }
+        }
+      }
+    },
+    "extractions": {
+      "type": "array",
+      "description": "All extracted content from conversations",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "content", "source", "tags", "timestamp"],
+        "properties": {
+          "id": {"type": "string", "description": "Unique extraction ID"},
+          "type": {
+            "type": "string",
+            "enum": [
+              "substantive_user_input",
+              "user_question",
+              "user_code",
+              "user_prompt",
+              "user_self_reflection",
+              "project_mention",
+              "domain_expertise",
+              "learning_progression",
+              "recurring_pattern",
+              "theory_of_mind",
+              "creative_direction",
+              "problem_description",
+              "solution_attempt"
+            ]
+          },
+          "content": {
+            "type": "object",
+            "properties": {
+              "text": {"type": "string", "description": "Full text of user input"},
+              "word_count": {"type": "number"},
+              "summary": {"type": "string", "description": "Brief summary if text is long"},
+              "key_quotes": {"type": "array", "items": {"type": "string"}}
+            }
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "conversation_id": {"type": "string"},
+              "conversation_title": {"type": "string"},
+              "conversation_date": {"type": "string", "format": "date"},
+              "message_id": {"type": "string"},
+              "message_sequence": {"type": "number"},
+              "batch_number": {"type": "number"}
+            }
+          },
+          "tags": {
+            "type": "object",
+            "properties": {
+              "primary": {"type": "array", "items": {"type": "string"}},
+              "domain": {"type": "array", "items": {"type": "string"}},
+              "project": {"type": "array", "items": {"type": "string"}},
+              "meta": {"type": "array", "items": {"type": "string"}}
+            }
+          },
+          "relationships": {
+            "type": "array",
+            "description": "Links to other extractions",
+            "items": {
+              "type": "object",
+              "properties": {
+                "related_extraction_id": {"type": "string"},
+                "relationship_type": {
+                  "type": "string",
+                  "enum": ["follows_up", "contradicts", "expands_on", "relates_to", "resolves"]
+                },
+                "strength": {"type": "number", "minimum": 0, "maximum": 1}
+              }
+            }
+          },
+          "analysis": {
+            "type": "object",
+            "properties": {
+              "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+              "reveals": {"type": "array", "items": {"type": "string"}},
+              "questions_raised": {"type": "array", "items": {"type": "string"}},
+              "blindspot_indicator": {"type": "boolean"},
+              "opportunity_indicator": {"type": "boolean"}
+            }
+          },
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "theory_of_mind": {
+      "type": "object",
+      "description": "Bilal's mental models, beliefs, values",
+      "properties": {
+        "beliefs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "belief": {"type": "string"},
+              "confidence": {"type": "number"},
+              "evidence": {"type": "array", "items": {"type": "string"}},
+              "first_observed": {"type": "string", "format": "date"},
+              "last_observed": {"type": "string", "format": "date"},
+              "evolution": {"type": "array", "items": {"type": "object"}}
+            }
+          }
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {"type": "string"},
+              "strength": {"type": "number"},
+              "evidence": {"type": "array", "items": {"type": "string"}},
+              "contexts": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "mental_models": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "description": {"type": "string"},
+              "framework": {"type": "string"},
+              "usage_count": {"type": "number"},
+              "examples": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "communication_patterns": {
+          "type": "object",
+          "properties": {
+            "question_style": {"type": "string"},
+            "language_patterns": {"type": "array", "items": {"type": "string"}},
+            "self_descriptions": {"type": "array", "items": {"type": "string"}},
+            "preferred_formats": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "problem_solving_approach": {
+          "type": "object",
+          "properties": {
+            "default_strategy": {"type": "string"},
+            "tools_used": {"type": "array", "items": {"type": "string"}},
+            "patterns": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "self_awareness": {
+          "type": "object",
+          "properties": {
+            "stated_strengths": {"type": "array", "items": {"type": "string"}},
+            "stated_weaknesses": {"type": "array", "items": {"type": "string"}},
+            "stated_fears": {"type": "array", "items": {"type": "string"}},
+            "stated_aspirations": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      }
+    },
+    "projects": {
+      "type": "array",
+      "description": "All projects Bilal works on or mentions",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "status": {
+            "type": "string",
+            "enum": ["active", "paused", "completed", "abandoned", "planned", "unknown"]
+          },
+          "first_mention": {"type": "string", "format": "date"},
+          "last_mention": {"type": "string", "format": "date"},
+          "description": {"type": "string"},
+          "domain": {"type": "array", "items": {"type": "string"}},
+          "collaborators": {"type": "array", "items": {"type": "string"}},
+          "mentions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "conversation_id": {"type": "string"},
+                "date": {"type": "string", "format": "date"},
+                "context": {"type": "string"},
+                "status_at_time": {"type": "string"}
+              }
+            }
+          },
+          "related_projects": {"type": "array", "items": {"type": "string"}},
+          "outcomes": {"type": "array", "items": {"type": "string"}},
+          "challenges": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "patterns": {
+      "type": "object",
+      "description": "Recurring themes, blindspots, opportunities",
+      "properties": {
+        "recurring_questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {"type": "string"},
+              "count": {"type": "number"},
+              "first_asked": {"type": "string", "format": "date"},
+              "last_asked": {"type": "string", "format": "date"},
+              "contexts": {"type": "array", "items": {"type": "string"}},
+              "resolved": {"type": "boolean"},
+              "resolution": {"type": "string"}
+            }
+          }
+        },
+        "recurring_topics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "topic": {"type": "string"},
+              "frequency": {"type": "number"},
+              "depth_evolution": {"type": "string"},
+              "related_topics": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "blindspots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "blindspot": {"type": "string"},
+              "evidence": {"type": "array", "items": {"type": "string"}},
+              "impact": {"type": "string"},
+              "self_identified": {"type": "boolean"}
+            }
+          }
+        },
+        "opportunities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "opportunity": {"type": "string"},
+              "reasoning": {"type": "string"},
+              "connections": {"type": "array", "items": {"type": "string"}},
+              "potential_impact": {"type": "string"}
+            }
+          }
+        },
+        "learning_progressions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "topic": {"type": "string"},
+              "stages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "date": {"type": "string", "format": "date"},
+                    "level": {"type": "string"},
+                    "evidence": {"type": "string"}
+                  }
+                }
+              },
+              "trajectory": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "domains": {
+      "type": "object",
+      "description": "Expertise map across domains",
+      "properties": {
+        "expert_in": {"type": "array", "items": {"type": "string"}},
+        "learning": {"type": "array", "items": {"type": "string"}},
+        "teaching": {"type": "array", "items": {"type": "string"}},
+        "domain_evolution": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "domain": {"type": "string"},
+              "timeline": {"type": "array", "items": {"type": "object"}}
+            }
+          }
+        }
+      }
+    },
+    "checkpoints": {
+      "type": "array",
+      "description": "Batch processing checkpoints",
+      "items": {
+        "type": "object",
+        "properties": {
+          "batch_number": {"type": "number"},
+          "conversations_analyzed": {"type": "number"},
+          "date": {"type": "string", "format": "date-time"},
+          "new_projects": {"type": "number"},
+          "new_patterns": {"type": "number"},
+          "insights": {"type": "array", "items": {"type": "string"}},
+          "next_steps": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}
