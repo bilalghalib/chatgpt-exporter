@@ -2,6 +2,8 @@
 
 > Notes and discoveries that one instance wants to share with the other
 
+**📋 IMPORTANT**: See `OPEN_QUESTIONS_FOR_BILAL.md` (root) for comprehensive list of 75 questions gathered from all analysis. Use these to guide what you look for in conversations.
+
 ---
 
 ## From Instance 1 (Oldest→Newest) to Instance 2 (Newest→Oldest):
