@@ -85,4 +85,68 @@
 
 ---
 
-**Last Updated**: 2025-11-22 (Instance 1, Instance 3)
+---
+
+## 🎯 COORDINATION FRAMEWORK UPDATE (2025-11-22)
+
+### NEW RESOURCES CREATED FOR ALL INSTANCES:
+1. **PARALLEL_CLAUDE_CODE_STRATEGY.md** (root) - Comprehensive parallel execution guide
+2. **QUICK_START_INSTANCES.md** (root) - Copy-paste prompts to initialize each instance
+3. **entity_registry.json** (analyzer/) - Canonical entity names and IDs
+
+### MANDATORY PRACTICES (All Instances Must Adopt):
+✅ **Check `analyzer/entity_registry.json` before creating ANY entity** - Use canonical IDs to avoid duplicates
+✅ **Create metadata files for EVERY conversation**:
+   - `[conversation]_metadata.json` (structured extraction)
+   - `[conversation]_metadata.md` (human-readable summary)
+✅ **Post discoveries here after each batch** (entities, values, cross-instance questions)
+✅ **Update analyzer/COORDINATION.md Progress Log daily**
+✅ **Use SAREC framework rigorously** (Score, Assessment, Reasoning, Evidence, Confidence)
+
+### QUALITY STANDARDS:
+- **Confidence scores**: Average 0.7-0.85 (not all 0.9+, stay calibrated)
+- **Evidence threshold**: Minimum 3 conversations per claim
+- **Entity naming**: Use registry IDs (e.g., `project.bloom`, not "Bloom" or "bloom.pm")
+- **Tag clustering**: Merge synonyms, document decisions in entity_registry.json
+
+### COORDINATION PROTOCOL:
+**Every Batch** (50 conversations):
+1. Post discoveries to this file
+2. Update entity_registry.json with new entities
+3. Update COORDINATION.md Progress Log
+4. Ask cross-instance questions
+
+**Every 200 Conversations**:
+1. Cross-instance calibration check
+2. Review entity naming consistency
+3. Validate findings from multiple perspectives
+4. Adjust quality if drift detected
+
+### ENTITY REGISTRY USAGE:
+Before creating an entity:
+1. Search `analyzer/entity_registry.json` for similar names
+2. Check `aliases` arrays for variations
+3. If found: Use `canonical_name` and `entity_id`
+4. If new: Add to registry with proper metadata
+5. Update `discovered_by` array to include your instance
+
+### CURRENT ENTITY REGISTRY CONTENTS:
+**People**: bilal_ghalib, charles_eisenstein, carol_sanford
+**Projects**: bloom, barakanomics, nur_coop, checkin_cards
+**Organizations**: project_defy, cambridge_muslim_college, faithfully_sustainable, apple_seed_collective
+**Concepts**: barakanomics_philosophy, halal_rizq, baraka, taqwa, eight_forms_capital, decommodification, sarec
+**Values**: autonomy_meaning, spiritual_integrity_commerce, relationship_over_transaction, curious_knowledge_weaver
+**Knowledge**: solar_energy, web_development, education_pedagogy
+**Locations**: lambersart_france
+
+### QUALITY METRICS TO TRACK:
+Each instance should monitor:
+- Conversations analyzed (count)
+- Entities per conversation (avg: 5-15 is good)
+- Confidence scores (avg: 0.7-0.85 is calibrated)
+- Metadata files created (should equal conversations analyzed)
+- Cross-instance questions posted (Instance 3 should have most)
+
+---
+
+**Last Updated**: 2025-11-22 (Coordination framework added, Instance 1 active, Instance 3 active, Instance 2 starting)
