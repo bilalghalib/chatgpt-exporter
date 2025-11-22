@@ -23,12 +23,12 @@
 ---
 
 ### **Instance 2 (Newest→Oldest)**
-**Status**: ⏳ NOT STARTED
+**Status**: 🟢 ACTIVE
 **Direction**: Backward (reverse chronological)
 **Range**: Conversations 3517 → 1759 (second half)
-**Current Progress**: Not started
-**Last Checkpoint**: N/A
-**Next Checkpoint**: After conversation 3517-3468 (first batch)
+**Current Progress**: Batch 71 starting (conversations 3517-3468)
+**Last Checkpoint**: 2025-11-22
+**Next Checkpoint**: After conversation 3468 (Batch 71 complete)
 
 **Batches Assigned**: 37-71 (batches of 50 each, numbered in reverse)
 - Batch 71: Conversations 3517-3468 ⏳ Start here
@@ -303,9 +303,9 @@ Every 200 conversations, both instances should check:
 - **NEXT UPDATE**: After completing Batch 1 (conversation 50)
 
 ### Instance 2 Updates:
-- **[WAITING TO START]**
-- Instance 2 should begin with: `ls -1 ./exported_conversations/*.json | sort -r | head -50`
-- First batch: Conversations 3517-3468 (Batch 71)
+- **2025-11-22 20:30 UTC**: Instance 2 ACTIVATED - Batch 71 starting (conversations 3517-3468)
+- **Direction**: Newest→Oldest (reverse chronological)
+- **Next update**: After completing Batch 71
 
 ---
 
