@@ -111,18 +111,30 @@ class BatchSelector:
     def select_batch(self,
                      batch_size: int = 50,
                      processed_ids: set = None,
-                     weights: Dict = None) -> List[Dict]:
+                     weights: Dict = None,
+                     mode: str = "balanced") -> List[Dict]:
         """
         Select conversations for next batch
 
-        weights: {
-            'recent': 0.4,     # Favor recent conversations
-            'depth': 0.4,      # Favor substantive conversations
-            'random': 0.2      # Include diversity
-        }
+        mode options:
+        - "balanced": 40% recent + 40% depth + 20% random (default)
+        - "scattershot": 100% random (for exploration/theme discovery)
+        - "recent": 80% recent + 20% random
+        - "depth": 80% depth + 20% random
+
+        weights: Custom weights override mode
         """
+        # Set weights based on mode (unless custom weights provided)
         if weights is None:
-            weights = {'recent': 0.4, 'depth': 0.4, 'random': 0.2}
+            if mode == "scattershot":
+                weights = {'recent': 0.0, 'depth': 0.0, 'random': 1.0}
+                print(f"📍 Scattershot mode: 100% random sampling for theme discovery")
+            elif mode == "recent":
+                weights = {'recent': 0.8, 'depth': 0.0, 'random': 0.2}
+            elif mode == "depth":
+                weights = {'recent': 0.0, 'depth': 0.8, 'random': 0.2}
+            else:  # balanced
+                weights = {'recent': 0.4, 'depth': 0.4, 'random': 0.2}
 
         if processed_ids is None:
             processed_ids = set()
@@ -219,6 +231,111 @@ class ProvenanceTracker:
         return prov
 
 
+class TagClusterer:
+    """
+    Prevent tag explosion by clustering similar tags
+    Maintains canonical forms and aliases
+    """
+
+    def __init__(self, aliases_file: Path = None):
+        if aliases_file is None:
+            aliases_file = Path("/home/user/chatgpt-exporter/analysis_batches/tag_aliases.json")
+
+        self.aliases_file = aliases_file
+        self.canonical_tags = {}  # canonical_tag → metadata
+        self.aliases = {}  # alias → canonical_tag
+
+        self.load_aliases()
+
+    def load_aliases(self):
+        """Load existing tag aliases"""
+        if self.aliases_file.exists():
+            with open(self.aliases_file, 'r') as f:
+                data = json.load(f)
+                self.canonical_tags = data.get('canonical_tags', {})
+                self.aliases = data.get('aliases', {})
+
+    def save_aliases(self):
+        """Save tag aliases"""
+        self.aliases_file.parent.mkdir(exist_ok=True, parents=True)
+        with open(self.aliases_file, 'w') as f:
+            json.dump({
+                'canonical_tags': self.canonical_tags,
+                'aliases': self.aliases,
+                'last_updated': datetime.now().isoformat()
+            }, f, indent=2)
+
+    def normalize_tag(self, tag: str) -> str:
+        """Convert tag to normalized form"""
+        tag = tag.lower().strip()
+        tag = tag.replace(' ', '_')
+        tag = tag.replace('-', '_')
+        # Remove plurals
+        if tag.endswith('s') and not tag.endswith('ss'):
+            tag = tag[:-1]
+        return tag
+
+    def get_canonical_tag(self, tag: str) -> str:
+        """Get canonical form of a tag, clustering similar ones"""
+        normalized = self.normalize_tag(tag)
+
+        # Check if already aliased
+        if normalized in self.aliases:
+            return self.aliases[normalized]
+
+        # Check if this IS the canonical form
+        if normalized in self.canonical_tags:
+            return normalized
+
+        # Look for similar tags (edit distance)
+        similar = self.find_similar_tag(normalized)
+        if similar:
+            # Register as alias
+            self.aliases[normalized] = similar
+            self.save_aliases()
+            return similar
+
+        # New canonical tag
+        self.canonical_tags[normalized] = {
+            'created': datetime.now().isoformat(),
+            'count': 1
+        }
+        self.save_aliases()
+        return normalized
+
+    def find_similar_tag(self, tag: str) -> str:
+        """Find similar canonical tag (edit distance < 3)"""
+        for canonical in self.canonical_tags.keys():
+            if self.edit_distance(tag, canonical) <= 2:
+                return canonical
+        return None
+
+    @staticmethod
+    def edit_distance(s1: str, s2: str) -> int:
+        """Calculate Levenshtein distance"""
+        if len(s1) < len(s2):
+            return TagClusterer.edit_distance(s2, s1)
+
+        if len(s2) == 0:
+            return len(s1)
+
+        previous_row = range(len(s2) + 1)
+        for i, c1 in enumerate(s1):
+            current_row = [i + 1]
+            for j, c2 in enumerate(s2):
+                insertions = previous_row[j + 1] + 1
+                deletions = current_row[j] + 1
+                substitutions = previous_row[j] + (c1 != c2)
+                current_row.append(min(insertions, deletions, substitutions))
+            previous_row = current_row
+
+        return previous_row[-1]
+
+    def cluster_tags(self, tags: List[str]) -> List[str]:
+        """Convert list of tags to canonical forms"""
+        return [self.get_canonical_tag(tag) for tag in tags]
+
+
 class SARECBeliefExtractor:
     """
     Extract SAREC-formatted beliefs from conversations
@@ -247,6 +364,7 @@ Analyze the conversation and extract beliefs. For each belief:
 - evidence: array of specific quotes from the conversation that support this
 - confidence: 0.0-1.0 (how certain you are)
 - book_worthy: true/false (is this compelling book material?)
+- tags: array of thematic tags (e.g., ["solar_energy", "iraq", "training_design", "conflict_zones"])
 
 IMPORTANT:
 - Only extract beliefs with STRONG evidence in THIS conversation
@@ -270,7 +388,8 @@ Return JSON array of beliefs:
       {{"quote": "another quote", "speaker": "user"}}
     ],
     "confidence": 0.85,
-    "book_worthy": false
+    "book_worthy": false,
+    "tags": ["tag1", "tag2", "tag3"]
   }}
 ]
 
@@ -632,6 +751,7 @@ class BatchProcessor:
 
         self.selector = BatchSelector(conversations_dir)
         self.analysis = GraphReadyAnalysis(output_dir)
+        self.tag_clusterer = TagClusterer()
         self.current_batch = None
 
         # Initialize LLM extractors (only if API key provided)
@@ -643,8 +763,12 @@ class BatchProcessor:
             self.belief_extractor = None
             self.values_generator = None
 
-    def process_batch(self, batch_number: int, batch_size: int = 50):
-        """Process a batch of conversations"""
+    def process_batch(self, batch_number: int, batch_size: int = 50, mode: str = "balanced"):
+        """
+        Process a batch of conversations
+
+        mode: "balanced", "scattershot", "recent", or "depth"
+        """
 
         print(f"\n{'='*80}")
         print(f"BATCH {batch_number} - Processing {batch_size} conversations")
@@ -653,7 +777,8 @@ class BatchProcessor:
         # Select conversations
         selected = self.selector.select_batch(
             batch_size=batch_size,
-            processed_ids=self.analysis.processed_conversations
+            processed_ids=self.analysis.processed_conversations,
+            mode=mode
         )
 
         if not selected:
@@ -887,16 +1012,22 @@ def main():
 
     # Parse arguments
     if len(sys.argv) < 2:
-        print("Usage: python3 batch_processor.py <ANTHROPIC_API_KEY> [batch_number] [batch_size]")
-        print("\nExample: python3 batch_processor.py sk-ant-... 1 50")
-        print("  (processes batch 1 with 50 conversations)")
+        print("Usage: python3 batch_processor.py <ANTHROPIC_API_KEY> [batch_number] [batch_size] [mode]")
+        print("\nExample: python3 batch_processor.py sk-ant-... 1 50 scattershot")
+        print("  (processes batch 1 with 50 conversations in scattershot mode)")
+        print("\nModes:")
+        print("  - scattershot: 100% random (theme discovery)")
+        print("  - balanced: 40% recent + 40% depth + 20% random (default)")
+        print("  - recent: 80% recent + 20% random")
+        print("  - depth: 80% depth + 20% random")
         print("\nTo test without API (dry run):")
-        print("  python3 batch_processor.py test 1 5")
+        print("  python3 batch_processor.py test 1 5 scattershot")
         sys.exit(1)
 
     api_key = sys.argv[1] if sys.argv[1] != "test" else None
     batch_number = int(sys.argv[2]) if len(sys.argv) > 2 else 1
     batch_size = int(sys.argv[3]) if len(sys.argv) > 3 else 50
+    mode = sys.argv[4] if len(sys.argv) > 4 else "balanced"
 
     conversations_dir = Path("/home/user/chatgpt-exporter/exported_conversations")
     output_dir = Path("/home/user/chatgpt-exporter/analysis_batches")
@@ -908,13 +1039,13 @@ def main():
         print(f"✓ API key provided - LLM analysis enabled")
     else:
         print(f"⚠️  No API key (test mode) - Will create structure without LLM analysis")
-    print(f"Batch: {batch_number}, Size: {batch_size}")
+    print(f"Batch: {batch_number}, Size: {batch_size}, Mode: {mode}")
     print(f"{'='*80}\n")
 
     processor = BatchProcessor(conversations_dir, output_dir, api_key=api_key)
 
     # Process batch
-    processor.process_batch(batch_number=batch_number, batch_size=batch_size)
+    processor.process_batch(batch_number=batch_number, batch_size=batch_size, mode=mode)
 
     print(f"\n{'='*80}")
     print(f"BATCH {batch_number} COMPLETE - System ready for incremental processing")
@@ -930,7 +1061,7 @@ def main():
         print(f"Avg cost per conversation: ${total_cost / max(batch_size, 1):.3f}")
 
     print(f"\nTo process next batch:")
-    print(f"  python3 batch_processor.py {sys.argv[1]} {batch_number + 1} {batch_size}")
+    print(f"  python3 batch_processor.py {sys.argv[1]} {batch_number + 1} {batch_size} {mode}")
 
 
 if __name__ == "__main__":
