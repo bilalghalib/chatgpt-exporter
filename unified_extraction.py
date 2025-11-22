@@ -556,8 +556,11 @@ Focus on quality over quantity. Only extract entities with confidence > 0.6."""
                     time.sleep(RATE_LIMIT_DELAY)
 
             except Exception as e:
+                import traceback
                 conv_title = conv.get('title', 'Unknown') if 'conv' in locals() else 'Unknown'
                 print(f"  [{i+1}/{len(batch_files)}] ✗ Error processing {conv_title[:30]}: {type(e).__name__}: {str(e)[:100]}")
+                if i == 0:  # Only print traceback for first error in batch
+                    traceback.print_exc()
 
         batch_time = time.time() - batch_start
         self.stats['batches_completed'] += 1
