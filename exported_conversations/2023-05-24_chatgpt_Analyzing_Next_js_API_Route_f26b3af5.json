@@ -1,0 +1,63 @@
+{
+  "id": "f26b3af5-0df4-49d5-ac35-397439442828",
+  "source": "chatgpt",
+  "title": "Analyzing Next.js API Route",
+  "created_at": "2023-05-24T11:33:56.134005",
+  "updated_at": "2023-05-24T11:34:30",
+  "summary": null,
+  "message_count": 4,
+  "messages": [
+    {
+      "id": "aaa26ed9-b9b6-4247-a4cd-df41526b7ce5",
+      "role": "user",
+      "content": "er)...\nevent - compiled successfully in 81 ms (91 modules)\nfetching url: https://bloom.pm\n(node:25660) ExperimentalWarning: The Fetch API is an experimental feature. This feature could change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\nfetching url: \nerror - Error [TypeError]: Failed to parse URL from \n    at new Request (node:internal/deps/undici/undici:5491:19)\n    at Agent.fetch2 (node:internal/deps/undici/undici:6288:25)\n    at Object.fetch (node:internal/deps/undici/undici:7125:20)\n    at fetch (node:internal/process/pre_execution:214:25)\n    at getDocuments (webpack-internal:///(api)/./pages/api/generate-embeddings.ts:68:32)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async handle (webpack-internal:///(api)/./pages/api/generate-embeddings.ts:18:27) {\n  digest: undefined\nhere:\nimport { NextApiRequest, NextApiResponse } from \"next\";\nimport { supabaseClient } from \"@/lib/embeddings-supabase\";\nimport * as cheerio from \"cheerio\";\n\n// embedding doc sizes\nconst docSize: number = 1000;\n\nexport default async function handle(\n  req: NextApiRequest,\n  res: NextApiResponse\n) {\n  const { method, body } = req;\n\n  if (method === \"POST\") {\n    const { urls } = body;\n    const documents = await getDocuments(urls);\n\n    for (const { url, body } of documents) {\n      const input = body.replace(/\\n/g, \" \");\n\n      console.log(\"\\nDocument length: \\n\", body.length);\n      console.log(\"\\nURL: \\n\", url);\n\n      const apiKey = process.env.OPENAI_API_KEY;\n      const apiURL = process.env.OPENAI_PROXY == \"\" ? \"https://api.openai.com\" : process.env.OPENAI_PROXY;\n\n      const embeddingResponse = await fetch(\n        apiURL + \"/v1/embeddings\",\n        {\n          method: \"POST\",\n          headers: {\n            Authorization: `Bearer ${apiKey}`,\n            \"Content-Type\": \"application/json\"\n          },\n          body: JSON.stringify({\n            input,\n            model: \"text-embedding-ada-002\"\n          })\n        }\n      );\n      // console.log(\"\\nembeddingResponse: \\n\", embeddingResponse);\n      const embeddingData = await embeddingResponse.json();\n\n      const [{ embedding }] = embeddingData.data;\n      // console.log(\"embedding:\" + embedding);\n\n      // In production we should handle possible errors\n      try {\n        let res = await supabaseClient.from(\"documents\").insert({\n          content: input,\n          embedding,\n          url\n        });\n      }\n      catch (error) {\n        console.error(\"error in supabase insert: \" + error);\n      }\n\n    }\n    return res.status(200).json({ success: true });\n  }\n\n  return res\n    .status(405)\n    .json({ success: false, message: \"Method not allowed\" });\n}\n\nasync function getDocuments(urls: string[]) {\n  const documents = [];\n  for (const url of urls) {\n    let fetchURL = url;\n    if (process.env.SPLASH_URL != \"\") {\n      fetchURL = `${process.env.SPLASH_URL}/render.html?url=${encodeURIComponent(url)}&timeout=10&wait=0.5`\n    }\n    console.log(\"fetching url: \" + fetchURL);\n\n    const response = await fetch(fetchURL);\n    const html = await response.text();\n    const $ = cheerio.load(html);\n    // tag based e.g. <main>\n    const articleText = $(\"body\").text();\n    // class bsaed e.g. <div class=\"docs-content\">\n    // const articleText = $(\".docs-content\").text();\n\n    let start = 0;\n    while (start < articleText.length) {\n      const end = start + docSize;\n      const chunk = articleText.slice(start, end);\n      documents.push({ url, body: chunk });\n      start = end;\n    }\n  }\n  return documents;\n}\n",
+      "created_at": "2023-05-24T11:33:56.135325",
+      "sequence_order": 0,
+      "parent_id": "5f48dd3d-d2a9-4f2e-9f0e-403c06c7c823",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "df5ecd46-f87d-46ba-a121-4907b7a588f7",
+      "role": "assistant",
+      "content": "This code snippet appears to be a Next.js API route that handles a POST request. The purpose of this code is to fetch documents from multiple URLs, process the fetched HTML content, and store the processed data into a database using Supabase. Let's go through the code step by step:\n\n1. The required dependencies and modules are imported, including `NextApiRequest` and `NextApiResponse` from the \"next\" package, `supabaseClient` from the \"@/lib/embeddings-supabase\" module, and `cheerio` for HTML parsing.\n\n2. The code defines a constant `docSize` with a value of 1000, which represents the size of the document chunks that will be stored in the database.\n\n3. The default export is an async function called `handle`, which receives the `req` (request) and `res` (response) objects from the Next.js API.\n\n4. Inside the `handle` function, the method and body of the request are extracted.\n\n5. If the method is \"POST\", the URLs are extracted from the request body, and the `getDocuments` function is called with the URLs as an argument to fetch and process the documents.\n\n6. For each document fetched, the code replaces newline characters with spaces and logs the document length and URL.\n\n7. The code then makes a request to the OpenAI API to obtain text embeddings for the document. The API URL and API key are obtained from environment variables.\n\n8. The response from the OpenAI API is parsed as JSON, and the embedding data is extracted.\n\n9. The code attempts to insert the document content, embedding, and URL into the Supabase database using the `supabaseClient` object. If an error occurs during insertion, it is logged.\n\n10. After processing all the documents, a JSON response with a success message is sent.\n\n11. If the method is not \"POST\", a JSON response with an error message and status code 405 (Method Not Allowed) is sent.\n\n12. Finally, there is an async function called `getDocuments` that takes an array of URLs as input. It iterates over the URLs, fetches the HTML content using `fetch` (which seems to be a custom fetch implementation), and uses `cheerio` to extract the text content from the HTML.\n\n13. The text content is then split into chunks of `docSize` length, and each chunk is added to an array along with the corresponding URL.\n\n14. The function returns an array of documents.\n\nOverall, this code fetches documents from multiple URLs, processes the text content, obtains embeddings using the OpenAI API, and stores the processed data in a Supabase database.",
+      "created_at": "2023-05-24T11:34:06.120327",
+      "sequence_order": 1,
+      "parent_id": "aaa26ed9-b9b6-4247-a4cd-df41526b7ce5",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa20244-8f8f-44ef-99a6-954485abc680",
+      "role": "user",
+      "content": "getting this error:\n\nStreamed response:  \nStreamed response:  \nwait  - compiling / (client and server)...\nevent - compiled client and server successfully in 171 ms (1315 modules)\nwait  - compiling /embeddings...\nevent - compiled client and server successfully in 105 ms (1318 modules)\nwait  - compiling /api/generate-embeddings (client and server)...\nevent - compiled successfully in 81 ms (91 modules)\nfetching url: https://bloom.pm\n(node:25660) ExperimentalWarning: The Fetch API is an experimental feature. This feature could change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\nfetching url: \nerror - Error [TypeError]: Failed to parse URL from \n    at new Request (node:internal/deps/undici/undici:5491:19)\n    at Agent.fetch2 (node:internal/deps/undici/undici:6288:25)\n    at Object.fetch (node:internal/deps/undici/undici:7125:20)\n    at fetch (node:internal/process/pre_execution:214:25)\n    at getDocuments (webpack-internal:///(api)/./pages/api/generate-embeddings.ts:68:32)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async handle (webpack-internal:///(api)/./pages/api/generate-embeddings.ts:18:27) {\n  digest: undefined\n}\n",
+      "created_at": "2023-05-24T11:34:30.364755",
+      "sequence_order": 2,
+      "parent_id": "df5ecd46-f87d-46ba-a121-4907b7a588f7",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "e8f63f16-ce70-46de-ab5b-8998cdb123cc",
+      "role": "assistant",
+      "content": "The error message indicates that there is an issue with parsing the URL in the code. Specifically, the error occurs at line 68 in the `getDocuments` function of the `generate-embeddings.ts` file. Here's the relevant section of the code:\n\n```typescript\nconst response = await fetch(fetchURL);\n```\n\nThe error suggests that the URL being passed to the `fetch` function is either empty or cannot be parsed properly. The error message `Failed to parse URL from` indicates that the URL is missing or invalid.\n\nTo troubleshoot this issue, you can check the value of the `fetchURL` variable before it is passed to the `fetch` function. Ensure that the `urls` array being passed to the `getDocuments` function contains valid URLs. Additionally, verify that the `SPLASH_URL` environment variable is properly configured and not empty.\n\nMake sure that the URLs you are trying to fetch are valid and accessible. Double-check the URLs in your `urls` array and ensure they are in the correct format (e.g., `https://example.com`). If any URLs are missing or incorrectly formatted, that could cause the error.\n\nBy addressing these potential issues, you should be able to resolve the error and successfully fetch the desired URLs.",
+      "created_at": "2023-05-24T11:34:34.634228",
+      "sequence_order": 3,
+      "parent_id": "aaa20244-8f8f-44ef-99a6-954485abc680",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

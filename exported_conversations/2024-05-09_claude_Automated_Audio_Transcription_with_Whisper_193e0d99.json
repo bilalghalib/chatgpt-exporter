@@ -1,0 +1,286 @@
+{
+  "id": "193e0d99-3a8f-4d66-a772-20cfb5dd4f53",
+  "source": "claude",
+  "title": "Automated Audio Transcription with Whisper",
+  "created_at": "2024-05-09T13:52:20.370942Z",
+  "updated_at": "2024-05-09T16:43:39.745469Z",
+  "summary": "",
+  "message_count": 12,
+  "messages": [
+    {
+      "id": "75c0a8a7-5735-47bf-b57c-7238fa5f72c5",
+      "role": "human",
+      "content": "can you help me write a python application that uses a local install of whisper to run through all audio files in a directory alphabetically and transcribes them - it's a two person audio file so if possible i'd like to tag the two speakers S1 and S2 - ask 3 questions to help you write the script and then get back to me",
+      "created_at": "2024-05-09T16:22:55.150397Z",
+      "sequence_order": 0,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:22:55.150397Z",
+            "stop_timestamp": "2024-05-09T16:22:55.150397Z",
+            "flags": null,
+            "type": "text",
+            "text": "can you help me write a python application that uses a local install of whisper to run through all audio files in a directory alphabetically and transcribes them - it's a two person audio file so if possible i'd like to tag the two speakers S1 and S2 - ask 3 questions to help you write the script and then get back to me",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:22:55.150397Z",
+        "attachments": [],
+        "files": []
+      }
+    },
+    {
+      "id": "92b33a84-fe91-4081-8bc9-ecd11332b97d",
+      "role": "assistant",
+      "content": " Certainly! I'd be happy to help you write a Python script that uses a local installation of Whisper to transcribe all audio files in a directory alphabetically and tag the two speakers as S1 and S2. To better assist you, I have a few questions:\n\n1. What is the file format of the audio files you want to transcribe (e.g., .wav, .mp3, .flac)?\n\n2. Are the audio files stored in a single directory, or are they nested in subdirectories within the main directory?\n\n3. Do you have a specific naming convention for the output transcription files, or would you like me to suggest a format?\n\nPlease provide your answers to these questions, and I'll proceed with writing the Python script for you.",
+      "created_at": "2024-05-09T16:22:55.150397Z",
+      "sequence_order": 1,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:22:55.150397Z",
+            "stop_timestamp": "2024-05-09T16:22:55.150397Z",
+            "flags": null,
+            "type": "text",
+            "text": " Certainly! I'd be happy to help you write a Python script that uses a local installation of Whisper to transcribe all audio files in a directory alphabetically and tag the two speakers as S1 and S2. To better assist you, I have a few questions:\n\n1. What is the file format of the audio files you want to transcribe (e.g., .wav, .mp3, .flac)?\n\n2. Are the audio files stored in a single directory, or are they nested in subdirectories within the main directory?\n\n3. Do you have a specific naming convention for the output transcription files, or would you like me to suggest a format?\n\nPlease provide your answers to these questions, and I'll proceed with writing the Python script for you.",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:22:55.150397Z",
+        "attachments": [],
+        "files": []
+      }
+    },
+    {
+      "id": "cafd42cf-df6b-4909-9bdf-22ccd8ad8662",
+      "role": "human",
+      "content": "mp3 the file is all in one folder suggest a format",
+      "created_at": "2024-05-09T16:23:37.833609Z",
+      "sequence_order": 2,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:23:37.833609Z",
+            "stop_timestamp": "2024-05-09T16:23:37.833609Z",
+            "flags": null,
+            "type": "text",
+            "text": "mp3 the file is all in one folder suggest a format",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:23:37.833609Z",
+        "attachments": [],
+        "files": []
+      }
+    },
+    {
+      "id": "a4613cdd-1af5-4083-b107-d59da88b30ad",
+      "role": "assistant",
+      "content": " Great! Based on your answers, here's a Python script that uses Whisper to transcribe all MP3 files in a single directory, tags the speakers as S1 and S2, and saves the transcriptions with a suggested naming format:\n\n```python\nimport os\nimport whisper\n\ndef transcribe_audio_files(directory):\n    model = whisper.load_model(\"base\")\n    \n    audio_files = [file for file in os.listdir(directory) if file.endswith(\".mp3\")]\n    audio_files.sort()\n    \n    for audio_file in audio_files:\n        audio_path = os.path.join(directory, audio_file)\n        result = model.transcribe(audio_path)\n        \n        segments = result[\"segments\"]\n        transcription = \"\"\n        current_speaker = \"\"\n        \n        for segment in segments:\n            if segment[\"speaker\"] != current_speaker:\n                current_speaker = segment[\"speaker\"]\n                transcription += f\"\\n\\nS{current_speaker}: \"\n            \n            transcription += segment[\"text\"] + \" \"\n        \n        output_file = os.path.splitext(audio_file)[0] + \"_transcription.txt\"\n        with open(output_file, \"w\") as file:\n            file.write(transcription.strip())\n        \n        print(f\"Transcription saved: {output_file}\")\n\n# Specify the directory containing the audio files\naudio_directory = \"/path/to/your/audio/directory\"\n\ntranscribe_audio_files(audio_directory)\n```\n\nHere's how the script works:\n\n1. The `transcribe_audio_files` function takes the directory path as an argument.\n\n2. It loads the Whisper model using `whisper.load_model(\"base\")`. You can change \"base\" to a different model size if desired.\n\n3. It retrieves a list of all MP3 files in the specified directory using `os.listdir()` and sorts them alphabetically.\n\n4. For each audio file, it constructs the full audio file path and passes it to `model.transcribe()` to transcribe the audio.\n\n5. The script iterates over the transcribed segments and builds the transcription string. It tags the speakers as S1 and S2 based on the speaker information provided by Whisper.\n\n6. The transcription is saved to a text file with the same name as the audio file, appended with \"_transcription.txt\". For example, if the audio file is \"audio1.mp3\", the transcription file will be \"audio1_transcription.txt\".\n\n7. The script prints a message indicating the saved transcription file for each audio file.\n\n8. Finally, you need to specify the directory path containing the audio files in the `audio_directory` variable.\n\nMake sure to replace `/path/to/your/audio/directory` with the actual path to the directory containing your MP3 files.\n\nNote: This script assumes that you have Whisper installed and set up correctly in your Python environment. If you haven't installed Whisper yet, you can install it using `pip install whisper`.\n\nLet me know if you have any further questions or if you need assistance with anything else!",
+      "created_at": "2024-05-09T16:23:37.833609Z",
+      "sequence_order": 3,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:23:37.833609Z",
+            "stop_timestamp": "2024-05-09T16:23:37.833609Z",
+            "flags": null,
+            "type": "text",
+            "text": " Great! Based on your answers, here's a Python script that uses Whisper to transcribe all MP3 files in a single directory, tags the speakers as S1 and S2, and saves the transcriptions with a suggested naming format:\n\n```python\nimport os\nimport whisper\n\ndef transcribe_audio_files(directory):\n    model = whisper.load_model(\"base\")\n    \n    audio_files = [file for file in os.listdir(directory) if file.endswith(\".mp3\")]\n    audio_files.sort()\n    \n    for audio_file in audio_files:\n        audio_path = os.path.join(directory, audio_file)\n        result = model.transcribe(audio_path)\n        \n        segments = result[\"segments\"]\n        transcription = \"\"\n        current_speaker = \"\"\n        \n        for segment in segments:\n            if segment[\"speaker\"] != current_speaker:\n                current_speaker = segment[\"speaker\"]\n                transcription += f\"\\n\\nS{current_speaker}: \"\n            \n            transcription += segment[\"text\"] + \" \"\n        \n        output_file = os.path.splitext(audio_file)[0] + \"_transcription.txt\"\n        with open(output_file, \"w\") as file:\n            file.write(transcription.strip())\n        \n        print(f\"Transcription saved: {output_file}\")\n\n# Specify the directory containing the audio files\naudio_directory = \"/path/to/your/audio/directory\"\n\ntranscribe_audio_files(audio_directory)\n```\n\nHere's how the script works:\n\n1. The `transcribe_audio_files` function takes the directory path as an argument.\n\n2. It loads the Whisper model using `whisper.load_model(\"base\")`. You can change \"base\" to a different model size if desired.\n\n3. It retrieves a list of all MP3 files in the specified directory using `os.listdir()` and sorts them alphabetically.\n\n4. For each audio file, it constructs the full audio file path and passes it to `model.transcribe()` to transcribe the audio.\n\n5. The script iterates over the transcribed segments and builds the transcription string. It tags the speakers as S1 and S2 based on the speaker information provided by Whisper.\n\n6. The transcription is saved to a text file with the same name as the audio file, appended with \"_transcription.txt\". For example, if the audio file is \"audio1.mp3\", the transcription file will be \"audio1_transcription.txt\".\n\n7. The script prints a message indicating the saved transcription file for each audio file.\n\n8. Finally, you need to specify the directory path containing the audio files in the `audio_directory` variable.\n\nMake sure to replace `/path/to/your/audio/directory` with the actual path to the directory containing your MP3 files.\n\nNote: This script assumes that you have Whisper installed and set up correctly in your Python environment. If you haven't installed Whisper yet, you can install it using `pip install whisper`.\n\nLet me know if you have any further questions or if you need assistance with anything else!",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:23:37.833609Z",
+        "attachments": [],
+        "files": []
+      }
+    },
+    {
+      "id": "9ef1bb5a-9384-4c5b-ad02-31db5768bdc7",
+      "role": "human",
+      "content": "got an error: (base) bilalghalib@Cruzer-2 audio % python splitspeakersTranscribe.py\n\n/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/whisper/transcribe.py:126: UserWarning: FP16 is not supported on CPU; using FP32 instead\n\n  warnings.warn(\"FP16 is not supported on CPU; using FP32 instead\")\n\nTraceback (most recent call last):\n\n  File \"/Users/bilalghalib/Pictures/RICOH THETA SC2/audio/splitspeakersTranscribe.py\", line 34, in <module>\n\n    transcribe\\_audio\\_files(audio\\_directory)\n\n  File \"/Users/bilalghalib/Pictures/RICOH THETA SC2/audio/splitspeakersTranscribe.py\", line 19, in transcribe\\_audio\\_files\n\n    if segment\\[\"speaker\"\\] != current\\_speaker:\n\nKeyError: 'speaker'",
+      "created_at": "2024-05-09T16:26:05.219047Z",
+      "sequence_order": 4,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:26:05.219047Z",
+            "stop_timestamp": "2024-05-09T16:26:05.219047Z",
+            "flags": null,
+            "type": "text",
+            "text": "got an error: (base) bilalghalib@Cruzer-2 audio % python splitspeakersTranscribe.py\n\n/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/whisper/transcribe.py:126: UserWarning: FP16 is not supported on CPU; using FP32 instead\n\n  warnings.warn(\"FP16 is not supported on CPU; using FP32 instead\")\n\nTraceback (most recent call last):\n\n  File \"/Users/bilalghalib/Pictures/RICOH THETA SC2/audio/splitspeakersTranscribe.py\", line 34, in <module>\n\n    transcribe\\_audio\\_files(audio\\_directory)\n\n  File \"/Users/bilalghalib/Pictures/RICOH THETA SC2/audio/splitspeakersTranscribe.py\", line 19, in transcribe\\_audio\\_files\n\n    if segment\\[\"speaker\"\\] != current\\_speaker:\n\nKeyError: 'speaker'",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:26:05.219047Z",
+        "attachments": [],
+        "files": []
+      }
+    },
+    {
+      "id": "6ccac63c-9a11-4fa7-ae3c-417f89813cb7",
+      "role": "assistant",
+      "content": " I apologize for the confusion. It seems like the Whisper model you are using doesn't support speaker diarization by default. To achieve speaker diarization, you can use the `pyannote.audio` library alongside Whisper. Here's an updated version of the script that incorporates speaker diarization:\n\n```python\nimport os\nimport whisper\nfrom pyannote.audio import Pipeline\n\ndef transcribe_audio_files(directory):\n    model = whisper.load_model(\"base\")\n    pipeline = Pipeline.from_pretrained(\"pyannote/speaker-diarization\")\n    \n    audio_files = [file for file in os.listdir(directory) if file.endswith(\".mp3\")]\n    audio_files.sort()\n    \n    for audio_file in audio_files:\n        audio_path = os.path.join(directory, audio_file)\n        diarization = pipeline(audio_path)\n        result = model.transcribe(audio_path)\n        \n        segments = result[\"segments\"]\n        transcription = \"\"\n        \n        for segment, track in zip(segments, diarization.itertracks(yield_label=True)):\n            speaker = track[1]\n            transcription += f\"\\n\\nS{speaker}: {segment['text']}\"\n        \n        output_file = os.path.splitext(audio_file)[0] + \"_transcription.txt\"\n        with open(output_file, \"w\") as file:\n            file.write(transcription.strip())\n        \n        print(f\"Transcription saved: {output_file}\")\n\n# Specify the directory containing the audio files\naudio_directory = \"/path/to/your/audio/directory\"\n\ntranscribe_audio_files(audio_directory)\n```\n\nHere's what has been updated:\n\n1. We import the `Pipeline` class from `pyannote.audio` to perform speaker diarization.\n\n2. Inside the `transcribe_audio_files` function, we initialize the speaker diarization pipeline using `Pipeline.from_pretrained(\"pyannote/speaker-diarization\")`.\n\n3. For each audio file, we apply the speaker diarization pipeline to obtain the speaker information for each segment using `pipeline(audio_path)`.\n\n4. We iterate over the segments and speaker labels simultaneously using `zip(segments, diarization.itertracks(yield_label=True))`.\n\n5. We extract the speaker label from the diarization output using `speaker = track[1]` and add it to the transcription along with the segment text.\n\n6. The rest of the script remains the same, saving the transcription to a text file with the speaker labels.\n\nTo use this updated script, you'll need to install the `pyannote.audio` library. You can install it using the following command:\n\n```\npip install pyannote.audio\n```\n\nPlease note that the `pyannote.audio` library may have additional dependencies that need to be installed separately.\n\nAlso, make sure to replace `/path/to/your/audio/directory` with the actual path to the directory containing your MP3 files.\n\nLet me know if you encounter any further issues or if you have any other questions!",
+      "created_at": "2024-05-09T16:26:05.219047Z",
+      "sequence_order": 5,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:26:05.219047Z",
+            "stop_timestamp": "2024-05-09T16:26:05.219047Z",
+            "flags": null,
+            "type": "text",
+            "text": " I apologize for the confusion. It seems like the Whisper model you are using doesn't support speaker diarization by default. To achieve speaker diarization, you can use the `pyannote.audio` library alongside Whisper. Here's an updated version of the script that incorporates speaker diarization:\n\n```python\nimport os\nimport whisper\nfrom pyannote.audio import Pipeline\n\ndef transcribe_audio_files(directory):\n    model = whisper.load_model(\"base\")\n    pipeline = Pipeline.from_pretrained(\"pyannote/speaker-diarization\")\n    \n    audio_files = [file for file in os.listdir(directory) if file.endswith(\".mp3\")]\n    audio_files.sort()\n    \n    for audio_file in audio_files:\n        audio_path = os.path.join(directory, audio_file)\n        diarization = pipeline(audio_path)\n        result = model.transcribe(audio_path)\n        \n        segments = result[\"segments\"]\n        transcription = \"\"\n        \n        for segment, track in zip(segments, diarization.itertracks(yield_label=True)):\n            speaker = track[1]\n            transcription += f\"\\n\\nS{speaker}: {segment['text']}\"\n        \n        output_file = os.path.splitext(audio_file)[0] + \"_transcription.txt\"\n        with open(output_file, \"w\") as file:\n            file.write(transcription.strip())\n        \n        print(f\"Transcription saved: {output_file}\")\n\n# Specify the directory containing the audio files\naudio_directory = \"/path/to/your/audio/directory\"\n\ntranscribe_audio_files(audio_directory)\n```\n\nHere's what has been updated:\n\n1. We import the `Pipeline` class from `pyannote.audio` to perform speaker diarization.\n\n2. Inside the `transcribe_audio_files` function, we initialize the speaker diarization pipeline using `Pipeline.from_pretrained(\"pyannote/speaker-diarization\")`.\n\n3. For each audio file, we apply the speaker diarization pipeline to obtain the speaker information for each segment using `pipeline(audio_path)`.\n\n4. We iterate over the segments and speaker labels simultaneously using `zip(segments, diarization.itertracks(yield_label=True))`.\n\n5. We extract the speaker label from the diarization output using `speaker = track[1]` and add it to the transcription along with the segment text.\n\n6. The rest of the script remains the same, saving the transcription to a text file with the speaker labels.\n\nTo use this updated script, you'll need to install the `pyannote.audio` library. You can install it using the following command:\n\n```\npip install pyannote.audio\n```\n\nPlease note that the `pyannote.audio` library may have additional dependencies that need to be installed separately.\n\nAlso, make sure to replace `/path/to/your/audio/directory` with the actual path to the directory containing your MP3 files.\n\nLet me know if you encounter any further issues or if you have any other questions!",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:26:05.219047Z",
+        "attachments": [],
+        "files": []
+      }
+    },
+    {
+      "id": "aa7a66a6-b167-4b10-bd32-a5d667f0a594",
+      "role": "human",
+      "content": "what about using this: I'm on a MacBook Pro 16gb m2 computer",
+      "created_at": "2024-05-09T16:30:12.222616Z",
+      "sequence_order": 6,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:30:12.222616Z",
+            "stop_timestamp": "2024-05-09T16:30:12.222616Z",
+            "flags": null,
+            "type": "text",
+            "text": "what about using this: I'm on a MacBook Pro 16gb m2 computer",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:30:12.222616Z",
+        "attachments": [
+          {
+            "file_name": "paste.txt",
+            "file_size": 9366,
+            "file_type": "txt",
+            "extracted_content": "Skip to content\nNavigation Menu\nVaibhavs10\n/\ninsanely-fast-whisper\n \nType / to search\n \nCode\nIssues\n60\nPull requests\n9\nActions\nProjects\nSecurity\nInsights\nOwner avatar\ninsanely-fast-whisper\nPublic\nVaibhavs10/insanely-fast-whisper\n\n\nt\nAdd file\nFolders and files\nName\t\t\nLatest commit\nVaibhavs10\nVaibhavs10\nMerge pull request #181 from felixcarmona/feature/normalize-cli-argum…\nf8bd18f\n · \n2 months ago\nHistory\n\nnotebooks\nCLI + PyPI package (#19)\n6 months ago\n\nsrc/insanely_fast_whisper\nNormalize CLI argument format from --hf_token to --hf-token\n3 months ago\n\ntests\nCLI + PyPI package (#19)\n6 months ago\n\n.gitignore\nUnify json result and fix segmentation error for None end timestamp\n5 months ago\n\nLICENSE\nCreate LICENSE\n6 months ago\n\nREADME.md\nNormalize CLI argument format from --hf_token to --hf-token\n3 months ago\n\nconvert_output.py\nAdd VTT and TXT formats to output converter\n3 months ago\n\ninsanely_fast_whisper_colab.ipynb\nCreated using Colaboratory\n6 months ago\n\npdm.lock\nBump.\n6 months ago\n\npyproject.toml\nUpdate pyproject.toml\n4 months ago\nRepository files navigation\n\nREADME\n\nApache-2.0 license\nInsanely Fast Whisper\n\nAn opinionated CLI to transcribe Audio files w/ Whisper on-device! Powered by 🤗 Transformers, Optimum & flash-attn\n\nTL;DR - Transcribe 150 minutes (2.5 hours) of audio in less than 98 seconds - with OpenAI's Whisper Large v3. Blazingly fast transcription is now a reality!⚡️\n\n\n\nNot convinced? Here are some benchmarks we ran on a Nvidia A100 - 80GB 👇\n\nOptimisation type\tTime to Transcribe (150 mins of Audio)\nlarge-v3 (Transformers) (fp32)\t~31 (31 min 1 sec)\nlarge-v3 (Transformers) (fp16 + batching [24] + bettertransformer)\t~5 (5 min 2 sec)\nlarge-v3 (Transformers) (fp16 + batching [24] + Flash Attention 2)\t~2 (1 min 38 sec)\ndistil-large-v2 (Transformers) (fp16 + batching [24] + bettertransformer)\t~3 (3 min 16 sec)\ndistil-large-v2 (Transformers) (fp16 + batching [24] + Flash Attention 2)\t~1 (1 min 18 sec)\nlarge-v2 (Faster Whisper) (fp16 + beam_size [1])\t~9.23 (9 min 23 sec)\nlarge-v2 (Faster Whisper) (8-bit + beam_size [1])\t~8 (8 min 15 sec)\nP.S. We also ran the benchmarks on a Google Colab T4 GPU instance too!\n\nP.P.S. This project originally started as a way to showcase benchmarks for Transformers, but has since evolved into a lightweight CLI for people to use. This is purely community driven. We add whatever community seems to have a strong demand for!\n\n🆕 Blazingly fast transcriptions via your terminal! ⚡️\n\nWe've added a CLI to enable fast transcriptions. Here's how you can use it:\n\nInstall insanely-fast-whisper with pipx (pip install pipx or brew install pipx):\n\npipx install insanely-fast-whisper\nNote: Due to a dependency on onnxruntime, Python 3.12 is currently not supported. You can force a Python version (e.g. 3.11) by adding --python python3.11 to the command.\n\n⚠️ If you have python 3.11.XX installed, pipx may parse the version incorrectly and install a very old version of insanely-fast-whisper without telling you (version 0.0.8, which won't work anymore with the current BetterTransformers). In that case, you can install the latest version by passing --ignore-requires-python to pip:\n\npipx install insanely-fast-whisper --force --pip-args=\"--ignore-requires-python\"\nIf you're installing with pip, you can pass the argument directly: pip install insanely-fast-whisper --ignore-requires-python.\n\nRun inference from any path on your computer:\n\ninsanely-fast-whisper --file-name <filename or URL>\nNote: if you are running on macOS, you also need to add --device-id mps flag.\n\n🔥 You can run Whisper-large-v3 w/ Flash Attention 2 from this CLI too:\n\ninsanely-fast-whisper --file-name <filename or URL> --flash True \n🌟 You can run distil-whisper directly from this CLI too:\n\ninsanely-fast-whisper --model-name distil-whisper/large-v2 --file-name <filename or URL> \nDon't want to install insanely-fast-whisper? Just use pipx run:\n\npipx run insanely-fast-whisper --file-name <filename or URL>\nNote\n\nThe CLI is highly opinionated and only works on NVIDIA GPUs & Mac. Make sure to check out the defaults and the list of options you can play around with to maximise your transcription throughput. Run insanely-fast-whisper --help or pipx run insanely-fast-whisper --help to get all the CLI arguments along with their defaults.\nCLI Options\n\nThe insanely-fast-whisper repo provides an all round support for running Whisper in various settings. Note that as of today 26th Nov, insanely-fast-whisper works on both CUDA and mps (mac) enabled devices.\n\n  -h, --help            show this help message and exit\n  --file-name FILE_NAME\n                        Path or URL to the audio file to be transcribed.\n  --device-id DEVICE_ID\n                        Device ID for your GPU. Just pass the device number when using CUDA, or \"mps\" for Macs with Apple Silicon. (default: \"0\")\n  --transcript-path TRANSCRIPT_PATH\n                        Path to save the transcription output. (default: output.json)\n  --model-name MODEL_NAME\n                        Name of the pretrained model/ checkpoint to perform ASR. (default: openai/whisper-large-v3)\n  --task {transcribe,translate}\n                        Task to perform: transcribe or translate to another language. (default: transcribe)\n  --language LANGUAGE   \n                        Language of the input audio. (default: \"None\" (Whisper auto-detects the language))\n  --batch-size BATCH_SIZE\n                        Number of parallel batches you want to compute. Reduce if you face OOMs. (default: 24)\n  --flash FLASH         \n                        Use Flash Attention 2. Read the FAQs to see how to install FA2 correctly. (default: False)\n  --timestamp {chunk,word}\n                        Whisper supports both chunked as well as word level timestamps. (default: chunk)\n  --hf-token HF_TOKEN\n                        Provide a hf.co/settings/token for Pyannote.audio to diarise the audio clips\n  --diarization_model DIARIZATION_MODEL\n                        Name of the pretrained model/ checkpoint to perform diarization. (default: pyannote/speaker-diarization)\n  --num-speakers NUM_SPEAKERS\n                        Specifies the exact number of speakers present in the audio file. Useful when the exact number of participants in the conversation is known. Must be at least 1. Cannot be used together with --min-speakers or --max-speakers. (default: None)\n  --min-speakers MIN_SPEAKERS\n                        Sets the minimum number of speakers that the system should consider during diarization. Must be at least 1. Cannot be used together with --num-speakers. Must be less than or equal to --max-speakers if both are specified. (default: None)\n  --max-speakers MAX_SPEAKERS\n                        Defines the maximum number of speakers that the system should consider in diarization. Must be at least 1. Cannot be used together with --num-speakers. Must be greater than or equal to --min-speakers if both are specified. (default: None)\nFrequently Asked Questions\n\nHow to correctly install flash-attn to make it work with insanely-fast-whisper?\n\nMake sure to install it via pipx runpip insanely-fast-whisper install flash-attn --no-build-isolation. Massive kudos to @li-yifei for helping with this.\n\nHow to solve an AssertionError: Torch not compiled with CUDA enabled error on Windows?\n\nThe root cause of this problem is still unknown, however, you can resolve this by manually installing torch in the virtualenv like python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121. Thanks to @pto2k for all tdebugging this.\n\nHow to avoid Out-Of-Memory (OOM) exceptions on Mac?\n\nThe mps backend isn't as optimised as CUDA, hence is way more memory hungry. Typically you can run with --batch-size 4 without any issues (should use roughly 12GB GPU VRAM). Don't forget to set --device-id mps.\n\nHow to use Whisper without a CLI?\n\nAll you need to run is the below snippet:\nAcknowledgements\n\nOpenAI Whisper team for open sourcing such a brilliant check point.\nHugging Face Transformers team, specifically Arthur, Patrick, Sanchit & Yoach (alphabetical order) for continuing to maintain Whisper in Transformers.\nHugging Face Optimum team for making the BetterTransformer API so easily accessible.\nPatrick Arminio for helping me tremendously to put together this CLI.\nCommunity showcase\n\n@ochen1 created a brilliant MVP for a CLI here: https://github.com/ochen1/insanely-fast-whisper-cli (Try it out now!)\n@arihanv created an app (Shush) using NextJS (Frontend) & Modal (Backend): https://github.com/arihanv/Shush (Check it outtt!)\n@kadirnar created a python package on top of the transformers with optimisations: https://github.com/kadirnar/whisper-plus (Go go go!!!)\nAbout\n\nNo description, website, or topics provided.\nResources\n Readme\nLicense\n Apache-2.0 license\n Activity\nStars\n 6.5k stars\nWatchers\n 56 watching\nForks\n 477 forks\nReport repository\nReleases\n\nNo releases published\nPackages\n\nNo packages published\nContributors\n20\n\n @Vaibhavs10\n @patrick91\n @pcuenca\n @felixcarmona\n @kadirnar\n @benjaminjackson\n @paulmeller\n @oliverwehrens\n @mjgiarlo\n @zackees\n @gsheni\n @python481516\n @SKocur\n @Broyojo\n+ 6 contributors\nLanguages\n\nJupyter Notebook\n98.4%\nPython\n1.6%\nFooter\n© 2024 GitHub, Inc.\nFooter navigation\nTerms\nPrivacy\nSecurity\nStatus\nDocs\nContact\nManage cookies\nDo not share my personal information\n"
+          }
+        ],
+        "files": [
+          {
+            "file_name": "paste.txt"
+          }
+        ]
+      }
+    },
+    {
+      "id": "93215b40-c945-4ab7-b3e4-3d489f68b4b9",
+      "role": "assistant",
+      "content": " Based on the information provided in the README, you can use the `insanely-fast-whisper` CLI on your MacBook Pro with an M2 chip. Here are the steps:\n\n1. Install `insanely-fast-whisper` using `pipx` (make sure you have `pipx` installed):\n   ```\n   pipx install insanely-fast-whisper\n   ```\n\n2. Run the transcription command with the `--device-id mps` flag to use the Apple Silicon GPU:\n   ```\n   insanely-fast-whisper --file-name <filename or URL> --device-id mps\n   ```\n\n   Replace `<filename or URL>` with the path to your audio file or the URL of the audio file you want to transcribe.\n\n3. If you encounter Out-Of-Memory (OOM) exceptions, you can reduce the batch size using the `--batch-size` flag:\n   ```\n   insanely-fast-whisper --file-name <filename or URL> --device-id mps --batch-size 4\n   ```\n\n   Reducing the batch size to 4 should typically use around 12GB of GPU memory and avoid OOM issues on your MacBook Pro with 16GB of memory.\n\nThe CLI provides various options to customize the transcription process. You can explore additional flags and their usage by running:\n```\ninsanely-fast-whisper --help\n```\n\nThis will display the available CLI arguments along with their defaults.\n\nBy following these steps, you should be able to use the `insanely-fast-whisper` CLI on your MacBook Pro with an M2 chip to transcribe audio files efficiently.",
+      "created_at": "2024-05-09T16:30:12.222616Z",
+      "sequence_order": 7,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:30:12.222616Z",
+            "stop_timestamp": "2024-05-09T16:30:12.222616Z",
+            "flags": null,
+            "type": "text",
+            "text": " Based on the information provided in the README, you can use the `insanely-fast-whisper` CLI on your MacBook Pro with an M2 chip. Here are the steps:\n\n1. Install `insanely-fast-whisper` using `pipx` (make sure you have `pipx` installed):\n   ```\n   pipx install insanely-fast-whisper\n   ```\n\n2. Run the transcription command with the `--device-id mps` flag to use the Apple Silicon GPU:\n   ```\n   insanely-fast-whisper --file-name <filename or URL> --device-id mps\n   ```\n\n   Replace `<filename or URL>` with the path to your audio file or the URL of the audio file you want to transcribe.\n\n3. If you encounter Out-Of-Memory (OOM) exceptions, you can reduce the batch size using the `--batch-size` flag:\n   ```\n   insanely-fast-whisper --file-name <filename or URL> --device-id mps --batch-size 4\n   ```\n\n   Reducing the batch size to 4 should typically use around 12GB of GPU memory and avoid OOM issues on your MacBook Pro with 16GB of memory.\n\nThe CLI provides various options to customize the transcription process. You can explore additional flags and their usage by running:\n```\ninsanely-fast-whisper --help\n```\n\nThis will display the available CLI arguments along with their defaults.\n\nBy following these steps, you should be able to use the `insanely-fast-whisper` CLI on your MacBook Pro with an M2 chip to transcribe audio files efficiently.",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:30:12.222616Z",
+        "attachments": [],
+        "files": []
+      }
+    },
+    {
+      "id": "db67693e-fa7b-4461-9a74-79afdb07e4e5",
+      "role": "human",
+      "content": "ok, how can i get it to do it and show me it's work in real time and also do it for all the files in the directory?",
+      "created_at": "2024-05-09T16:34:03.018563Z",
+      "sequence_order": 8,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:34:03.018563Z",
+            "stop_timestamp": "2024-05-09T16:34:03.018563Z",
+            "flags": null,
+            "type": "text",
+            "text": "ok, how can i get it to do it and show me it's work in real time and also do it for all the files in the directory?",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:34:03.018563Z",
+        "attachments": [],
+        "files": []
+      }
+    },
+    {
+      "id": "6e857a4d-87a3-4cda-8ea0-b9a9f7fc3870",
+      "role": "assistant",
+      "content": " To transcribe all the audio files in a directory and display the progress in real-time, you can modify the Python script I provided earlier. Here's an updated version that incorporates the `insanely-fast-whisper` CLI and shows the progress:\n\n```python\nimport os\nimport subprocess\nfrom tqdm import tqdm\n\ndef transcribe_audio_files(directory):\n    audio_files = [file for file in os.listdir(directory) if file.endswith(\".mp3\")]\n    audio_files.sort()\n    \n    for audio_file in tqdm(audio_files, desc=\"Transcribing audio files\"):\n        audio_path = os.path.join(directory, audio_file)\n        output_file = os.path.splitext(audio_file)[0] + \"_transcription.json\"\n        \n        command = [\n            \"insanely-fast-whisper\",\n            \"--file-name\", audio_path,\n            \"--device-id\", \"mps\",\n            \"--batch-size\", \"4\",\n            \"--transcript-path\", output_file\n        ]\n        \n        subprocess.run(command, check=True)\n        \n        print(f\"\\nTranscription saved: {output_file}\")\n\n# Specify the directory containing the audio files\naudio_directory = \"/path/to/your/audio/directory\"\n\ntranscribe_audio_files(audio_directory)\n```\n\nHere's how the updated script works:\n\n1. We import the necessary modules: `os` for file and directory operations, `subprocess` to run the `insanely-fast-whisper` CLI command, and `tqdm` to display progress bars.\n\n2. Inside the `transcribe_audio_files` function, we get a list of all MP3 files in the specified directory and sort them alphabetically.\n\n3. We iterate over the audio files using `tqdm` to display a progress bar. The `desc` parameter sets the description for the progress bar.\n\n4. For each audio file, we construct the full audio file path and the corresponding output file path for the transcription. The output file will have the same name as the audio file, appended with \"_transcription.json\".\n\n5. We create a list called `command` that contains the `insanely-fast-whisper` CLI command and its arguments. We specify the `--file-name` as the audio file path, `--device-id` as \"mps\" to use the Apple Silicon GPU, `--batch-size` as \"4\" to avoid OOM issues, and `--transcript-path` as the output file path.\n\n6. We use `subprocess.run()` to execute the `insanely-fast-whisper` CLI command with the specified arguments. The `check=True` parameter ensures that an exception is raised if the command fails.\n\n7. After each transcription, we print a message indicating the saved transcription file.\n\n8. Finally, you need to specify the directory path containing the audio files in the `audio_directory` variable.\n\nMake sure to replace `/path/to/your/audio/directory` with the actual path to the directory containing your MP3 files.\n\nThis script will iterate over all the MP3 files in the specified directory, transcribe each file using the `insanely-fast-whisper` CLI, and save the transcriptions as JSON files. The progress will be displayed in real-time using a progress bar.\n\nNote: Ensure that you have the `insanely-fast-whisper` CLI installed and accessible from the command line before running this script.\n\nLet me know if you have any further questions!",
+      "created_at": "2024-05-09T16:34:03.018563Z",
+      "sequence_order": 9,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:34:03.018563Z",
+            "stop_timestamp": "2024-05-09T16:34:03.018563Z",
+            "flags": null,
+            "type": "text",
+            "text": " To transcribe all the audio files in a directory and display the progress in real-time, you can modify the Python script I provided earlier. Here's an updated version that incorporates the `insanely-fast-whisper` CLI and shows the progress:\n\n```python\nimport os\nimport subprocess\nfrom tqdm import tqdm\n\ndef transcribe_audio_files(directory):\n    audio_files = [file for file in os.listdir(directory) if file.endswith(\".mp3\")]\n    audio_files.sort()\n    \n    for audio_file in tqdm(audio_files, desc=\"Transcribing audio files\"):\n        audio_path = os.path.join(directory, audio_file)\n        output_file = os.path.splitext(audio_file)[0] + \"_transcription.json\"\n        \n        command = [\n            \"insanely-fast-whisper\",\n            \"--file-name\", audio_path,\n            \"--device-id\", \"mps\",\n            \"--batch-size\", \"4\",\n            \"--transcript-path\", output_file\n        ]\n        \n        subprocess.run(command, check=True)\n        \n        print(f\"\\nTranscription saved: {output_file}\")\n\n# Specify the directory containing the audio files\naudio_directory = \"/path/to/your/audio/directory\"\n\ntranscribe_audio_files(audio_directory)\n```\n\nHere's how the updated script works:\n\n1. We import the necessary modules: `os` for file and directory operations, `subprocess` to run the `insanely-fast-whisper` CLI command, and `tqdm` to display progress bars.\n\n2. Inside the `transcribe_audio_files` function, we get a list of all MP3 files in the specified directory and sort them alphabetically.\n\n3. We iterate over the audio files using `tqdm` to display a progress bar. The `desc` parameter sets the description for the progress bar.\n\n4. For each audio file, we construct the full audio file path and the corresponding output file path for the transcription. The output file will have the same name as the audio file, appended with \"_transcription.json\".\n\n5. We create a list called `command` that contains the `insanely-fast-whisper` CLI command and its arguments. We specify the `--file-name` as the audio file path, `--device-id` as \"mps\" to use the Apple Silicon GPU, `--batch-size` as \"4\" to avoid OOM issues, and `--transcript-path` as the output file path.\n\n6. We use `subprocess.run()` to execute the `insanely-fast-whisper` CLI command with the specified arguments. The `check=True` parameter ensures that an exception is raised if the command fails.\n\n7. After each transcription, we print a message indicating the saved transcription file.\n\n8. Finally, you need to specify the directory path containing the audio files in the `audio_directory` variable.\n\nMake sure to replace `/path/to/your/audio/directory` with the actual path to the directory containing your MP3 files.\n\nThis script will iterate over all the MP3 files in the specified directory, transcribe each file using the `insanely-fast-whisper` CLI, and save the transcriptions as JSON files. The progress will be displayed in real-time using a progress bar.\n\nNote: Ensure that you have the `insanely-fast-whisper` CLI installed and accessible from the command line before running this script.\n\nLet me know if you have any further questions!",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:34:03.018563Z",
+        "attachments": [],
+        "files": []
+      }
+    },
+    {
+      "id": "557a89be-c746-4327-a64a-39ab8f827e37",
+      "role": "human",
+      "content": "**NotImplementedError:**\n\n**The operator 'aten::isin.Tensor\\_Tensor\\_out' is not currently implemented for the MPS device. If you want this op to be added in priority during the prototype phase of this feature, please comment on https://github.com/pytorch/pytorch/issues/77764. As a temporary fix, you can set the environment variable** `PYTORCH_ENABLE_MPS_FALLBACK=1` **to use the CPU as a fallback for this op. WARNING: this will be slower than running natively on MPS.**\n\n(base) bilalghalib@Cruzer-2 audio %",
+      "created_at": "2024-05-09T16:43:39.745469Z",
+      "sequence_order": 10,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:43:39.745469Z",
+            "stop_timestamp": "2024-05-09T16:43:39.745469Z",
+            "flags": null,
+            "type": "text",
+            "text": "**NotImplementedError:**\n\n**The operator 'aten::isin.Tensor\\_Tensor\\_out' is not currently implemented for the MPS device. If you want this op to be added in priority during the prototype phase of this feature, please comment on https://github.com/pytorch/pytorch/issues/77764. As a temporary fix, you can set the environment variable** `PYTORCH_ENABLE_MPS_FALLBACK=1` **to use the CPU as a fallback for this op. WARNING: this will be slower than running natively on MPS.**\n\n(base) bilalghalib@Cruzer-2 audio %",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:43:39.745469Z",
+        "attachments": [],
+        "files": []
+      }
+    },
+    {
+      "id": "81ba848a-b7fc-4cc0-b7c9-e8d0f80aa4e7",
+      "role": "assistant",
+      "content": " The error message suggests that the `aten::isin.Tensor_Tensor_out` operator is not currently implemented for the MPS (Metal Performance Shaders) device on macOS. This means that the PyTorch operation being performed is not supported on the Apple Silicon GPU at the moment.\n\nAs a temporary workaround, you can set the environment variable `PYTORCH_ENABLE_MPS_FALLBACK=1` to use the CPU as a fallback for this specific operation. However, please note that using the CPU fallback will be slower than running natively on the MPS device.\n\nTo set the environment variable and run the script, you can modify the Python script to include the following lines at the beginning:\n\n```python\nimport os\nos.environ[\"PYTORCH_ENABLE_MPS_FALLBACK\"] = \"1\"\n```\n\nHere's the updated script with the environment variable set:\n\n```python\nimport os\nos.environ[\"PYTORCH_ENABLE_MPS_FALLBACK\"] = \"1\"\n\nimport subprocess\nfrom tqdm import tqdm\n\ndef transcribe_audio_files(directory):\n    audio_files = [file for file in os.listdir(directory) if file.endswith(\".mp3\")]\n    audio_files.sort()\n    \n    for audio_file in tqdm(audio_files, desc=\"Transcribing audio files\"):\n        audio_path = os.path.join(directory, audio_file)\n        output_file = os.path.splitext(audio_file)[0] + \"_transcription.json\"\n        \n        command = [\n            \"insanely-fast-whisper\",\n            \"--file-name\", audio_path,\n            \"--device-id\", \"mps\",\n            \"--batch-size\", \"4\",\n            \"--transcript-path\", output_file\n        ]\n        \n        subprocess.run(command, check=True)\n        \n        print(f\"\\nTranscription saved: {output_file}\")\n\n# Specify the directory containing the audio files\naudio_directory = \"/path/to/your/audio/directory\"\n\ntranscribe_audio_files(audio_directory)\n```\n\nBy setting the `PYTORCH_ENABLE_MPS_FALLBACK` environment variable to `\"1\"`, PyTorch will use the CPU as a fallback for the unsupported operation.\n\nPlease note that this is a temporary workaround, and it's recommended to keep an eye on the PyTorch GitHub issue mentioned in the error message (https://github.com/pytorch/pytorch/issues/77764) for updates on the implementation of the `aten::isin.Tensor_Tensor_out` operator for the MPS device.\n\nIf the CPU fallback does not work or if you encounter further issues, you may need to consider running the script on a machine with a supported GPU (e.g., an NVIDIA GPU with CUDA) or explore alternative approaches for transcription.",
+      "created_at": "2024-05-09T16:43:39.745469Z",
+      "sequence_order": 11,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": "2024-05-09T16:43:39.745469Z",
+            "stop_timestamp": "2024-05-09T16:43:39.745469Z",
+            "flags": null,
+            "type": "text",
+            "text": " The error message suggests that the `aten::isin.Tensor_Tensor_out` operator is not currently implemented for the MPS (Metal Performance Shaders) device on macOS. This means that the PyTorch operation being performed is not supported on the Apple Silicon GPU at the moment.\n\nAs a temporary workaround, you can set the environment variable `PYTORCH_ENABLE_MPS_FALLBACK=1` to use the CPU as a fallback for this specific operation. However, please note that using the CPU fallback will be slower than running natively on the MPS device.\n\nTo set the environment variable and run the script, you can modify the Python script to include the following lines at the beginning:\n\n```python\nimport os\nos.environ[\"PYTORCH_ENABLE_MPS_FALLBACK\"] = \"1\"\n```\n\nHere's the updated script with the environment variable set:\n\n```python\nimport os\nos.environ[\"PYTORCH_ENABLE_MPS_FALLBACK\"] = \"1\"\n\nimport subprocess\nfrom tqdm import tqdm\n\ndef transcribe_audio_files(directory):\n    audio_files = [file for file in os.listdir(directory) if file.endswith(\".mp3\")]\n    audio_files.sort()\n    \n    for audio_file in tqdm(audio_files, desc=\"Transcribing audio files\"):\n        audio_path = os.path.join(directory, audio_file)\n        output_file = os.path.splitext(audio_file)[0] + \"_transcription.json\"\n        \n        command = [\n            \"insanely-fast-whisper\",\n            \"--file-name\", audio_path,\n            \"--device-id\", \"mps\",\n            \"--batch-size\", \"4\",\n            \"--transcript-path\", output_file\n        ]\n        \n        subprocess.run(command, check=True)\n        \n        print(f\"\\nTranscription saved: {output_file}\")\n\n# Specify the directory containing the audio files\naudio_directory = \"/path/to/your/audio/directory\"\n\ntranscribe_audio_files(audio_directory)\n```\n\nBy setting the `PYTORCH_ENABLE_MPS_FALLBACK` environment variable to `\"1\"`, PyTorch will use the CPU as a fallback for the unsupported operation.\n\nPlease note that this is a temporary workaround, and it's recommended to keep an eye on the PyTorch GitHub issue mentioned in the error message (https://github.com/pytorch/pytorch/issues/77764) for updates on the implementation of the `aten::isin.Tensor_Tensor_out` operator for the MPS device.\n\nIf the CPU fallback does not work or if you encounter further issues, you may need to consider running the script on a machine with a supported GPU (e.g., an NVIDIA GPU with CUDA) or explore alternative approaches for transcription.",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-05-09T16:43:39.745469Z",
+        "attachments": [],
+        "files": []
+      }
+    }
+  ]
+}

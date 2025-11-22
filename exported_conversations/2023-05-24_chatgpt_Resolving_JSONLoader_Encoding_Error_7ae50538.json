@@ -1,0 +1,115 @@
+{
+  "id": "7ae50538-a992-4e0d-b795-7a0c44f2b105",
+  "source": "chatgpt",
+  "title": "Resolving JSONLoader Encoding Error",
+  "created_at": "2023-05-24T22:58:42.160929",
+  "updated_at": "2023-05-24T23:00:46",
+  "summary": null,
+  "message_count": 8,
+  "messages": [
+    {
+      "id": "aaa22048-a23f-4c1a-818f-fef578ee6d03",
+      "role": "user",
+      "content": "Creating new vectorstore\nLoading documents from source_documents\nLoading new documents:   0%|                          | 0/10973 [00:04<?, ?it/s]\nmultiprocessing.pool.RemoteTraceback: \n\"\"\"\nTraceback (most recent call last):\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/multiprocessing/pool.py\", line 125, in worker\n    result = (True, func(*args, **kwds))\n  File \"/Users/bilalghalib/Projects/Github/privateGPT/ingest.py\", line 90, in load_single_document\n    loader = loader_class(file_path, **loader_args)\nTypeError: JSONLoader.__init__() got an unexpected keyword argument 'encoding'\n\"\"\"\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/bilalghalib/Projects/Github/privateGPT/ingest.py\", line 169, in <module>\n    main()\n  File \"/Users/bilalghalib/Projects/Github/privateGPT/ingest.py\", line 159, in main\n    texts = process_documents()\n  File \"/Users/bilalghalib/Projects/Github/privateGPT/ingest.py\", line 121, in process_documents\n    documents = load_documents(source_directory, ignored_files)\n  File \"/Users/bilalghalib/Projects/Github/privateGPT/ingest.py\", line 110, in load_documents\n    for i, doc in enumerate(pool.imap_unordered(load_single_document, filtered_files)):\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/multiprocessing/pool.py\", line 873, in next\n    raise value\nTypeError: JSONLoader.__init__() got an unexpected keyword argument 'encoding'\n",
+      "created_at": "2023-05-24T22:58:42.162295",
+      "sequence_order": 0,
+      "parent_id": "b532b448-3360-4257-8401-0cdfd0f4e687",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "0a4b1274-2040-4a87-ac6d-63d1196368df",
+      "role": "assistant",
+      "content": "It seems that there is an error related to the `encoding` argument in the `JSONLoader` class. The error message suggests that the `JSONLoader` class does not expect the `encoding` argument.\n\nTo resolve this issue, you need to modify the code that initializes the `JSONLoader` class and remove the `encoding` argument. The exact code changes will depend on your implementation and how the `JSONLoader` class is being used.\n\nOnce you have made the necessary modifications, you can rerun the code to create the new vector store and load the documents without encountering the `TypeError` related to the `encoding` argument.",
+      "created_at": "2023-05-24T22:58:43.825635",
+      "sequence_order": 1,
+      "parent_id": "aaa22048-a23f-4c1a-818f-fef578ee6d03",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa22e02-8cd4-4dd2-a0fa-6d7f5d6471f7",
+      "role": "user",
+      "content": "what to do here? #!/usr/bin/env python3\nimport os\nimport glob\nfrom typing import List\nfrom dotenv import load_dotenv\nfrom multiprocessing import Pool\nfrom tqdm import tqdm\n\nfrom langchain.document_loaders import (\n    CSVLoader,\n    EverNoteLoader,\n    PDFMinerLoader,\n    TextLoader,\n    JSONLoader,\n    UnstructuredEmailLoader,\n    UnstructuredEPubLoader,\n    UnstructuredHTMLLoader,\n    UnstructuredMarkdownLoader,\n    UnstructuredODTLoader,\n    UnstructuredPowerPointLoader,\n    UnstructuredWordDocumentLoader,\n)\n\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter\nfrom langchain.vectorstores import Chroma\nfrom langchain.embeddings import HuggingFaceEmbeddings\nfrom langchain.docstore.document import Document\nfrom constants import CHROMA_SETTINGS\n\n\nload_dotenv()\n\n\n# Load environment variables\npersist_directory = os.environ.get('PERSIST_DIRECTORY')\nsource_directory = os.environ.get('SOURCE_DIRECTORY', 'source_documents')\nembeddings_model_name = os.environ.get('EMBEDDINGS_MODEL_NAME')\nchunk_size = 500\nchunk_overlap = 50\n\n\n# Custom document loaders\nclass MyElmLoader(UnstructuredEmailLoader):\n    \"\"\"Wrapper to fallback to text/plain when default does not work\"\"\"\n\n    def load(self) -> List[Document]:\n        \"\"\"Wrapper adding fallback for elm without html\"\"\"\n        try:\n            try:\n                doc = UnstructuredEmailLoader.load(self)\n            except ValueError as e:\n                if 'text/html content not found in email' in str(e):\n                    # Try plain text\n                    self.unstructured_kwargs[\"content_source\"]=\"text/plain\"\n                    doc = UnstructuredEmailLoader.load(self)\n                else:\n                    raise\n        except Exception as e:\n            # Add file_path to exception message\n            raise type(e)(f\"{self.file_path}: {e}\") from e\n\n        return doc\n\n\n# Map file extensions to document loaders and their arguments\nLOADER_MAPPING = {\n    \".csv\": (CSVLoader, {}),\n    # \".docx\": (Docx2txtLoader, {}),\n    \".doc\": (UnstructuredWordDocumentLoader, {}),\n    \".docx\": (UnstructuredWordDocumentLoader, {}),\n    \".enex\": (EverNoteLoader, {}),\n    \".eml\": (MyElmLoader, {}),\n    \".epub\": (UnstructuredEPubLoader, {}),\n    \".html\": (UnstructuredHTMLLoader, {}),\n    \".md\": (UnstructuredMarkdownLoader, {}),\n    \".odt\": (UnstructuredODTLoader, {}),\n    \".pdf\": (PDFMinerLoader, {}),\n    \".ppt\": (UnstructuredPowerPointLoader, {}),\n    \".pptx\": (UnstructuredPowerPointLoader, {}),\n    \".json\": (JSONLoader, {\"encoding\": \"utf8\"}),\n    \".txt\": (TextLoader, {\"encoding\": \"utf8\"}),\n    # Add more mappings for other file extensions and loaders as needed\n}\n\n\ndef load_single_document(file_path: str) -> Document:\n    ext = \".\" + file_path.rsplit(\".\", 1)[-1]\n    if ext in LOADER_MAPPING:\n        loader_class, loader_args = LOADER_MAPPING[ext]\n        loader = loader_class(file_path, **loader_args)\n        return loader.load()[0]\n\n    raise ValueError(f\"Unsupported file extension '{ext}'\")\n\n\ndef load_documents(source_dir: str, ignored_files: List[str] = []) -> List[Document]:\n    \"\"\"\n    Loads all documents from the source documents directory, ignoring specified files\n    \"\"\"\n    all_files = []\n    for ext in LOADER_MAPPING:\n        all_files.extend(\n            glob.glob(os.path.join(source_dir, f\"**/*{ext}\"), recursive=True)\n        )\n    filtered_files = [file_path for file_path in all_files if file_path not in ignored_files]\n\n    with Pool(processes=os.cpu_count()) as pool:\n        results = []\n        with tqdm(total=len(filtered_files), desc='Loading new documents', ncols=80) as pbar:\n            for i, doc in enumerate(pool.imap_unordered(load_single_document, filtered_files)):\n                results.append(doc)\n                pbar.update()\n\n    return results\n\ndef process_documents(ignored_files: List[str] = []) -> List[Document]:\n    \"\"\"\n    Load documents and split in chunks\n    \"\"\"\n    print(f\"Loading documents from {source_directory}\")\n    documents = load_documents(source_directory, ignored_files)\n    if not documents:\n        print(\"No new documents to load\")\n        exit(0)\n    print(f\"Loaded {len(documents)} new documents from {source_directory}\")\n    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)\n    texts = text_splitter.split_documents(documents)\n    print(f\"Split into {len(texts)} chunks of text (max. {chunk_size} tokens each)\")\n    return texts\n\ndef does_vectorstore_exist(persist_directory: str) -> bool:\n    \"\"\"\n    Checks if vectorstore exists\n    \"\"\"\n    if os.path.exists(os.path.join(persist_directory, 'index')):\n        if os.path.exists(os.path.join(persist_directory, 'chroma-collections.parquet')) and os.path.exists(os.path.join(persist_directory, 'chroma-embeddings.parquet')):\n            list_index_files = glob.glob(os.path.join(persist_directory, 'index/*.bin'))\n            list_index_files += glob.glob(os.path.join(persist_directory, 'index/*.pkl'))\n            # At least 3 documents are needed in a working vectorstore\n            if len(list_index_files) > 3:\n                return True\n    return False\n\ndef main():\n    # Create embeddings\n    embeddings = HuggingFaceEmbeddings(model_name=embeddings_model_name)\n\n    if does_vectorstore_exist(persist_directory):\n        # Update and store locally vectorstore\n        print(f\"Appending to existing vectorstore at {persist_directory}\")\n        db = Chroma(persist_directory=persist_directory, embedding_function=embeddings, client_settings=CHROMA_SETTINGS)\n        collection = db.get()\n        texts = process_documents([metadata['source'] for metadata in collection['metadatas']])\n        print(f\"Creating embeddings. May take some minutes...\")\n        db.add_documents(texts)\n    else:\n        # Create and store locally vectorstore\n        print(\"Creating new vectorstore\")\n        texts = process_documents()\n        print(f\"Creating embeddings. May take some minutes...\")\n        db = Chroma.from_documents(texts, embeddings, persist_directory=persist_directory, client_settings=CHROMA_SETTINGS)\n    db.persist()\n    db = None\n\n    print(f\"Ingestion complete! You can now run privateGPT.py to query your documents\")\n\n\nif __name__ == \"__main__\":\n    main()\n",
+      "created_at": "2023-05-24T22:59:01.526546",
+      "sequence_order": 2,
+      "parent_id": "0a4b1274-2040-4a87-ac6d-63d1196368df",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "eb0180e8-abbf-41ab-8c56-df82bb811dbb",
+      "role": "assistant",
+      "content": "In the code you provided, the error is occurring in the `JSONLoader` class instantiation. The `JSONLoader` class does not expect the `encoding` argument, but it is being passed in the `LOADER_MAPPING` dictionary.\n\nTo fix the issue, you need to remove the `encoding` argument from the `JSONLoader` mapping in the `LOADER_MAPPING` dictionary. Here's the modified code:\n\n```python\nLOADER_MAPPING = {\n    \".csv\": (CSVLoader, {}),\n    # Rest of the mappings...\n    \".json\": (JSONLoader, {}),\n    \".txt\": (TextLoader, {\"encoding\": \"utf8\"}),\n    # Rest of the mappings...\n}\n```\n\nAfter making this change, try running the code again. It should resolve the `TypeError` related to the `encoding` argument in the `JSONLoader` class instantiation.",
+      "created_at": "2023-05-24T22:59:04.679740",
+      "sequence_order": 3,
+      "parent_id": "aaa22e02-8cd4-4dd2-a0fa-6d7f5d6471f7",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2e0d5-ab9f-474b-9c11-6d57d9a33fa9",
+      "role": "user",
+      "content": "(base) bilalghalib@macbook-pro privateGPT % python ingest.py\nCreating new vectorstore\nLoading documents from source_documents\nLoading new documents:   0%|                          | 0/10973 [00:04<?, ?it/s]\nmultiprocessing.pool.RemoteTraceback: \n\"\"\"\nTraceback (most recent call last):\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/multiprocessing/pool.py\", line 125, in worker\n    result = (True, func(*args, **kwds))\n  File \"/Users/bilalghalib/Projects/Github/privateGPT/ingest.py\", line 90, in load_single_document\n    loader = loader_class(file_path, **loader_args)\nTypeError: JSONLoader.__init__() missing 1 required positional argument: 'jq_schema'\n\"\"\"\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/bilalghalib/Projects/Github/privateGPT/ingest.py\", line 169, in <module>\n    main()\n  File \"/Users/bilalghalib/Projects/Github/privateGPT/ingest.py\", line 159, in main\n    texts = process_documents()\n  File \"/Users/bilalghalib/Projects/Github/privateGPT/ingest.py\", line 121, in process_documents\n    documents = load_documents(source_directory, ignored_files)\n  File \"/Users/bilalghalib/Projects/Github/privateGPT/ingest.py\", line 110, in load_documents\n    for i, doc in enumerate(pool.imap_unordered(load_single_document, filtered_files)):\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/multiprocessing/pool.py\", line 873, in next\n    raise value\nTypeError: JSONLoader.__init__() missing 1 required positional argument: 'jq_schema'\n",
+      "created_at": "2023-05-24T22:59:43.759411",
+      "sequence_order": 4,
+      "parent_id": "eb0180e8-abbf-41ab-8c56-df82bb811dbb",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "dab6deed-78ea-4d76-b446-b64f156c1474",
+      "role": "assistant",
+      "content": "The new error suggests that there is a missing positional argument `'jq_schema'` in the `JSONLoader` class instantiation.\n\nLooking at the code, it seems that the `JSONLoader` class expects a `'jq_schema'` argument in addition to the filename. You need to update the `LOADER_MAPPING` dictionary to include the `'jq_schema'` argument for `JSONLoader` as well.\n\nHere's the modified code:\n\n```python\nLOADER_MAPPING = {\n    \".csv\": (CSVLoader, {}),\n    # Rest of the mappings...\n    \".json\": (JSONLoader, {\"jq_schema\": \"your_jq_schema_file_path\"}),\n    \".txt\": (TextLoader, {\"encoding\": \"utf8\"}),\n    # Rest of the mappings...\n}\n```\n\nMake sure to replace `\"your_jq_schema_file_path\"` with the actual file path of your JQ schema file that needs to be used for JSON loading.\n\nAfter making this change, run the code again. It should resolve the `TypeError` related to the missing positional argument in the `JSONLoader` class instantiation.",
+      "created_at": "2023-05-24T22:59:47.637311",
+      "sequence_order": 5,
+      "parent_id": "aaa2e0d5-ab9f-474b-9c11-6d57d9a33fa9",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2b590-8957-4422-8b4c-8519605afe5c",
+      "role": "user",
+      "content": "import { JSONLinesLoader } from \"langchain/document_loaders/fs/json\";\n\nconst loader = new JSONLinesLoader(\n  \"src/document_loaders/example_data/example.jsonl\",\n  \"/html\"\n);\n",
+      "created_at": "2023-05-24T23:00:46.087247",
+      "sequence_order": 6,
+      "parent_id": "dab6deed-78ea-4d76-b446-b64f156c1474",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "4a95900f-2e5a-4772-af7a-25a00794e7cf",
+      "role": "assistant",
+      "content": "It seems that you are trying to use the `JSONLinesLoader` from the `langchain/document_loaders/fs/json` module. However, the code you provided is written in JavaScript, while the previous conversation was in Python.\n\nIf you're encountering an issue with the `JSONLinesLoader` in JavaScript, please provide more details about the specific error or problem you're facing. Additionally, including the relevant code surrounding the usage of `JSONLinesLoader` would be helpful for further assistance.\n\nPlease note that as an AI language model, my expertise is primarily focused on providing assistance with code and concepts rather than actively executing or debugging code.",
+      "created_at": "2023-05-24T23:00:48.374558",
+      "sequence_order": 7,
+      "parent_id": "aaa2b590-8957-4422-8b4c-8519605afe5c",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

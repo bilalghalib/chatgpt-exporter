@@ -1,0 +1,37 @@
+{
+  "id": "74c9c3cf-56e6-4330-aeca-7c17a8ada2ca",
+  "source": "chatgpt",
+  "title": "\"Extracting Song Info Script\"",
+  "created_at": "2023-05-15T15:49:00.992579",
+  "updated_at": "2023-05-15T15:50:12",
+  "summary": null,
+  "message_count": 2,
+  "messages": [
+    {
+      "id": "aaa29a1c-b98e-4abe-8820-933a47ae01cf",
+      "role": "user",
+      "content": "I want a script to take text like this:\"-  Use the 'append_to_file' command to add information about the song to the 'songs.txt' file, including the song name, artist name, character strength, year, genre, style, tags, why the song was chosen for this strength, and a link to the YouTube URL.\n-  Look for other songs that inspire perseverance in different ways, whether they are about facing obstacles, bouncing back from setbacks, or building resilience.\nCRITICISM: \nNEXT ACTION:  COMMAND = append_to_file ARGUMENTS = {'filename': '/Users/bilalghalib/Projects/Github/Auto-GPT/autogpt/auto_gpt_workspace/songs.txt', 'text': \"\\nEye of the Tiger | Survivor | Perseverance | 1982 | Rock | Hard Rock, Arena Rock | Perseverance, Courage, Victory | The song 'Eye of the Tiger' is a powerful anthem of determination and perseverance. Its driving beat and uplifting lyrics create a sense of energy and motivation that encourages us to keep pushing forward in the face of adversity. The song's themes of perseverance, courage, and victory closely align with the perseverance strength, which celebrates our ability to overcome challenges and achieve our goals through hard work, focus, and determination. 'Eye of the Tiger' inspires us to stay strong and resilient, and to never give up on our dreams.| https://www.youtube.com/watch?v=btPJPFnesV4\"}\nAUTHORISED COMMANDS LEFT: 4 \nSYSTEM:  Command append_to_file returned: Text appended successfully.\"\nAnd export a csv with Song Name,\tArtist,\tCharacter Strength,\tReasoning,\tYouTube URL, genre, year",
+      "created_at": "2023-05-15T15:49:01.248983",
+      "sequence_order": 0,
+      "parent_id": "acc266e9-0511-42d9-aea4-26635dd84e5b",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "ecd4f248-1237-4e7d-bd80-000edafa02ed",
+      "role": "assistant",
+      "content": "To achieve this, you could write a Python script that utilizes regular expressions to extract the necessary information from the text and then outputs it into a csv file. Here's an example of how you might do it:\n\n```python\nimport re\nimport csv\n\ndef extract_song_info(text):\n    pattern = r\"'text': \\\"\\\\n(.*?) \\| (.*?) \\| (.*?) \\| (.*?) \\| (.*?) \\| (.*?) \\| (.*?) \\| (.*?)\\|(.*?)\\\"\"\n    match = re.search(pattern, text)\n    \n    if match:\n        song_name = match.group(1)\n        artist = match.group(2)\n        character_strength = match.group(3)\n        year = match.group(4)\n        genre = match.group(5)\n        style = match.group(6)  # Assuming you don't need this as per your csv column requirements\n        tags = match.group(7)  # Assuming you don't need this as per your csv column requirements\n        reasoning = match.group(8).strip()\n        youtube_url = match.group(9).strip()\n\n        return [song_name, artist, character_strength, reasoning, youtube_url, genre, year]\n\n    return []\n\ndef text_to_csv(text, output_filename):\n    song_info = extract_song_info(text)\n    if song_info:\n        with open(output_filename, 'w', newline='') as file:\n            writer = csv.writer(file)\n            writer.writerow([\"Song Name\", \"Artist\", \"Character Strength\", \"Reasoning\", \"YouTube URL\", \"Genre\", \"Year\"])\n            writer.writerow(song_info)\n    else:\n        print(\"No song information found in the provided text.\")\n\ntext = \"\"\"...\"\"\"  # Your text here\n\ntext_to_csv(text, \"songs.csv\")\n```\n\nPlease replace `\"\"\"...\"\"\"` with your actual text. You can run this script and it will generate a file called \"songs.csv\" in the same directory with the extracted information.\n\nDo note, this script makes some assumptions about the format of the text provided, and it will not work if the format changes. If the format can vary, you would need a more robust solution.",
+      "created_at": "2023-05-15T15:50:12.054571",
+      "sequence_order": 1,
+      "parent_id": "aaa29a1c-b98e-4abe-8820-933a47ae01cf",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

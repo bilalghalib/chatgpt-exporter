@@ -1,0 +1,102 @@
+{
+  "id": "682a5c9c-3ba4-8012-86ef-e976c7892871",
+  "source": "chatgpt",
+  "title": "Interactive Interview Processing Tool",
+  "created_at": "2025-05-19T00:18:04.367775",
+  "updated_at": "2025-05-19T00:18:22.330865",
+  "summary": null,
+  "message_count": 7,
+  "messages": [
+    {
+      "id": "7ec9e320-7f66-44d9-8fa7-337ecfbfe8eb",
+      "role": "user",
+      "content": "",
+      "created_at": null,
+      "sequence_order": 0,
+      "parent_id": "b6e4245c-02ab-4cf5-890b-c6107b5cbe8a",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "8d9644f1-5366-48de-8c5f-c66105effa97",
+      "role": "user",
+      "content": "Here is a prompt and here is the full prompt strategy, I want to run this locally on my computer using open AI and open ai's o3 API endpoint and have it produce documents that \"feed into each other from one to the next, I have a text file that contains both the transcript and the first pass of the insights, can you help me write a script that operationalizes this? Maybe it'd be nice to have it have some sort of way to have some iterative feedback processes although I'm not sure how to do that, I want it to go through each interview, extract everything, then I'm not sure if i should wait till I go through all the interviews or if i should update the content one at a time... actually I think it'll be cool if it was a bit more interactive and if after each interview I was asked 10 questions to help prioritize the content and to then update a \"transition document\" or something, that would be the document that would be updated with confirmed and quality content that we're sure we want to use to create and update a trainers manual and the final pitch deck. think through this step by step and help me come up with a PRD and an outline for a python script, or a locally running web interface (very basic html with no css needed, keep it super basic as a way to operate the python backend or something) to operationalize this cleanly, what decisions do i have to make and what do yout hink is the best strateggy? ",
+      "created_at": "2025-05-19T00:18:03.893000",
+      "sequence_order": 1,
+      "parent_id": "7ec9e320-7f66-44d9-8fa7-337ecfbfe8eb",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "5eac2e55-4c47-4ae3-b3e9-2e82f7ad2f60",
+      "role": "assistant",
+      "content": "",
+      "created_at": "2025-05-19T00:18:16.462604",
+      "sequence_order": 2,
+      "parent_id": "8d9644f1-5366-48de-8c5f-c66105effa97",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    },
+    {
+      "id": "901c28fd-df18-44f1-8560-f110edf31d19",
+      "role": "assistant",
+      "content": "",
+      "created_at": "2025-05-19T00:18:16.462844",
+      "sequence_order": 3,
+      "parent_id": "5eac2e55-4c47-4ae3-b3e9-2e82f7ad2f60",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    },
+    {
+      "id": "651fd6ee-2071-45cd-abed-f72ddfa9eebb",
+      "role": "assistant",
+      "content": "{\"name\": \"Interview Processing Automation PRD and Script Outline\", \"type\": \"document\", \"content\": \"## Product Requirements Document (PRD)\\n\\n### 1. Overview\\n**Goal:** Automate the processing of interview transcripts and initial insights, with iterative feedback after each interview, culminating in a single “transition document” that feeds into a trainers’ manual and final pitch deck.\\n\\n### 2. Objectives & Success Metrics\\n- **Automated Extraction**: Extract key themes, quotes, and insights from each interview transcript via OpenAI’s o3 API.\\n- **Interactive Feedback Loop**: After each interview, present 10 prioritization questions to the user and capture responses.\\n- **Central Transition Document**: Maintain an evolving markdown/JSON document of confirmed, high-quality content.\\n- **Final Outputs**: Generate a trainers’ manual draft and pitch deck skeleton automatically based on the transition document.\\n\\n**Success Metrics:**\\n- Reduction in manual transcription review time by ≥ 60%.\\n- User satisfaction ≥ 80% in terms of ease of feedback and content quality.\\n\\n---\\n### 3. User Stories\\n1. **Researcher** wants to upload a transcript file and initial insights, then have the system extract all key items automatically.\\n2. **Researcher** wants to answer 10 prioritization questions after each interview to refine content.\\n3. **Researcher** wants to see an updated transition document after each feedback round.\\n4. **Researcher** wants to export a trainers’ manual draft and pitch deck outline at any time.\\n\\n---\\n### 4. Functional Requirements\\n\\n| ID | Requirement                                                                                     |\\n|----|-------------------------------------------------------------------------------------------------| \\n| FR1| Upload transcript + first-pass insights text files.                                            |\\n| FR2| Call OpenAI o3 endpoint to extract themes, quotes, and insights.                               |\\n| FR3| Display 10 configurable questions in interactive session; record answers.                       |\\n| FR4| Merge AI output + user inputs into a central transition document (markdown/JSON).               |\\n| FR5| On demand, generate trainers’ manual draft from transition doc via AI.                           |\\n| FR6| On demand, generate pitch deck outline from transition doc via AI.                              |\\n| FR7| Persist state between sessions (e.g., using a local JSON database or simple file).              |\\n\\n---\\n### 5. Non-Functional Requirements\\n- **Local Execution**: No external servers beyond OpenAI API.\\n- **Lightweight Web UI**: Basic HTML forms, minimal JavaScript.\\n- **Modular Code**: Clear separation of data, logic, and presentation.\\n- **Extensible**: Ability to add/remove questions, adjust prompts.\\n- **Configuration**: API key via environment variable, configurable prompts file.\\n\\n---\\n### 6. Technology Stack\\n- **Language**: Python 3.9+\\n- **Framework**: Flask (for lightweight web UI) or CLI (argparse + prompt toolkit)\\n- **Storage**: Local JSON files (e.g., `state.json`, `transition.md`)\\n- **AI Client**: `openai` Python package\\n- **Templating**: Jinja2 for HTML pages\\n\\n---\\n### 7. Workflow & Architecture\\n\\n```plaintext\\n[Start] --> [Upload transcript & insights] --> [AI extraction] --> [Show AI results]\\n      \\\\\\n       \\\\-> [Present 10 questions] --> [Capture answers] --> [Merge into transition doc]\\n                                        |\\n                                        v\\n                             [Save state & transition doc]\\n                                        |\\n                         +--------------+--------------+\\n                         |                             |\\n            [Generate manual draft]      [Generate pitch deck]\\n                         |                             |\\n                    [Output files]                [Output files]\\n```   \\n\\n---\\n### 8. Decision Points\\n\\n1. **Interactive vs. Batch Processing**:  \\n   - *Interactive per interview*: Gives immediate feedback, but requires user presence.  \\n   - *Batch*: Process all interviews first, then one feedback session.  \\n   - **Recommendation**: Interactive per interview for continual alignment.\\n\\n2. **Data Format**:  \\n   - Markdown vs. JSON for transition doc.  \\n   - **Recommendation**: Use Markdown + front-matter JSON for readability + machine-readability.\\n\\n3. **UI Choice**:  \\n   - CLI only vs. Lightweight Web UI.  \\n   - **Recommendation**: Web UI for ease of interactive Q&A; CLI mode also supported.\\n\\n4. **State Persistence**:  \\n   - Single `state.json` vs. per-interview files.  \\n   - **Recommendation**: Central `state.json` tracking progress & responses.\\n\\n---\\n### 9. Python Script / Web App Outline\\n\\n#### 9.1 File Structure\\n```\\nproject/\\n├── app.py           # Flask application (or cli.py for CLI)\\n├── prompts.json     # List of 10 questions + AI prompts\\n├── templates/\\n│   └── interview.html\\n├── static/          # optional JS for form handling\\n├── data/\\n│   ├── transcripts/ # raw uploaded files\\n│   ├── insights/    # first-pass insights\\n│   ├── state.json   # tracks completed interviews & content\\n│   └── transition.md\\n└── utils.py         # AI calls, file I/O, merging logic\\n```\\n\\n#### 9.2 Key Modules & Functions\\n\\n```python\\n# utils.py\\n\\ndef load_transcript(path: str) -> str:\\n    # read transcript\\n\\ndef load_insights(path: str) -> str:\\n    # read first-pass insights\\n\\ndef call_ai_extract(text: str) -> dict:\\n    # call openai.Completion.create or ChatCompletion with o3 endpoint\\n\\ndef merge_transition(existing_md: str, ai_output: dict, answers: dict) -> str:\\n    # update transition document markdown\\n\\n# app.py (Flask)\\n\\n@app.route('/upload', methods=['GET','POST'])\\n def upload():\\n    # handle file upload\\n\\n@app.route('/review/<interview_id>', methods=['GET','POST'])\\n def review(interview_id):\\n    # show AI extraction + questions form\\n\\n@app.route('/generate/<output_type>')\\n def generate(output_type):\\n    # generate manual or deck outline via AI based on transition.md\\n```\\n\\n---\\n### 10. Next Steps & Timeline\\n1. **Setup** environment & dependencies (1 day)\\n2. **Implement** AI extraction & state management (2 days)\\n3. **Build** interactive review UI (2 days)\\n4. **Integrate** final generation endpoints (1 day)\\n5. **Test** end-to-end with sample interviews (2 days)\\n\\n---\\n**With this PRD and outline, you’ll have a clear blueprint for building a robust, interactive pipeline that operationalizes your interviews into high-quality deliverables.**\"}",
+      "created_at": "2025-05-19T00:18:04.432316",
+      "sequence_order": 4,
+      "parent_id": "901c28fd-df18-44f1-8560-f110edf31d19",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    },
+    {
+      "id": "8d336c44-8bd4-456f-ba07-21d40d1bee75",
+      "role": "tool",
+      "content": "Successfully created text document 'Interview Processing Automation Prd And Script Outline' which will be referenced in all future messages with the unique identifier textdoc_id: '682a5caae1588191a301edaa97c602dd'",
+      "created_at": "2025-05-19T00:18:20.730667",
+      "sequence_order": 5,
+      "parent_id": "651fd6ee-2071-45cd-abed-f72ddfa9eebb",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 0,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "4e662456-d98d-460e-8e72-b48224807989",
+      "role": "assistant",
+      "content": "I’ve drafted a detailed PRD and a Python-plus-Flask outline to power an interactive, per-interview processing pipeline that feeds into a single transition document—ready to evolve into your trainers’ manual and pitch deck. Let me know if you’d like to tweak any sections, add more detail on the AI prompts, or pivot toward a pure CLI implementation!",
+      "created_at": "2025-05-19T00:18:19.282310",
+      "sequence_order": 6,
+      "parent_id": "8d336c44-8bd4-456f-ba07-21d40d1bee75",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

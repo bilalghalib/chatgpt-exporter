@@ -1,0 +1,89 @@
+{
+  "id": "d57b7de6-2778-4fb0-be47-0c20f0f8b14d",
+  "source": "chatgpt",
+  "title": "Python Recreation: Prayer Clock",
+  "created_at": "2023-03-26T16:27:59.267990",
+  "updated_at": "2023-03-26T16:39:53",
+  "summary": null,
+  "message_count": 6,
+  "messages": [
+    {
+      "id": "6e69eefd-fcb3-4bc9-9354-6017f940abce",
+      "role": "user",
+      "content": "Read this code and find the most efficient language and shortest code to recreate the idea here: \n class PrayerClock {\n  constructor(prayerTimes) {\n    this.prayerTimes = prayerTimes;\n    this.angleMapping = this.getAngleMapping(prayerTimes);\n    this.colors = [\n      color(255, 182, 193), // Fajr\n      color(250, 128, 114), // Sunrise\n      color(255, 255, 153), // Dhuhr\n      color(173, 216, 230), // Asr\n      color(255, 105, 180), // Maghrib\n      color(255, 99, 71) // Isha\n    ];\n  }\n\n  draw() {\n    this.drawClock();\n    this.drawCurrentTime();\n  }\n\n  drawClock() {\n    const keys = Object.keys(this.prayerTimes);\n    const len = keys.length;\n\n    for (let i = 0; i < len; i++) {\n      const prevAngle = this.angleMapping[keys[i]];\n      const nextAngle = this.angleMapping[keys[(i + 1) % len]];\n\n      fill(this.colors[i]);\n      arc(0, 0, 300, 300, prevAngle, nextAngle);\n\n      const midAngle = (prevAngle + nextAngle) / 2;\n      const labelPos = p5.Vector.fromAngle(radians(midAngle - 90), 150 * 1.1);\n      textAlign(CENTER, CENTER);\n      noStroke();\n      fill(0);\n      text(keys[i], labelPos.x, labelPos.y);\n    }\n  }\n\n  drawCurrentTime() {\n    const currentTime = new Date();\n    const currentHour = currentTime.getHours();\n    const currentMinute = currentTime.getMinutes();\n    const currentAngle = this.getCurrentAngle(currentHour, currentMinute);\n    const clockHand = p5.Vector.fromAngle(radians(currentAngle - 90), 150 / 2);\n\n    stroke(0, 0, 255);\n    strokeWeight(2);\n    line(0, 0, clockHand.x, clockHand.y);\n  }\n\n  getAngleMapping(times) {\n    let angleMap = {};\n\n    for (const [key, value] of Object.entries(times)) {\n      const time = value.split(':');\n      const hour = parseInt(time[0]);\n      const minute = parseInt(time[1]);\n\n      angleMap[key] = this.getCurrentAngle(hour, minute);\n    }\n\n    return angleMap;\n  }\n\n  getCurrentAngle(hour, minute) {\n    const totalMinutes = hour * 60 + minute;\n    const angle = ((totalMinutes - (5 * 60 + 15)) / (24 * 60)) * 360;\n    return angle;\n  }\n}\n\nconst prayerTimes = {\n  'Fajr': '05:15',\n  'Sunrise': '06:44',\n  'Dhuhr': '12:57',\n  'Asr': '16:22',\n  'Maghrib': '19:10',\n  'Isha': '20:39'\n};\n\nlet prayerClock;\n\nfunction setup() {\n  createCanvas(400, 400);\n  angleMode(DEGREES);\n  prayerClock = new PrayerClock(prayerTimes);\n}\n\nfunction draw() {\n  background(255);\n  translate(width / 2, height / 2);\n  prayerClock.draw();\n}",
+      "created_at": "2023-03-26T16:27:59.272136",
+      "sequence_order": 0,
+      "parent_id": "2fe700f4-feb9-4dff-985d-c99b92130736",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "80cbfeed-31a5-4d59-b667-04598805fd7e",
+      "role": "assistant",
+      "content": "The original code provided is in JavaScript using the p5.js library for graphics. A more concise implementation of the same idea can be achieved in Python using the Pycairo library for graphics. Here's a recreation of the given code in Python:\n\n```python\nimport cairo\nfrom datetime import datetime\nimport math\n\nprayer_times = {\n    \"Fajr\": \"05:15\",\n    \"Sunrise\": \"06:44\",\n    \"Dhuhr\": \"12:57\",\n    \"Asr\": \"16:22\",\n    \"Maghrib\": \"19:10\",\n    \"Isha\": \"20:39\",\n}\n\ncolors = [\n    (1, 182 / 255, 193 / 255),  # Fajr\n    (250 / 255, 128 / 255, 114 / 255),  # Sunrise\n    (1, 1, 153 / 255),  # Dhuhr\n    (173 / 255, 216 / 255, 230 / 255),  # Asr\n    (1, 105 / 255, 180 / 255),  # Maghrib\n    (1, 99 / 255, 71 / 255),  # Isha\n]\n\n\ndef get_angle(time):\n    hour, minute = map(int, time.split(\":\"))\n    total_minutes = hour * 60 + minute\n    return ((total_minutes - (5 * 60 + 15)) / (24 * 60)) * 360\n\n\ndef draw_prayer_clock(ctx, width, height):\n    ctx.translate(width / 2, height / 2)\n    radius = 150\n    angle_mapping = {k: get_angle(v) for k, v in prayer_times.items()}\n    keys = list(prayer_times.keys())\n\n    for i, key in enumerate(keys):\n        prev_angle = angle_mapping[key]\n        next_angle = angle_mapping[keys[(i + 1) % len(keys)]]\n        ctx.set_source_rgb(*colors[i])\n\n        ctx.move_to(0, 0)\n        ctx.arc(0, 0, radius, math.radians(prev_angle - 90), math.radians(next_angle - 90))\n        ctx.close_path()\n        ctx.fill()\n\n        mid_angle = (prev_angle + next_angle) / 2\n        label_x = math.cos(math.radians(mid_angle - 90)) * radius * 1.1\n        label_y = math.sin(math.radians(mid_angle - 90)) * radius * 1.1\n        ctx.move_to(label_x, label_y)\n        ctx.set_source_rgb(0, 0, 0)\n        ctx.show_text(key)\n\n    current_time = datetime.now()\n    current_hour, current_minute = current_time.hour, current_time.minute\n    current_angle = get_angle(f\"{current_hour:02d}:{current_minute:02d}\")\n    clock_hand_x = math.cos(math.radians(current_angle - 90)) * radius / 2\n    clock_hand_y = math.sin(math.radians(current_angle - 90)) * radius / 2\n    ctx.set_source_rgb(0, 0, 1)\n    ctx.set_line_width(2)\n    ctx.move_to(0, 0)\n    ctx.line_to(clock_hand_x, clock_hand_y)\n    ctx.stroke()\n\n\nwidth, height = 400, 400\nsurface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)\nctx = cairo.Context(surface)\nctx.set_source_rgb(1, 1, 1)\nctx.paint()\ndraw_prayer_clock(ctx, width, height)\nsurface.write_to_png(\"prayer_clock.png\")\n```\n\nThis Python implementation uses the Py",
+      "created_at": "2023-03-26T16:30:31.025313",
+      "sequence_order": 1,
+      "parent_id": "6e69eefd-fcb3-4bc9-9354-6017f940abce",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    },
+    {
+      "id": "4b581d84-3894-4dae-9c7a-7d5e7dd1be8f",
+      "role": "user",
+      "content": "Cairo isn't available",
+      "created_at": "2023-03-26T16:33:00.174849",
+      "sequence_order": 2,
+      "parent_id": "80cbfeed-31a5-4d59-b667-04598805fd7e",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "2392f452-261c-44ec-9bc1-fde24d802e5a",
+      "role": "assistant",
+      "content": "In that case, we can use the Python `turtle` module, which is part of the standard library and doesn't require any additional installation. Here's the code using `turtle`:\n\n```python\nimport turtle\nfrom datetime import datetime\nimport math\n\nprayer_times = {\n    \"Fajr\": \"05:15\",\n    \"Sunrise\": \"06:44\",\n    \"Dhuhr\": \"12:57\",\n    \"Asr\": \"16:22\",\n    \"Maghrib\": \"19:10\",\n    \"Isha\": \"20:39\",\n}\n\ncolors = [\n    (1, 182 / 255, 193 / 255),  # Fajr\n    (250 / 255, 128 / 255, 114 / 255),  # Sunrise\n    (1, 1, 153 / 255),  # Dhuhr\n    (173 / 255, 216 / 255, 230 / 255),  # Asr\n    (1, 105 / 255, 180 / 255),  # Maghrib\n    (1, 99 / 255, 71 / 255),  # Isha\n]\n\n\ndef get_angle(time):\n    hour, minute = map(int, time.split(\":\"))\n    total_minutes = hour * 60 + minute\n    return ((total_minutes - (5 * 60 + 15)) / (24 * 60)) * 360\n\n\ndef draw_sector(angle1, angle2, radius, color):\n    turtle.color(color)\n    turtle.begin_fill()\n    turtle.left(angle1)\n    turtle.forward(radius)\n    turtle.left(90)\n    turtle.circle(radius, angle2 - angle1)\n    turtle.left(90)\n    turtle.forward(radius)\n    turtle.left(180)\n    turtle.end_fill()\n\n\ndef draw_prayer_clock():\n    turtle.up()\n    turtle.goto(0, -150)\n    turtle.down()\n    turtle.speed(0)\n    turtle.hideturtle()\n\n    angle_mapping = {k: get_angle(v) for k, v in prayer_times.items()}\n    keys = list(prayer_times.keys())\n\n    for i, key in enumerate(keys):\n        prev_angle = angle_mapping[key]\n        next_angle = angle_mapping[keys[(i + 1) % len(keys)]]\n        draw_sector(prev_angle, next_angle, 150, colors[i])\n\n        mid_angle = (prev_angle + next_angle) / 2\n        label_x = math.cos(math.radians(mid_angle - 90)) * 150 * 1.1\n        label_y = math.sin(math.radians(mid_angle - 90)) * 150 * 1.1\n        turtle.up()\n        turtle.goto(label_x, label_y - 10)\n        turtle.down()\n        turtle.color(\"black\")\n        turtle.write(key, align=\"center\", font=(\"Arial\", 12, \"normal\"))\n\n    current_time = datetime.now()\n    current_hour, current_minute = current_time.hour, current_time.minute\n    current_angle = get_angle(f\"{current_hour:02d}:{current_minute:02d}\")\n    clock_hand_x = math.cos(math.radians(current_angle - 90)) * 150 / 2\n    clock_hand_y = math.sin(math.radians(current_angle - 90)) * 150 / 2\n    turtle.up()\n    turtle.goto(0, 0)\n    turtle.down()\n    turtle.color(\"blue\")\n    turtle.setheading(current_angle)\n    turtle.forward(150 / 2)\n\n\nturtle.bgcolor(\"white\")\nturtle.title(\"Prayer Clock\")\ndraw_prayer_clock()\nturtle.done()\n```\n\nThis code uses the `turtle` graphics module to draw the prayer clock.",
+      "created_at": "2023-03-26T16:35:46.436553",
+      "sequence_order": 3,
+      "parent_id": "4b581d84-3894-4dae-9c7a-7d5e7dd1be8f",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    },
+    {
+      "id": "0e9be8d0-5396-4032-8d4c-b2bf3b5490af",
+      "role": "user",
+      "content": "you can use another library that works with python 3 on Mac m1s",
+      "created_at": "2023-03-26T16:39:53.483509",
+      "sequence_order": 4,
+      "parent_id": "2392f452-261c-44ec-9bc1-fde24d802e5a",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "fc903872-2f3c-4617-bbb8-f03d2b0cc36b",
+      "role": "assistant",
+      "content": "You can use the `pygame` library for creating the prayer clock. It works with Python 3 on Mac M1s. First, you'll need to install `pygame`:\n\n```\npip install pygame\n```\n\nHere's the code using `pygame`:\n\n```python\nimport pygame\nfrom datetime import datetime\nimport math\n\npygame.init()\n\nprayer_times = {\n    \"Fajr\": \"05:15\",\n    \"Sunrise\": \"06:44\",\n    \"Dhuhr\": \"12:57\",\n    \"Asr\": \"16:22\",\n    \"Maghrib\": \"19:10\",\n    \"Isha\": \"20:39\",\n}\n\ncolors = [\n    (255, 182, 193),  # Fajr\n    (250, 128, 114),  # Sunrise\n    (255, 255, 153),  # Dhuhr\n    (173, 216, 230),  # Asr\n    (255, 105, 180),  # Maghrib\n    (255, 99, 71),  # Isha\n]\n\n\ndef get_angle(time):\n    hour, minute = map(int, time.split(\":\"))\n    total_minutes = hour * 60 + minute\n    return ((total_minutes - (5 * 60 + 15)) / (24 * 60)) * 360\n\n\ndef draw_prayer_clock(screen, width, height):\n    radius = 150\n    angle_mapping = {k: get_angle(v) for k, v in prayer_times.items()}\n    keys = list(prayer_times.keys())\n    font = pygame.font.Font(None, 24)\n\n    for i, key in enumerate(keys):\n        prev_angle = angle_mapping[key]\n        next_angle = angle_mapping[keys[(i + 1) % len(keys)]]\n        pygame.draw.arc(screen, colors[i], (width / 2 - radius, height / 2 - radius, radius * 2, radius * 2), math.radians(prev_angle - 90), math.radians(next_angle - 90), 10)\n\n        mid_angle = (prev_angle + next_angle) / 2\n        label_x = width / 2 + math.cos(math.radians(mid_angle - 90)) * radius * 1.1\n        label_y = height / 2 + math.sin(math.radians(mid_angle - 90)) * radius * 1.1\n        text = font.render(key, True, (0, 0, 0))\n        screen.blit(text, (label_x - text.get_width() / 2, label_y - text.get_height() / 2))\n\n    current_time = datetime.now()\n    current_hour, current_minute = current_time.hour, current_time.minute\n    current_angle = get_angle(f\"{current_hour:02d}:{current_minute:02d}\")\n    clock_hand_x = width / 2 + math.cos(math.radians(current_angle - 90)) * radius / 2\n    clock_hand_y = height / 2 + math.sin(math.radians(current_angle - 90)) * radius / 2\n    pygame.draw.line(screen, (0, 0, 255), (width / 2, height / 2), (clock_hand_x, clock_hand_y), 2)\n\n\nwidth, height = 400, 400\nscreen = pygame.display.set_mode((width, height))\npygame.display.set_caption(\"Prayer Clock\")\nrunning = True\n\nwhile running:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            running = False\n\n    screen.fill((255, 255, 255))\n    draw_prayer_clock(screen, width, height)\n    pygame.display",
+      "created_at": "2023-03-26T16:42:32.430210",
+      "sequence_order": 5,
+      "parent_id": "0e9be8d0-5396-4032-8d4c-b2bf3b5490af",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    }
+  ]
+}

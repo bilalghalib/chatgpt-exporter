@@ -1,0 +1,37 @@
+{
+  "id": "aeecbd3f-163c-432c-b156-da60aa2ff154",
+  "source": "chatgpt",
+  "title": "CSV Variable Argument Update.",
+  "created_at": "2023-08-07T16:36:59.225494",
+  "updated_at": "2023-08-07T16:37:28",
+  "summary": null,
+  "message_count": 2,
+  "messages": [
+    {
+      "id": "aaa2d6ad-70c3-4c0b-a49c-a75c22feef20",
+      "role": "user",
+      "content": "can you help me make this code take a csv as a variable as an argument in terminal and tell me how to do it?\nimport pandas as pd\nimport os\nimport sys\nimport requests\ndata = pd.read_csv('./Assessment results sync production - Application Form HMN2-2.csv')\n\n# Define the function to extract information for emails\ndef extract_info_for_emails(emails_list):\n    # Create an empty DataFrame with the required columns\n    columns = [\n        \"Name\",\"Email\",\"Team Name\", \"Workspace Name\", \"What is your motivation to join the program?\", \"Gender\",\n        \"Geographic Location\", \"Age\", \"Nationality\", \"Phone number\",\n        \"Social Media Links\", \"Describe your company in 120 characters\",\n        \"Sectors\", \"Entreprise stage pre-funding\", \"Current Team Size\", \"Team Roles and Background\", \"Founding Date (31/12/2022) MM/DD/YYYY\", \"Registration Status of The Company\", \"Type of Company\",\"Registration country\",\"Website\", \"Team growth plans: What are your current plans to grow the business?\", \"State the (green) problem you are solving and how you first identified it\", \"Your solution / value proposition: What is the Company offering?\", \"Traction: Your monthly sales or monthly active users/or clients\",\n        \"SDG Focus\", \"Impact and key impact indicators: How do you measure success beyond financial revenues? What kind of impact have you already had?\",\n        \"Investment or Funding Raised\", \"Priorities Areas of Development\",\n        \"Elaborate on your priority areas of development (max 250 words)\",\n        \"Link to 2 min pitch video (Please use loom.com or another tool to record a short 2 min introduction video about your team and your company)\",\n        \"Have you participated in any other accelerator or mentorship programs before? If yes, please provide details.\"\n    ]\n    \n    output_df = pd.DataFrame(columns=columns)\n    \n    # Loop through each email and extract the relevant information\n    for email in emails_list:\n        filtered_data = data[data['email'] == email]\n        info_dict = {\"Email\": email}\n\n        for _, row in filtered_data.iterrows():\n            question = row[\"questionText\"]\n            answer = row[\"score\"]\n            \n            name = row[\"name\"]\n            teamName = row[\"teamName\"]\n            workspaceName = row[\"workspaceName\"]\n            \n            info_dict[\"Name\"] = name\n            info_dict[\"Team Name\"] = teamName\n            info_dict[\"Workspace Name\"] = workspaceName\n            \n            if question in columns:  # Only add the questions that are in our predefined columns list\n                info_dict[question] = answer\n\n        \n        # Append the information to the dataframe\n        output_df = output_df._append(info_dict, ignore_index=True)\n    \n    # Save the dataframe to a CSV file\n    output_path = \"./extracted_info.csv\"\n    output_df.to_csv(output_path, index=False)\n    \n    return output_path\n\n# Define the list of emails to process\nemails_list = [\"kalinashoshefarm2022@gmail.com\", \"indukwe23@gmail.com\", \"akinyir035@gmail.com\", \"joeyemmyventuresnigltd@gmail.com\", \"liberathakawamala@gmail.com\", \"matildafakazi@gmail.com\", \"dannytsegaye@outlook.com\", \"rootazabaleen@gmail.com\", \"nkhamuts@gmail.com\", \"mohammed.abdulbary@bloom.pm\", \"yasmine.samhoun@hotmail.com\", \"jabbour.houda@gmail.com\", \"ichingwamildred@gmail.com\", \"rensch@live.com\", \"nouran.elghazouly@gmail.com\", \"estevao.sousabmwm3@gmail.com\", \"info@prim-u.com\", \"mennaessa321@gmail.com\", \"sopraagriculture@gmail.com\", \"maureenwarega@gmail.com\", \"sabogazlha@gmail.com\", \"tochioguejiofor@gmail.com\", \"smokelessbriqqs@gmail.com\", \"farahelhajjar@gmail.com\", \"sowprecise@gmail.com\", \"aishasaad544@gmail.com\", \"suhairalchaliby@gmail.com\", \"hiba.f.najjar@hotmail.com\", \"mwk13@aub.edu.lb\", \"info@somdevconsultancy.com\", \"manuella.younes.tamer@hotmail.com\", \"mercisavon@gmail.com\", \"farah.zeid@hotmail.com\", \"koigielizabeth3@gmail.com\", \"rula@granola-shop.com\", \"saniomoises2@gmail.com\", \"jessy.saber@hotmail.com\", \"elizabethatieno467@gmail.com\", \"yasminemoustafa@yahoo.com\", \"sisrahme@gmail.com\", \"karenwalid@hotmail.com\", \"myriam@quad-bh.com\", \"carenajwang@gmail.com\", \"achraf.aouadi@gmail.com\", \"hadilhammad30@gmail.com\", \"nqollek.haja@gmail.com\"]\n\n# Call the function and get the output path\ncsv_path = extract_info_for_emails(emails_list)\n\n# Print the output path\nprint(f\"The CSV file with the extracted information is saved at {csv_path}\")\n",
+      "created_at": "2023-08-07T16:36:59.234754",
+      "sequence_order": 0,
+      "parent_id": "e38b5a45-a3b5-48af-9ad1-db676ae32d0d",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "8a20a333-1b0a-4b3d-b9b1-1bc0e529706d",
+      "role": "assistant",
+      "content": "To make your script accept a CSV file as an argument via the terminal, you need to make use of the `sys.argv` list. `sys.argv[0]` is always the script's name itself, and `sys.argv[1]` will be the first argument you pass when calling the script.\n\nHere's how you can modify your code:\n\n1. Replace the hardcoded file path with `sys.argv[1]`.\n2. Check if the script was called with the correct number of arguments.\n3. Add a main function check to make sure the script runs appropriately when invoked.\n\nHere's your modified code:\n\n```python\nimport pandas as pd\nimport os\nimport sys\nimport requests\n\n# Check if the correct number of arguments have been provided\nif len(sys.argv) != 2:\n    print(\"Usage: python your_script_name.py <path_to_csv_file>\")\n    sys.exit(1)\n\ndata = pd.read_csv(sys.argv[1])\n\n# ... [rest of your functions and code remains unchanged]\n\n# Add a main function check\nif __name__ == \"__main__\":\n    # Call the function and get the output path\n    csv_path = extract_info_for_emails(emails_list)\n\n    # Print the output path\n    print(f\"The CSV file with the extracted information is saved at {csv_path}\")\n```\n\nNow, to run the script with your CSV file, use the command:\n\n```\npython your_script_name.py path_to_your_csv_file.csv\n```\n\nJust replace `your_script_name.py` with the name you save your script as, and `path_to_your_csv_file.csv` with the path to your CSV file.",
+      "created_at": "2023-08-07T16:37:28.919461",
+      "sequence_order": 1,
+      "parent_id": "aaa2d6ad-70c3-4c0b-a49c-a75c22feef20",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

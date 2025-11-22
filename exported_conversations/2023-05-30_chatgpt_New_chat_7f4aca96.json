@@ -1,0 +1,271 @@
+{
+  "id": "7f4aca96-4bcc-442a-9fc3-ccc475738b18",
+  "source": "chatgpt",
+  "title": "New chat",
+  "created_at": "2023-05-30T13:03:58.177035",
+  "updated_at": "2023-05-30T13:35:52",
+  "summary": null,
+  "message_count": 20,
+  "messages": [
+    {
+      "id": "aaa256ab-2c7d-4575-8df7-a96de3f2fc69",
+      "role": "user",
+      "content": "Can you convert this streamlit python app to gradio app ?",
+      "created_at": "2023-05-30T13:03:58.187379",
+      "sequence_order": 0,
+      "parent_id": "712c2b05-8e4a-4c4d-bfa6-412160cc05c2",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "75356e61-3241-45f7-a416-f38b53d5ec6d",
+      "role": "assistant",
+      "content": "Sure, I can guide you through the process of converting a Streamlit app to a Gradio app. However, without seeing the specific Streamlit app, I can only provide a general guide. Here's a basic example:\n\nLet's say you have a simple Streamlit app like this:\n\n```python\nimport streamlit as st\nimport some_model",
+      "created_at": "2023-05-30T13:04:04.997919",
+      "sequence_order": 1,
+      "parent_id": "aaa256ab-2c7d-4575-8df7-a96de3f2fc69",
+      "metadata": {
+        "status": "in_progress",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "aaa225bb-2847-4019-8bd7-0b916dc04681",
+      "role": "user",
+      "content": "import os\nimport pickle\nimport streamlit as st\nfrom dotenv import load_dotenv\nfrom PyPDF2 import PdfReader\nfrom streamlit_extras.add_vertical_space import add_vertical_space\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.llms import OpenAI\nfrom langchain.chains.question_answering import load_qa_chain\nfrom langchain.callbacks import get_openai_callback\nfrom langchain.document_loaders import DirectoryLoader\nimport openai\n\n# Sidebar contents\nwith st.sidebar:\n    st.title('Bloom Assessment Dialog App')\n    st.markdown('''\n    ## About\n    This use this chatbot to talk with your Bloom Data:\n    ''')\n    add_vertical_space(5)\n    st.write('Made with ❤️ by [Bloom.pm](https://bloom.pm/)')\n\n# Load environment variables\nload_dotenv()\n\n# Try to get the OpenAI API Key from the Streamlit secrets\n# If it doesn't work, get it from the environment variables\ntry:\n    openai.api_key = st.secrets[\"OPENAI_API_KEY\"]\n    st.write(\"st.secrets method worked\")\nexcept:\n    openai.api_key = os.getenv(\"OPENAI_API_KEY\")\n    st.write(\"os.getenv() method worked\")\n\n# Initialize OpenAI\nllm = OpenAI(openai_api_key=openai.api_key, model_name=\"gpt-3.5-turbo\")\n\n\ndef main():\n    st.header(\"Chat with your assessment data 💬\")\n    loaders = [DirectoryLoader('./data/', glob=\"**/*.txt\")]\n    documents = [doc for loader in loaders for doc in loader.load()]\n    st.write(f\"Total number of documents: {len(documents)}\")\n\n    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)\n    chunks = text_splitter.split_documents(documents)    \n    st.write(chunks)\n\n    store_name = \"talkToAssessmentData\"\n    st.write(f'{store_name}')\n\n    # Load or create embeddings\n    if os.path.exists(f\"{store_name}.pkl\"):\n        with open(f\"{store_name}.pkl\", \"rb\") as f:\n            VectorStore = pickle.load(f)\n        st.write('Embeddings Loaded from the Disk')\n    else:\n        embeddings = OpenAIEmbeddings()\n        VectorStore = FAISS.from_documents(chunks, embedding=embeddings)\n        with open(f\"{store_name}.pkl\", \"wb\") as f:\n            pickle.dump(VectorStore, f)\n        st.write(\"Vector embeddings from OpenAI created\")\n\n    # Accept user questions/query\n    query = st.text_input(\"Ask questions about your assessments:\")\n    if query:\n        docs = VectorStore.similarity_search(query=query, k=2)\n        chain = load_qa_chain(llm=llm, chain_type=\"stuff\")\n        with get_openai_callback() as cb:\n            response = chain.run(input_documents=docs, question=query)\n            print(cb)\n        st.write(response)\n \n\nif __name__ == '__main__':\n    main()\n",
+      "created_at": "2023-05-30T13:04:06.498478",
+      "sequence_order": 2,
+      "parent_id": "75356e61-3241-45f7-a416-f38b53d5ec6d",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "5b4c0c9a-12db-4720-be32-26a13189a572",
+      "role": "assistant",
+      "content": "Here's how you might convert your Streamlit app to a Gradio app. Note that Gradio is more focused on creating interfaces for machine learning models, so some features of Streamlit, like the sidebar, might not have a direct equivalent in Gradio.\n\n```python\nimport os\nimport pickle\nimport gradio as gr\nfrom dotenv import load_dotenv\nfrom PyPDF2 import PdfReader\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.llms import OpenAI\nfrom langchain.chains.question_answering import load_qa_chain\nfrom langchain.callbacks import get_openai_callback\nfrom langchain.document_loaders import DirectoryLoader\nimport openai\n\n# Load environment variables\nload_dotenv()\n\n# Try to get the OpenAI API Key from the environment variables\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\n# Initialize OpenAI\nllm = OpenAI(openai_api_key=openai.api_key, model_name=\"gpt-3.5-turbo\")\n\ndef main(query):\n    loaders = [DirectoryLoader('./data/', glob=\"**/*.txt\")]\n    documents = [doc for loader in loaders for doc in loader.load()]\n\n    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)\n    chunks = text_splitter.split_documents(documents)    \n\n    store_name = \"talkToAssessmentData\"\n\n    # Load or create embeddings\n    if os.path.exists(f\"{store_name}.pkl\"):\n        with open(f\"{store_name}.pkl\", \"rb\") as f:\n            VectorStore = pickle.load(f)\n    else:\n        embeddings = OpenAIEmbeddings()\n        VectorStore = FAISS.from_documents(chunks, embedding=embeddings)\n        with open(f\"{store_name}.pkl\", \"wb\") as f:\n            pickle.dump(VectorStore, f)\n\n    # Accept user questions/query\n    if query:\n        docs = VectorStore.similarity_search(query=query, k=2)\n        chain = load_qa_chain(llm=llm, chain_type=\"stuff\")\n        with get_openai_callback() as cb:\n            response = chain.run(input_documents=docs, question=query)\n            print(cb)\n        return response\n\niface = gr.Interface(fn=main, inputs=\"text\", outputs=\"text\")\niface.launch()\n```\n\nIn this Gradio app, the user inputs a question about their assessments, and the app returns the response from the OpenAI model. The `main` function is used as the function for the Gradio interface, and it takes the user's question as an input and returns the model's response as an output. The Gradio interface is launched with `iface.launch()`.",
+      "created_at": "2023-05-30T13:04:57.181334",
+      "sequence_order": 3,
+      "parent_id": "aaa225bb-2847-4019-8bd7-0b916dc04681",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa20044-2425-49a9-9ba9-ae80ac8cf4e0",
+      "role": "user",
+      "content": "got this warning:\n/Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages/langchain/llms/openai.py:169: UserWarning: You are trying to use a chat model. This way of initializing it is no longer supported. Instead, please use: `from langchain.chat_models import ChatOpenAI`\n  warnings.warn(\n/Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages/langchain/llms/openai.py:682: UserWarning: You are trying to use a chat model. This way of initializing it is no longer supported. Instead, please use: `from langchain.chat_models import ChatOpenAI`\n  warnings.warn(\n",
+      "created_at": "2023-05-30T13:06:43.952122",
+      "sequence_order": 4,
+      "parent_id": "5b4c0c9a-12db-4720-be32-26a13189a572",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "b48719a2-e124-4ed1-a0b4-db5621c988cd",
+      "role": "assistant",
+      "content": "The warning is suggesting that the way you're initializing the chat model is no longer supported. Instead, you should use `from langchain.chat_models import ChatOpenAI`.\n\nHere's how you can modify your code:\n\n```python\nimport os\nimport pickle\nimport gradio as gr\nfrom dotenv import load_dotenv\nfrom PyPDF2 import PdfReader\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.chains.question_answering import load_qa_chain\nfrom langchain.callbacks import get_openai_callback\nfrom langchain.document_loaders import DirectoryLoader\nfrom langchain.chat_models import ChatOpenAI  # Change here\nimport openai\n\n# Load environment variables\nload_dotenv()\n\n# Try to get the OpenAI API Key from the environment variables\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\n# Initialize OpenAI\nllm = ChatOpenAI(openai_api_key=openai.api_key, model_name=\"gpt-3.5-turbo\")  # Change here\n\ndef main(query):\n    loaders = [DirectoryLoader('./data/', glob=\"**/*.txt\")]\n    documents = [doc for loader in loaders for doc in loader.load()]\n\n    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)\n    chunks = text_splitter.split_documents(documents)    \n\n    store_name = \"talkToAssessmentData\"\n\n    # Load or create embeddings\n    if os.path.exists(f\"{store_name}.pkl\"):\n        with open(f\"{store_name}.pkl\", \"rb\") as f:\n            VectorStore = pickle.load(f)\n    else:\n        embeddings = OpenAIEmbeddings()\n        VectorStore = FAISS.from_documents(chunks, embedding=embeddings)\n        with open(f\"{store_name}.pkl\", \"wb\") as f:\n            pickle.dump(VectorStore, f)\n\n    # Accept user questions/query\n    if query:\n        docs = VectorStore.similarity_search(query=query, k=2)\n        chain = load_qa_chain(llm=llm, chain_type=\"stuff\")\n        with get_openai_callback() as cb:\n            response = chain.run(input_documents=docs, question=query)\n            print(cb)\n        return response\n\niface = gr.Interface(fn=main, inputs=\"text\", outputs=\"text\")\niface.launch()\n```\n\nThis should resolve the warnings you're seeing. Please replace the `OpenAI` import and initialization with `ChatOpenAI` as suggested by the warning.",
+      "created_at": "2023-05-30T13:07:35.517683",
+      "sequence_order": 5,
+      "parent_id": "aaa20044-2425-49a9-9ba9-ae80ac8cf4e0",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa25fda-22ba-4ef1-9002-007460d84dbb",
+      "role": "user",
+      "content": "can you make it one on top of the other with some intro text? that says something like \"Welcome to the Bloom Assessment conversation tool\" ",
+      "created_at": "2023-05-30T13:09:19.278960",
+      "sequence_order": 6,
+      "parent_id": "b48719a2-e124-4ed1-a0b4-db5621c988cd",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "aac3166d-7d75-4eda-be7c-7a45ffe236ee",
+      "role": "assistant",
+      "content": "Sure, you can add an introduction text to your Gradio interface using the `description` parameter in the `Interface` function. Also, you can stack the input and output interfaces on top of each other by setting the `layout` parameter to `'vertical'`. Here's how you can do it:\n\n```python\nimport os\nimport pickle\nimport gradio as gr\nfrom dotenv import load_dotenv\nfrom PyPDF2 import PdfReader\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.chains.question_answering import load_qa_chain\nfrom langchain.callbacks import get_openai_callback\nfrom langchain.document_loaders import DirectoryLoader\nfrom langchain.chat_models import ChatOpenAI\nimport openai\n\n# Load environment variables\nload_dotenv()\n\n# Try to get the OpenAI API Key from the environment variables\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\n# Initialize OpenAI\nllm = ChatOpenAI(openai_api_key=openai.api_key, model_name=\"gpt-3.5-turbo\")\n\ndef main(query):\n    loaders = [DirectoryLoader('./data/', glob=\"**/*.txt\")]\n    documents = [doc for loader in loaders for doc in loader.load()]\n\n    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)\n    chunks = text_splitter.split_documents(documents)    \n\n    store_name = \"talkToAssessmentData\"\n\n    # Load or create embeddings\n    if os.path.exists(f\"{store_name}.pkl\"):\n        with open(f\"{store_name}.pkl\", \"rb\") as f:\n            VectorStore = pickle.load(f)\n    else:\n        embeddings = OpenAIEmbeddings()\n        VectorStore = FAISS.from_documents(chunks, embedding=embeddings)\n        with open(f\"{store_name}.pkl\", \"wb\") as f:\n            pickle.dump(VectorStore, f)\n\n    # Accept user questions/query\n    if query:\n        docs = VectorStore.similarity_search(query=query, k=2)\n        chain = load_qa_chain(llm=llm, chain_type=\"stuff\")\n        with get_openai_callback() as cb:\n            response = chain.run(input_documents=docs, question=query)\n            print(cb)\n        return response\n\niface = gr.Interface(fn=main, \n                     inputs=\"text\", \n                     outputs=\"text\", \n                     description=\"Welcome to the Bloom Assessment conversation tool\",  # Add description\n                     layout='vertical')  # Set layout to vertical\niface.launch()\n```\n\nNow, the Gradio interface will display the introduction text \"Welcome to the Bloom Assessment conversation tool\" at the top, and the input and output interfaces will be stacked vertically.",
+      "created_at": "2023-05-30T13:10:12.238049",
+      "sequence_order": 7,
+      "parent_id": "aaa25fda-22ba-4ef1-9002-007460d84dbb",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa231a0-7b5c-4d91-aeda-2f70a4ea809f",
+      "role": "user",
+      "content": "can you make this code check how many tokens it's going to send to the request endpoint and be sure it's below 4097 for openai's limit you can use this code as a base:\nYou can use the tiktoken package for Python to count tokens before sending an API request. According to the OpenAI documentation, one token generally corresponds to ~4 characters of text for common English text. This translates to roughly ¾ of a word (so 100 tokens ~= 75 words).\n\nHere’s an example of how you can use tiktoken to count tokens:\n\nimport openai\nfrom tiktoken import Tokenizer\n\nopenai.api_key = \"YOUR_API_KEY\"\n\ntext = \"This is an example sentence.\"\ntokenizer = Tokenizer()\ntokens = tokenizer.tokenize(text)\nprint(len(tokens))",
+      "created_at": "2023-05-30T13:18:21.600204",
+      "sequence_order": 8,
+      "parent_id": "aac3166d-7d75-4eda-be7c-7a45ffe236ee",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "d992a766-a290-4dfc-ae21-828da3cb4d1d",
+      "role": "assistant",
+      "content": "Sure, I can help you integrate the `tiktoken` package into your Gradio app to ensure that the number of tokens sent to the OpenAI API is below the limit of 4096 tokens. Here's how you can modify your code:\n\n```python\nimport os\nimport pickle\nimport gradio as gr\nfrom dotenv import load_dotenv\nfrom PyPDF2 import PdfReader\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.chains.question_answering import load_qa_chain\nfrom langchain.callbacks import get_openai_callback\nfrom langchain.document_loaders import DirectoryLoader\nfrom langchain.chat_models import ChatOpenAI\nfrom tiktoken import Tokenizer  # Import tiktoken\nimport openai\n\n# Load environment variables\nload_dotenv()\n\n# Try to get the OpenAI API Key from the environment variables\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\n# Initialize OpenAI\nllm = ChatOpenAI(openai_api_key=openai.api_key, model_name=\"gpt-3.5-turbo\")\n\ndef main(query):\n    loaders = [DirectoryLoader('./data/', glob=\"**/*.txt\")]\n    documents = [doc for loader in loaders for doc in loader.load()]\n\n    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)\n    chunks = text_splitter.split_documents(documents)    \n\n    store_name = \"talkToAssessmentData\"\n\n    # Load or create embeddings\n    if os.path.exists(f\"{store_name}.pkl\"):\n        with open(f\"{store_name}.pkl\", \"rb\") as f:\n            VectorStore = pickle.load(f)\n    else:\n        embeddings = OpenAIEmbeddings()\n        VectorStore = FAISS.from_documents(chunks, embedding=embeddings)\n        with open(f\"{store_name}.pkl\", \"wb\") as f:\n            pickle.dump(VectorStore, f)\n\n    # Accept user questions/query\n    if query:\n        # Count tokens in query\n        tokenizer = Tokenizer()\n        tokens = tokenizer.tokenize(query)\n        num_tokens = len(tokens)\n\n        # Check if number of tokens is below the limit\n        if num_tokens > 4096:\n            return f\"Your query is too long ({num_tokens} tokens). Please shorten it to less than 4096 tokens.\"\n        else:\n            docs = VectorStore.similarity_search(query=query, k=2)\n            chain = load_qa_chain(llm=llm, chain_type=\"stuff\")\n            with get_openai_callback() as cb:\n                response = chain.run(input_documents=docs, question=query)\n                print(cb)\n            return response\n\niface = gr.Interface(fn=main, \n                     inputs=\"text\", \n                     outputs=\"text\", \n                     description=\"Welcome to the Bloom Assessment conversation tool\", \n                     layout='vertical')\niface.launch()\n```\n\nIn this modified code, before sending the query to the OpenAI API, we count the number of tokens in the query using `tiktoken`. If the number of tokens is above the limit of 4096, we return an error message to the user asking them to shorten their query. If the number of tokens is below the limit, we proceed with the query as before.",
+      "created_at": "2023-05-30T13:19:41.743344",
+      "sequence_order": 9,
+      "parent_id": "aaa231a0-7b5c-4d91-aeda-2f70a4ea809f",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa23769-8c82-4810-ac33-c4342b778c44",
+      "role": "user",
+      "content": "ImportError: cannot import name 'Tokenizer' from 'tiktoken' (/Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages/tiktoken/__init__.py)\n>>> \nKeyboardInterrupt\n>>> exit()\n(myenv) bilalghalib@macbook-pro streamChatPDF % pip install tiktoken\nRequirement already satisfied: tiktoken in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (0.4.0)\nRequirement already satisfied: regex>=2022.1.18 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from tiktoken) (2023.5.5)\nRequirement already satisfied: requests>=2.26.0 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from tiktoken) (2.31.0)\nRequirement already satisfied: charset-normalizer<4,>=2 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (3.1.0)\nRequirement already satisfied: idna<4,>=2.5 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (3.4)\nRequirement already satisfied: urllib3<3,>=1.21.1 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (2.0.2)\nRequirement already satisfied: certifi>=2017.4.17 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (2023.5.7)\n",
+      "created_at": "2023-05-30T13:23:42.169224",
+      "sequence_order": 10,
+      "parent_id": "d992a766-a290-4dfc-ae21-828da3cb4d1d",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "5686688b-5440-4727-a9c1-360ea2993f27",
+      "role": "assistant",
+      "content": "I apologize for the confusion. The `Tokenizer` class is not directly importable from `tiktoken`. Instead, you should use the `TokenList` class from `tiktoken.models` to count the tokens in a string. Here's how you can modify your code:\n\n```python\nimport os\nimport pickle\nimport gradio as gr\nfrom dotenv import load_dotenv\nfrom PyPDF2 import PdfReader\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.chains.question_answering import load_qa_chain\nfrom langchain.callbacks import get_openai_callback\nfrom langchain.document_loaders import DirectoryLoader\nfrom langchain.chat_models import ChatOpenAI\nfrom tiktoken import Tokenizer, TokenList  # Import TokenList from tiktoken.models\nimport openai\n\n# Load environment variables\nload_dotenv()\n\n# Try to get the OpenAI API Key from the environment variables\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\n# Initialize OpenAI\nllm = ChatOpenAI(openai_api_key=openai.api_key, model_name=\"gpt-3.5-turbo\")\n\ndef main(query):\n    loaders = [DirectoryLoader('./data/', glob=\"**/*.txt\")]\n    documents = [doc for loader in loaders for doc in loader.load()]\n\n    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)\n    chunks = text_splitter.split_documents(documents)    \n\n    store_name = \"talkToAssessmentData\"\n\n    # Load or create embeddings\n    if os.path.exists(f\"{store_name}.pkl\"):\n        with open(f\"{store_name}.pkl\", \"rb\") as f:\n            VectorStore = pickle.load(f)\n    else:\n        embeddings = OpenAIEmbeddings()\n        VectorStore = FAISS.from_documents(chunks, embedding=embeddings)\n        with open(f\"{store_name}.pkl\", \"wb\") as f:\n            pickle.dump(VectorStore, f)\n\n    # Accept user questions/query\n    if query:\n        # Count tokens in query\n        tokenizer = Tokenizer()\n        token_list = TokenList(tokenizer.tokenize(query))\n        num_tokens = len(token_list)\n\n        # Check if number of tokens is below the limit\n        if num_tokens > 4096:\n            return f\"Your query is too long ({num_tokens} tokens). Please shorten it to less than 4096 tokens.\"\n        else:\n            docs = VectorStore.similarity_search(query=query, k=2)\n            chain = load_qa_chain(llm=llm, chain_type=\"stuff\")\n            with get_openai_callback() as cb:\n                response = chain.run(input_documents=docs, question=query)\n                print(cb)\n            return response\n\niface = gr.Interface(fn=main, \n                     inputs=\"text\", \n                     outputs=\"text\", \n                     description=\"Welcome to the Bloom Assessment conversation tool\", \n                     layout='vertical')\niface.launch()\n```\n\nIn this modified code, we use the `TokenList` class to count the tokens in the query. The `TokenList` class takes a list of tokens, which we get by calling `tokenizer.tokenize(query)`.",
+      "created_at": "2023-05-30T13:24:53.624318",
+      "sequence_order": 11,
+      "parent_id": "aaa23769-8c82-4810-ac33-c4342b778c44",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2c93c-ee4b-444a-8ada-5d5fb4d06c8b",
+      "role": "user",
+      "content": "can you learn from this style so the conversation looks like a chat going vertically? \nimport gradio as gr\nimport random\nimport time\n\ndef respond(message, chat_history):\n    bot_message = random.choice([\"How are you?\", \"I love you\", \"I'm very hungry\"])\n    chat_history.append((message, bot_message))\n    time.sleep(1)\n    return \"\", chat_history\n\niface = gr.Interface(\n    fn=respond,\n    inputs=\"textbox\",\n    outputs=\"text\",\n    description=\"conversation tool\",\n    layout='vertical'\n)\n\niface.launch()\n",
+      "created_at": "2023-05-30T13:25:15.064939",
+      "sequence_order": 12,
+      "parent_id": "5686688b-5440-4727-a9c1-360ea2993f27",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "867f84b4-c857-4e6c-9fec-cd9414c60a68",
+      "role": "assistant",
+      "content": "Sure, you can modify your Gradio app to make the conversation look like a chat going vertically. Here's how you can modify your code:\n\n```python\nimport os\nimport pickle\nimport gradio as gr\nfrom dotenv import load_dotenv\nfrom PyPDF2 import PdfReader\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.chains.question_answering import load_qa_chain\nfrom langchain.callbacks import get_openai_callback\nfrom langchain.document_loaders import DirectoryLoader\nfrom langchain.chat_models import ChatOpenAI\nfrom tiktoken import Tokenizer, TokenList\nimport openai\nimport time\n\n# Load environment variables\nload_dotenv()\n\n# Try to get the OpenAI API Key from the environment variables\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\n# Initialize OpenAI\nllm = ChatOpenAI(openai_api_key=openai.api_key, model_name=\"gpt-3.5-turbo\")\n\ndef respond(query, chat_history):\n    loaders = [DirectoryLoader('./data/', glob=\"**/*.txt\")]\n    documents = [doc for loader in loaders for doc in loader.load()]\n\n    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)\n    chunks = text_splitter.split_documents(documents)    \n\n    store_name = \"talkToAssessmentData\"\n\n    # Load or create embeddings\n    if os.path.exists(f\"{store_name}.pkl\"):\n        with open(f\"{store_name}.pkl\", \"rb\") as f:\n            VectorStore = pickle.load(f)\n    else:\n        embeddings = OpenAIEmbeddings()\n        VectorStore = FAISS.from_documents(chunks, embedding=embeddings)\n        with open(f\"{store_name}.pkl\", \"wb\") as f:\n            pickle.dump(VectorStore, f)\n\n    # Accept user questions/query\n    if query:\n        # Count tokens in query\n        tokenizer = Tokenizer()\n        token_list = TokenList(tokenizer.tokenize(query))\n        num_tokens = len(token_list)\n\n        # Check if number of tokens is below the limit\n        if num_tokens > 4096:\n            bot_message = f\"Your query is too long ({num_tokens} tokens). Please shorten it to less than 4096 tokens.\"\n        else:\n            docs = VectorStore.similarity_search(query=query, k=2)\n            chain = load_qa_chain(llm=llm, chain_type=\"stuff\")\n            with get_openai_callback() as cb:\n                bot_message = chain.run(input_documents=docs, question=query)\n                print(cb)\n\n        chat_history.append((query, bot_message))\n        time.sleep(1)\n        return \"\", chat_history\n\niface = gr.Interface(fn=respond, \n                     inputs=\"textbox\", \n                     outputs=\"text\", \n                     description=\"Welcome to the Bloom Assessment conversation tool\", \n                     layout='vertical')\niface.launch()\n```\n\nIn this modified code, the `respond` function takes the user's query and the chat history as inputs. It appends the user's query and the bot's response to the chat history, and then returns the updated chat history. The Gradio interface is set up to display the chat history vertically.",
+      "created_at": "2023-05-30T13:26:19.547773",
+      "sequence_order": 13,
+      "parent_id": "aaa2c93c-ee4b-444a-8ada-5d5fb4d06c8b",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa24e85-042b-4e85-800b-9aa3c634316c",
+      "role": "user",
+      "content": "looks like I'm uninstalling and installing to different folders:\nUninstalling tiktoken-0.4.0:\n  Would remove:\n    /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages/tiktoken-0.4.0.dist-info/*\n    /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages/tiktoken/*\n    /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages/tiktoken_ext/openai_public.py\nProceed (Y/n)? y\n  Successfully uninstalled tiktoken-0.4.0\n(myenv) bilalghalib@macbook-pro streamChatPDF % pip install tiktoken  \nCollecting tiktoken\n  Using cached tiktoken-0.4.0-cp310-cp310-macosx_11_0_arm64.whl (761 kB)\nRequirement already satisfied: regex>=2022.1.18 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from tiktoken) (2023.5.5)\nRequirement already satisfied: requests>=2.26.0 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from tiktoken) (2.31.0)\nRequirement already satisfied: charset-normalizer<4,>=2 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (3.1.0)\nRequirement already satisfied: idna<4,>=2.5 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (3.4)\nRequirement already satisfied: urllib3<3,>=1.21.1 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (2.0.2)\nRequirement already satisfied: certifi>=2017.4.17 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (2023.5.7)\nInstalling collected packages: tiktoken\nSuccessfully installed tiktoken-0.4.0\n",
+      "created_at": "2023-05-30T13:30:49.155029",
+      "sequence_order": 14,
+      "parent_id": "867f84b4-c857-4e6c-9fec-cd9414c60a68",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "94f159ac-e07d-4495-8309-e325dabbdcfd",
+      "role": "assistant",
+      "content": "It seems like you have successfully uninstalled and reinstalled the `tiktoken` package. However, the `tiktoken` package has been updated and the `Tokenizer` class is no longer directly available. Instead, you should use the `TokenList` from `tiktoken.Tokenizer` to count the tokens in a string.\n\nHere's how you can modify your code:\n\n```python\nfrom tiktoken.Tokenizer import TokenList\n\n# ...\n\ndef main(query):\n    # ...\n\n    # Count tokens in query\n    tokenizer = TokenList()\n    tokens = tokenizer.count_tokens(query)\n    num_tokens = len(tokens)\n\n    # ...\n```\n\nIn this modified code, we use the `TokenList` class to count the tokens in the query. The `TokenList` class takes a string and returns the number of tokens in the string.",
+      "created_at": "2023-05-30T13:31:06.657593",
+      "sequence_order": 15,
+      "parent_id": "aaa24e85-042b-4e85-800b-9aa3c634316c",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2808b-3864-405f-8b41-0cb364fc8ca5",
+      "role": "user",
+      "content": "no, it seems like it's installing them to different folders for differnt python versions I stillg et this error:  Using cached tiktoken-0.4.0-cp310-cp310-macosx_11_0_arm64.whl (761 kB)\nRequirement already satisfied: regex>=2022.1.18 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from tiktoken) (2023.5.5)\nRequirement already satisfied: requests>=2.26.0 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from tiktoken) (2.31.0)\nRequirement already satisfied: charset-normalizer<4,>=2 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (3.1.0)\nRequirement already satisfied: idna<4,>=2.5 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (3.4)\nRequirement already satisfied: urllib3<3,>=1.21.1 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (2.0.2)\nRequirement already satisfied: certifi>=2017.4.17 in /Users/bilalghalib/mambaforge/envs/myenv/lib/python3.10/site-packages (from requests>=2.26.0->tiktoken) (2023.5.7)\nInstalling collected packages: tiktoken\nSuccessfully installed tiktoken-0.4.0\n(myenv) bilalghalib@macbook-pro streamChatPDF % python -V             \nPython 3.10.11\n(myenv) bilalghalib@macbook-pro streamChatPDF % which python\n/Users/bilalghalib/mambaforge/envs/myenv/bin/python\n\nYou see when I install it immediately after uninstalling it says that \"Requirement already satisfied\" how can I install it for this python 3.10.11 in mambaforge/envs/myenv...",
+      "created_at": "2023-05-30T13:32:44.112320",
+      "sequence_order": 16,
+      "parent_id": "94f159ac-e07d-4495-8309-e325dabbdcfd",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "73d2b54f-eacf-4edd-8430-09cfe7347180",
+      "role": "assistant",
+      "content": "It seems like you're facing a common issue with Python package management where different versions of Python or different environments have different packages installed.\n\nHere are a few steps you can take to try to resolve this issue:\n\n1. **Ensure you're in the correct environment**: If you're using a virtual environment (like with `conda` or `venv`), make sure you've activated the correct environment where you want to install the package.\n\n2. **Use Python's `-m` flag**: When installing the package, use Python's `-m` flag to ensure you're installing the package for the correct version of Python. This is especially useful if you have multiple versions of Python installed. Here's how you can do it:\n\n    ```bash\n    python -m pip install tiktoken\n    ```\n\n    This command will use the `pip` associated with the `python` command to install the package.\n\n3. **Upgrade `pip`**: Sometimes, an outdated version of `pip` can cause issues. You can upgrade `pip` using the following command:\n\n    ```bash\n    python -m pip install --upgrade pip\n    ```\n\n    After upgrading `pip`, try installing the package again.\n\n4. **Uninstall and reinstall the package**: If the package is already installed but is causing issues, you can try uninstalling and reinstalling it. Here's how you can do it:\n\n    ```bash\n    python -m pip uninstall tiktoken\n    python -m pip install tiktoken\n    ```\n\n    These commands will uninstall and reinstall the package using the `pip` associated with the `python` command.\n\n5. **Check the installed packages**: You can check which packages are installed in your current Python environment using the following command:\n\n    ```bash\n    python -m pip list\n    ```\n\n    This command will list all installed packages in the Python environment associated with the `python` command. Check if `tiktoken` is in the list after you install it.\n\nRemember to replace `python` with `python3` or the path to the specific Python interpreter you want to use if necessary.",
+      "created_at": "2023-05-30T13:33:28.168640",
+      "sequence_order": 17,
+      "parent_id": "aaa2808b-3864-405f-8b41-0cb364fc8ca5",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2b232-8905-49a8-92f2-c15af6f320ca",
+      "role": "user",
+      "content": "can you use this tokenization method in this code:\ntoken method:\nimport tiktoken\n\ndef num_tokens_from_string(string: str, encoding_name: str) -> int:\n    encoding = tiktoken.get_encoding(encoding_name)\n    num_tokens = len(encoding.encode(string))\n    return num_tokens\n\nnum_tokens_from_string(\"tiktoken is great!\", \"cl100k_base\")\n\nCode:\nimport os\nimport pickle\nimport gradio as gr\nfrom dotenv import load_dotenv\nfrom PyPDF2 import PdfReader\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.chains.question_answering import load_qa_chain\nfrom langchain.callbacks import get_openai_callback\nfrom langchain.document_loaders import DirectoryLoader\nfrom langchain.chat_models import ChatOpenAI\nfrom tiktoken import Tokenizer  # Import tiktoken\nimport openai\n\n# Load environment variables\nload_dotenv()\n\n# Try to get the OpenAI API Key from the environment variables\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\n# Initialize OpenAI\nllm = ChatOpenAI(openai_api_key=openai.api_key, model_name=\"gpt-3.5-turbo\")\n\ndef main(query):\n    loaders = [DirectoryLoader('./data/', glob=\"**/*.txt\")]\n    documents = [doc for loader in loaders for doc in loader.load()]\n\n    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)\n    chunks = text_splitter.split_documents(documents)    \n\n    store_name = \"talkToAssessmentData\"\n\n    # Load or create embeddings\n    if os.path.exists(f\"{store_name}.pkl\"):\n        with open(f\"{store_name}.pkl\", \"rb\") as f:\n            VectorStore = pickle.load(f)\n    else:\n        embeddings = OpenAIEmbeddings()\n        VectorStore = FAISS.from_documents(chunks, embedding=embeddings)\n        with open(f\"{store_name}.pkl\", \"wb\") as f:\n            pickle.dump(VectorStore, f)\n\n    # Accept user questions/query\n    if query:\n        # Count tokens in query\n        tokenizer = Tokenizer()\n        tokens = tokenizer.tokenize(query)\n        num_tokens = len(tokens)\n\n        # Check if number of tokens is below the limit\n        if num_tokens > 4096:\n            return f\"Your query is too long ({num_tokens} tokens). Please shorten it to less than 4096 tokens.\"\n        else:\n            docs = VectorStore.similarity_search(query=query, k=2)\n            chain = load_qa_chain(llm=llm, chain_type=\"stuff\")\n            with get_openai_callback() as cb:\n                response = chain.run(input_documents=docs, question=query)\n                print(cb)\n            return response\n\niface = gr.Interface(fn=main, \n                     inputs=\"text\", \n                     outputs=\"text\", \n                     description=\"Welcome to the Bloom Assessment conversation tool\", \n                     layout='vertical')\niface.launch()\n",
+      "created_at": "2023-05-30T13:35:52.347672",
+      "sequence_order": 18,
+      "parent_id": "73d2b54f-eacf-4edd-8430-09cfe7347180",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "2436ee1a-be50-4471-b45b-c4bb91e12281",
+      "role": "assistant",
+      "content": "Sure, I can help you integrate the `tiktoken` package into your Gradio app to ensure that the number of tokens sent to the OpenAI API is below the limit of 4096 tokens. Here's how you can modify your code:\n\n```python\nimport os\nimport pickle\nimport gradio as gr\nfrom dotenv import load_dotenv\nfrom PyPDF2 import PdfReader\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.chains.question_answering import load_qa_chain\nfrom langchain.callbacks import get_openai_callback\nfrom langchain.document_loaders import DirectoryLoader\nfrom langchain.chat_models import ChatOpenAI\nimport openai\nimport tiktoken\n\n# Load environment variables\nload_dotenv()\n\n# Try to get the OpenAI API Key from the environment variables\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\n# Initialize OpenAI\nllm = ChatOpenAI(openai_api_key=openai.api_key, model_name=\"gpt-3.5-turbo\")\n\ndef num_tokens_from_string(string: str, encoding_name: str) -> int:\n    encoding = tiktoken.get_encoding(encoding_name)\n    num_tokens = len(encoding.encode(string))\n    return num_tokens\n\ndef main(query):\n    loaders = [DirectoryLoader('./data/', glob=\"**/*.txt\")]\n    documents = [doc for loader in loaders for doc in loader.load()]\n\n    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)\n    chunks = text_splitter.split_documents(documents)    \n\n    store_name = \"talkToAssessmentData\"\n\n    # Load or create embeddings\n    if os.path.exists(f\"{store_name}.pkl\"):\n        with open(f\"{store_name}.pkl\", \"rb\") as f:\n            VectorStore = pickle.load(f)\n    else:\n        embeddings = OpenAIEmbeddings()\n        VectorStore = FAISS.from_documents(chunks, embedding=embeddings)\n        with open(f\"{store_name}.pkl\", \"wb\") as f:\n            pickle.dump(VectorStore, f)\n\n    # Accept user questions/query\n    if query:\n        # Count tokens in query\n        num_tokens = num_tokens_from_string(query, \"cl100k_base\")\n\n        # Check if number of tokens is below the limit\n        if num_tokens > 4096:\n            return f\"Your query is too long ({num_tokens} tokens). Please shorten it to less than 4096 tokens.\"\n        else:\n            docs = VectorStore.similarity_search(query=query, k=2)\n            chain = load_qa_chain(llm=llm, chain_type=\"stuff\")\n            with get_openai_callback() as cb:\n                response = chain.run(input_documents=docs, question=query)\n                print(cb)\n            return response\n\niface = gr.Interface(fn=main, \n                     inputs=\"text\", \n                     outputs=\"text\", \n                     description=\"Welcome to the Bloom Assessment conversation tool\", \n                     layout='vertical')\niface.launch()\n```\n\nIn this modified code, before sending the query to the OpenAI API, we count the number of tokens in the query using the `num_tokens_from_string` function. If the number of tokens is above the limit of 4096, we return an error message to the user asking them to shorten their query. If the number of tokens is below the limit, we proceed with the query as before.",
+      "created_at": "2023-05-30T13:37:04.355014",
+      "sequence_order": 19,
+      "parent_id": "aaa2b232-8905-49a8-92f2-c15af6f320ca",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

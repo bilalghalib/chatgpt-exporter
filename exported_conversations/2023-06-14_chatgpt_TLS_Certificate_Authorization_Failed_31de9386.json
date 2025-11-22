@@ -1,0 +1,115 @@
+{
+  "id": "31de9386-c404-4b4c-a6bb-008aafa8a5f6",
+  "source": "chatgpt",
+  "title": "TLS Certificate Authorization Failed",
+  "created_at": "2023-06-14T11:01:40.594834",
+  "updated_at": "2023-06-14T12:32:31",
+  "summary": null,
+  "message_count": 8,
+  "messages": [
+    {
+      "id": "aaa220ac-abf2-4e95-8f17-d7d2e258b8d5",
+      "role": "user",
+      "content": "Could not issue an SSL/TLS certificate for blm.pm\nDetails\nCould not issue a Let's Encrypt SSL/TLS certificate for blm.pm. Authorization for the domain failed.\n\nDetails\nInvalid response from https://acme-v02.api.letsencrypt.org/acme/authz-v3/236700204157.\n\nDetails:\n\nType: urn:ietf:params:acme:error:tls\n\nStatus: 400\n\nDetail: 164.92.129.205: Fetching https://blm.pm/.well-known/acme-challenge/Ae0V4BQMbqSsSJL7WbDoLFdfH48inFQKMeT-KDLk9Fs: remote error: tls: handshake failure\n",
+      "created_at": "2023-06-14T11:01:40.596262",
+      "sequence_order": 0,
+      "parent_id": "221600a7-c63e-414d-9331-09fc4a7bb881",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "2cc81a46-42c1-45dd-b8ff-f7097b97537c",
+      "role": "assistant",
+      "content": "The error you're encountering seems to be related to the Let's Encrypt SSL/TLS certificate issuance process. Let's Encrypt uses the ACME protocol to verify that you control the domain for which you're requesting a certificate. It does this by trying to fetch a specific file from a .well-known/acme-challenge directory on your domain.\n\nThe error message you provided suggests that there's a problem with the SSL/TLS handshake when Let's Encrypt's servers attempt to connect to your server. This could be due to a variety of reasons, such as:\n\n1. Incompatible SSL/TLS configurations: Your server might be configured to use SSL/TLS protocols or cipher suites that are not supported by Let's Encrypt's validation servers.\n\n2. Firewall or networking issues: Your server might be behind a firewall that's blocking connections from Let's Encrypt's validation servers, or there could be other networking issues preventing the connection.\n\n3. Server not correctly configured to serve the .well-known/acme-challenge directory over HTTPS: While Let's Encrypt is generally able to follow redirects from HTTP to HTTPS, if the server isn't correctly configured to serve these requests over HTTPS, it might cause issues.\n\nTo troubleshoot this issue, you could:\n\n1. Check your server's SSL/TLS configuration and ensure it's compatible with Let's Encrypt's validation servers.\n\n2. Check your firewall and networking settings to ensure they're not blocking connections from Let's Encrypt's validation servers.\n\n3. Test and verify that your server is correctly configured to serve the .well-known/acme-challenge directory over HTTPS. You can do this by placing a test file in the .well-known/acme-challenge directory and trying to access it over HTTPS from a different network.\n\n4. Consider using HTTP validation instead of TLS validation for the domain. \n\nFor more detailed help, you may want to check Let's Encrypt's community forums or consult with a professional who specializes in server administration and SSL/TLS configuration.",
+      "created_at": "2023-06-14T11:02:34.043716",
+      "sequence_order": 1,
+      "parent_id": "aaa220ac-abf2-4e95-8f17-d7d2e258b8d5",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2175c-6764-41a8-b083-2716ed09ddcb",
+      "role": "user",
+      "content": "so I'm running a local app on my server: \n\"Running on local URL:  http://127.0.0.1:7860\"\nhow can i see that link on my digital ocean droplet on the website attached to the ip address. \nThe local host is on: 164.92.129.205 and the dns pointing to it is blm.pm\n\n",
+      "created_at": "2023-06-14T11:47:14.191571",
+      "sequence_order": 2,
+      "parent_id": "2cc81a46-42c1-45dd-b8ff-f7097b97537c",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "50be5f59-1328-4852-a804-8d06cb74fabe",
+      "role": "assistant",
+      "content": "If your application is running on your local server, it's only accessible from the same machine. To make it accessible from the internet, you need to bind it to a public IP address or a domain name.\n\nFirstly, you should change your application to listen on `0.0.0.0` instead of `127.0.0.1`. This allows the application to be accessible from any IP address, not just the local machine. Check your application's documentation for how to change the listening address.\n\nSecondly, if your application is running on a port that is not usually open to the internet (like 7860), you'll need to set up port forwarding. This can often be done through your server's firewall. A basic rule might look like this:\n\n```\niptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 7860\n```\n\nThis command tells the firewall to forward traffic that comes to port 80 (the default HTTP port) to port 7860, where your application is running. Note that you'll need to replace `eth0` with the name of your internet-facing network interface. \n\nAfter you've done this, your application should be accessible at `http://blm.pm`, assuming that `blm.pm` is correctly set up to point to your server's IP address.\n\nHowever, you may still face issues with HTTPS (secured HTTP), as your application itself is serving unsecured HTTP. To resolve this, you might want to consider setting up a reverse proxy server that can handle HTTPS and forward traffic to your application. Tools like Nginx or Apache can be configured as a reverse proxy server. The reverse proxy can handle the SSL/TLS handshake with clients, and then pass the requests along to your application. This would also resolve your earlier problem with Let's Encrypt, as the reverse proxy server can be configured to correctly serve the .well-known/acme-challenge directory over HTTPS. \n\nRemember, exposing an application to the internet brings with it security risks, so make sure to secure your server properly. Consider using tools like Fail2ban to block IP addresses that make too many failed login attempts, keep your server software updated, and use strong, unique passwords. If you're not comfortable with this, consider hiring a professional or using a platform that handles these details for you.",
+      "created_at": "2023-06-14T11:48:18.009208",
+      "sequence_order": 3,
+      "parent_id": "aaa2175c-6764-41a8-b083-2716ed09ddcb",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa29766-952a-4a97-a3b3-2426126a46a8",
+      "role": "user",
+      "content": "[nltk_data] Downloading package punkt to /root/nltk_data...\n[nltk_data]   Unzipping tokenizers/punkt.zip.\n[nltk_data] Downloading package averaged_perceptron_tagger to\n[nltk_data]     /root/nltk_data...\n[nltk_data]   Unzipping taggers/averaged_perceptron_tagger.zip.\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.10/dist-packages/gradio/routes.py\", line 422, in run_predict\n    output = await app.get_blocks().process_api(\n  File \"/usr/local/lib/python3.10/dist-packages/gradio/blocks.py\", line 1323, in process_api\n    result = await self.call_function(\n  File \"/usr/local/lib/python3.10/dist-packages/gradio/blocks.py\", line 1051, in call_function\n    prediction = await anyio.to_thread.run_sync(\n  File \"/usr/local/lib/python3.10/dist-packages/anyio/to_thread.py\", line 31, in run_sync\n    return await get_asynclib().run_sync_in_worker_thread(\n  File \"/usr/local/lib/python3.10/dist-packages/anyio/_backends/_asyncio.py\", line 937, in run_sync_in_worker_thread\n    return await future\n  File \"/usr/local/lib/python3.10/dist-packages/anyio/_backends/_asyncio.py\", line 867, in run\n    result = context.run(func, *args)\n  File \"/var/www/vhosts/blm.pm/datachat.blm.pm/streamChatPDF/gradio_app.py\", line 32, in main\n    documents = [doc for loader in loaders for doc in loader.load()]\n  File \"/var/www/vhosts/blm.pm/datachat.blm.pm/streamChatPDF/gradio_app.py\", line 32, in <listcomp>\n    documents = [doc for loader in loaders for doc in loader.load()]\n  File \"/usr/local/lib/python3.10/dist-packages/langchain/document_loaders/directory.py\", line 84, in load\n    raise e\n  File \"/usr/local/lib/python3.10/dist-packages/langchain/document_loaders/directory.py\", line 78, in load\n    sub_docs = self.loader_cls(str(i), **self.loader_kwargs).load()\n  File \"/usr/local/lib/python3.10/dist-packages/langchain/document_loaders/unstructured.py\", line 61, in load\n    elements = self._get_elements()\n  File \"/usr/local/lib/python3.10/dist-packages/langchain/document_loaders/unstructured.py\", line 95, in _get_elements\n    return partition(filename=self.file_path, **self.unstructured_kwargs)\n  File \"/usr/local/lib/python3.10/dist-packages/unstructured/partition/auto.py\", line 184, in partition\n    elements = partition_text(\n  File \"/usr/local/lib/python3.10/dist-packages/unstructured/file_utils/filetype.py\", line 483, in wrapper\n    elements = func(*args, **kwargs)\n  File \"/usr/local/lib/python3.10/dist-packages/unstructured/partition/text.py\", line 64, in partition_text\n    encoding, file_text = read_txt_file(filename=filename, encoding=encoding)\n  File \"/usr/local/lib/python3.10/dist-packages/unstructured/file_utils/encoding.py\", line 93, in read_txt_file\n    encoding, file_text = detect_file_encoding(filename)\n  File \"/usr/local/lib/python3.10/dist-packages/unstructured/file_utils/encoding.py\", line 74, in detect_file_encoding\n    file_text = byte_data.decode(encoding)\n  File \"/usr/lib/python3.10/encodings/cp1254.py\", line 15, in decode\n    return codecs.charmap_decode(input,errors,decoding_table)\nUnicodeDecodeError: 'charmap' codec can't decode byte 0x8e in position 402: character maps to <undefined>",
+      "created_at": "2023-06-14T12:08:19.490497",
+      "sequence_order": 4,
+      "parent_id": "50be5f59-1328-4852-a804-8d06cb74fabe",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "e94e0fb0-1886-433e-82eb-5718904c8bce",
+      "role": "assistant",
+      "content": "The error message you're seeing is a `UnicodeDecodeError`. This error typically occurs when there's a byte sequence that's not valid for the encoding being used.\n\nHere, it appears your program is trying to decode a file using the 'charmap' codec, specifically the `cp1254` encoding (also known as Windows-1254). However, it's encountering a byte (`0x8e`) that doesn't map to a valid character in this encoding, resulting in the error.\n\nHere's what you can do to handle this error:\n\n1. **Explicitly specify a different encoding**: If you know the correct encoding of your file, you can specify it directly when opening the file. Python's built-in `open()` function allows you to specify an encoding. For example, if your file is in UTF-8, you can open it like this: `open(filename, 'r', encoding='utf-8')`.\n\n2. **Use a different method to guess the encoding**: The error occurs in the `detect_file_encoding()` function, which tries to guess the file's encoding. If the guessing is incorrect, this can lead to errors. You could use a different method to guess the encoding, such as the `chardet` library.\n\n3. **Handle decoding errors**: If you can't be sure of the file's encoding, or if it can vary, you can tell Python to replace or ignore invalid characters when decoding. You can do this by specifying the `errors` parameter when decoding a byte string, like this: `byte_data.decode(encoding, errors='replace')` or `byte_data.decode(encoding, errors='ignore')`. This will replace invalid characters with the Unicode replacement character, or ignore them, respectively.\n\n4. **Check the file content**: The error could be due to unexpected content in the file. If possible, examine the file to see if there are any unusual characters at the location indicated by the error message (byte 402).\n\nRemember, while options 3 and 4 can prevent the error from happening, they may not be the correct solution if the data in the file is important and needs to be accurately represented in your application. In such a case, you would need to know the correct encoding of the file.",
+      "created_at": "2023-06-14T12:09:07.371570",
+      "sequence_order": 5,
+      "parent_id": "aaa29766-952a-4a97-a3b3-2426126a46a8",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa23879-48cd-4fa6-92b0-4b88ceeeffe0",
+      "role": "user",
+      "content": "the code: import os\nimport pickle\nimport gradio as gr\nfrom dotenv import load_dotenv\nfrom PyPDF2 import PdfReader\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.chains.question_answering import load_qa_chain\nfrom langchain.callbacks import get_openai_callback\nfrom langchain.document_loaders import DirectoryLoader\nfrom langchain.chat_models import ChatOpenAI\nimport openai\nimport tiktoken\n\n# Load environment variables\nload_dotenv()\n\n# Try to get the OpenAI API Key from the environment variables\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\n# Initialize OpenAI\nllm = ChatOpenAI(openai_api_key=openai.api_key, model_name=\"gpt-3.5-turbo\")\n\ndef num_tokens_from_string(string: str, encoding_name: str) -> int:\n    encoding = tiktoken.get_encoding(encoding_name)\n    num_tokens = len(encoding.encode(string))\n    return num_tokens\n\ndef main(query):\n    loaders = [DirectoryLoader('./data/', glob=\"**/*.txt\")]\n    documents = [doc for loader in loaders for doc in loader.load()]\n\n    text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=200)\n    chunks = text_splitter.split_documents(documents)    \n\n    store_name = \"talkToAssessmentData\"\n\n    # Load or create embeddings\n    if os.path.exists('/Users/bilalghalib/Projects/scripts/streamChatPDF/'+f\"{store_name}.pkl\"):\n        with open('/Users/bilalghalib/Projects/scripts/streamChatPDF/'+f\"{store_name}.pkl\", \"rb\") as f:\n            VectorStore = pickle.load(f)\n    else:\n        embeddings = OpenAIEmbeddings()\n        VectorStore = FAISS.from_documents(chunks, embedding=embeddings)\n        with open('/Users/bilalghalib/Projects/scripts/streamChatPDF/'+f\"{store_name}.pkl\", \"wb\") as f:\n            pickle.dump(VectorStore, f)\n\n    # Accept user questions/query\n    if query:\n        # Count tokens in query\n        num_tokens = num_tokens_from_string(query, \"cl100k_base\")\n\n        # Check if number of tokens is below the limit\n        if num_tokens > 4096:\n            return f\"Your query is too long ({num_tokens} tokens). Please shorten it to less than 4096 tokens.\"\n        else:\n            docs = VectorStore.similarity_search(query=query, k=2)\n            chain = load_qa_chain(llm=llm, chain_type=\"stuff\")\n            with get_openai_callback() as cb:\n                response = chain.run(input_documents=docs, question=query)\n                print(cb)\n            return response\n\niface = gr.Interface(fn=main, \n                     inputs=\"text\", \n                     outputs=\"text\", \n                     description=\"Welcome to the Bloom Assessment conversation tool\", \n                     layout='vertical')\niface.launch(share=True)\n",
+      "created_at": "2023-06-14T12:32:31.515890",
+      "sequence_order": 6,
+      "parent_id": "e94e0fb0-1886-433e-82eb-5718904c8bce",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "c998ca0c-0148-4467-b408-26784e3b4619",
+      "role": "assistant",
+      "content": "The code you've provided seems to be a Gradio interface for a chat model that uses OpenAI's GPT-3.5-turbo. It takes in a query, and based on the input, the model retrieves relevant documents from a directory and provides a response. \n\nHere are a few key points about the code:\n\n- **Environment variables**: The `load_dotenv()` function is used to load environment variables. It's assumed that the OpenAI API key is stored in an environment variable, which is accessed using `os.getenv(\"OPENAI_API_KEY\")`.\n\n- **Document loading**: The `DirectoryLoader` class is used to load documents from a directory. In this case, it's loading all .txt files from the `./data/` directory.\n\n- **Text splitting**: The `CharacterTextSplitter` class is used to split the loaded documents into smaller chunks.\n\n- **Embedding and VectorStore**: `OpenAIEmbeddings` and `FAISS` are used for creating embeddings of the chunks. These embeddings are either loaded from a .pkl file if it exists, or created and then saved to a .pkl file.\n\n- **User query handling**: The `main` function accepts a user query, checks its length, and if it's not too long, retrieves the most similar documents to the query from the `VectorStore`. It then uses a question-answering chain (`load_qa_chain`) to generate a response based on the retrieved documents and the user query.\n\n- **Interface**: The `gr.Interface` class from the Gradio library is used to create a web-based user interface for the chat model. The `main` function is used as the function that's called when a user submits a query. The interface expects text input and returns text output.\n\n- **Launch**: The `launch` method is used to start the Gradio interface. The `share=True` parameter indicates that the interface should be shareable with others.\n\nMake sure to replace `'/Users/bilalghalib/Projects/scripts/streamChatPDF/'` with the correct path on your server where the .pkl file is stored. Also, ensure that the OpenAI API key is correctly set in the environment variables, and the `./data/` directory contains the .txt files you want to load.\n\nLet me know if you need help with any specific part of the code!",
+      "created_at": "2023-06-14T12:33:23.537063",
+      "sequence_order": 7,
+      "parent_id": "aaa23879-48cd-4fa6-92b0-4b88ceeeffe0",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

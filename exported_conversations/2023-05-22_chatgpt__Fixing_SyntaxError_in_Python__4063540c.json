@@ -1,0 +1,37 @@
+{
+  "id": "4063540c-c14c-4c2e-a113-236da08aaed6",
+  "source": "chatgpt",
+  "title": "\"Fixing SyntaxError in Python\"",
+  "created_at": "2023-05-22T16:56:16.074236",
+  "updated_at": "2023-05-22T16:56:20",
+  "summary": null,
+  "message_count": 2,
+  "messages": [
+    {
+      "id": "aaa28ff2-7cea-432f-96c4-629d10588c77",
+      "role": "user",
+      "content": "getting this error:\nSyntaxError: positional argument follows keyword argument\nroot@blm-plesk-4-2-lon:/srv/chatPriorities/chat-gpt-celery-flask# flask routes\nTraceback (most recent call last):\n  File \"/usr/local/bin/flask\", line 8, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/usr/local/lib/python3.11/dist-packages/flask/cli.py\", line 1063, in main\n    cli.main()\n  File \"/usr/local/lib/python3.11/dist-packages/click/core.py\", line 1055, in main\n    rv = self.invoke(ctx)\n         ^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/dist-packages/click/core.py\", line 1657, in invoke\n    return _process_result(sub_ctx.command.invoke(sub_ctx))\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/dist-packages/click/core.py\", line 1404, in invoke\n    return ctx.invoke(self.callback, **ctx.params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/dist-packages/click/core.py\", line 760, in invoke\n    return __callback(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/dist-packages/click/decorators.py\", line 26, in new_func\n    return f(get_current_context(), *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/dist-packages/flask/cli.py\", line 354, in decorator\n    app = __ctx.ensure_object(ScriptInfo).load_app()\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/dist-packages/flask/cli.py\", line 312, in load_app\n    app = locate_app(import_name, None, raise_if_not_found=False)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/dist-packages/flask/cli.py\", line 218, in locate_app\n    __import__(module_name)\n  File \"/srv/chatPriorities/chat-gpt-celery-flask/app.py\", line 35\n    \"temperature\": 0.8,\n                 ^\nhere\nimport os\nimport json\nimport requests\nfrom dotenv import load_dotenv\nfrom flask import Flask, request, jsonify, render_template\nfrom flask_cors import cross_origin\nfrom celery import Celery\nimport openai\n\napp = Flask(__name__)\n\nload_dotenv()\n\n# Configure Celery here we use radis\napp.config['CELERY_BROKER_URL'] = os.getenv('CELERY_BROKER_URL')\napp.config['CELERY_RESULT_BACKEND'] = os.getenv('CELERY_RESULT_BACKEND')\n\ncelery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])\ncelery.conf.update(app.config)\n\n# GPT-3 endpoint and credentials\ngpt3_endpoint = \"https://api.openai.com/v1/engines/text-davinci-003/completions\"\ngpt3_image_endpoint = \"https://api.openai.com/v1/images/generations\"\ngpt3_api_key = os.getenv(\"OPEN_AI_KEY\")\nopenai.api_key = gpt3_api_key\n\n\n@celery.task\n\ndef generate_text(messages):\n    # Send request to GPT-3.5 Turbo\n    response = openai.ChatCompletion.create(\n        #model=\"gpt-4\",\n        model=\"gpt-3.5-turbo\",\n        \"temperature\": 0.8,\n        messages=messages\n    )\n\n    # Return response\n    return response\n#def generate_text(prompt):\n#    # Send request to GPT-3\n#    headers = {\n#        \"Content-Type\": \"application/json\",\n#        \"Authorization\": f\"Bearer {gpt3_api_key}\"\n#    }\n",
+      "created_at": "2023-05-22T16:56:16.075513",
+      "sequence_order": 0,
+      "parent_id": "d27411b2-ffe5-47e5-82c3-d7359c75ae41",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "d8f811f4-7723-4fc5-be5f-5d144a280796",
+      "role": "assistant",
+      "content": "The error you're encountering is a `SyntaxError` indicating that you have a positional argument following a keyword argument in your code. In the provided code snippet, the error is occurring in the `generate_text` function when calling the `openai.ChatCompletion.create` method.\n\nTo fix this issue, you need to modify the line `\"temperature\": 0.8` in the `generate_text` function. The correct syntax for passing a keyword argument is `key=value`, but you have used a colon (`:`) instead of an equals sign (`=`) to assign the value to the `temperature` key.\n\nHere's the corrected code snippet:\n\n```python\ndef generate_text(messages):\n    # Send request to GPT-3.5 Turbo\n    response = openai.ChatCompletion.create(\n        model=\"gpt-3.5-turbo\",\n        temperature=0.8,\n        messages=messages\n    )\n\n    # Return response\n    return response\n```\n\nAfter making this change, the `generate_text` function should work correctly without causing the `SyntaxError`.",
+      "created_at": "2023-05-22T16:56:19.994795",
+      "sequence_order": 1,
+      "parent_id": "aaa28ff2-7cea-432f-96c4-629d10588c77",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

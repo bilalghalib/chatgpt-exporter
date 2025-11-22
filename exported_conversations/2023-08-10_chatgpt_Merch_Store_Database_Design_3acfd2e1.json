@@ -1,0 +1,37 @@
+{
+  "id": "3acfd2e1-ddb6-4f1a-bcea-c3282a0ff400",
+  "source": "chatgpt",
+  "title": "Merch Store Database Design",
+  "created_at": "2023-08-10T22:15:06.704059",
+  "updated_at": "2023-08-10T22:16:27",
+  "summary": null,
+  "message_count": 2,
+  "messages": [
+    {
+      "id": "aaa22ee3-9238-4046-9f42-0df077ed3b0b",
+      "role": "user",
+      "content": "Design a database schema for an online merch store.",
+      "created_at": "2023-08-10T22:15:06.709993",
+      "sequence_order": 0,
+      "parent_id": "14213f22-3ed8-4891-92d8-a7914f4c0441",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "64719c40-cc13-4a7e-a94f-8a5c93c33bf9",
+      "role": "assistant",
+      "content": "Certainly! Here's a basic database schema for an online merchandise store. This schema will handle products, customers, orders, and related entities.\n\n### Tables:\n\n1. **Products**\n    - product_id (Primary Key, Auto Increment)\n    - product_name\n    - description\n    - price\n    - stock_quantity\n    - category_id (Foreign Key)\n    - image_url\n\n2. **Categories**\n    - category_id (Primary Key, Auto Increment)\n    - category_name\n    - description\n\n3. **Customers**\n    - customer_id (Primary Key, Auto Increment)\n    - first_name\n    - last_name\n    - email (Unique)\n    - password (hashed and salted)\n    - phone_number\n    - shipping_address\n    - billing_address\n    - registration_date\n\n4. **Orders**\n    - order_id (Primary Key, Auto Increment)\n    - customer_id (Foreign Key)\n    - order_date\n    - shipping_date\n    - status (e.g., 'Pending', 'Shipped', 'Delivered')\n\n5. **OrderDetails**\n    - order_detail_id (Primary Key, Auto Increment)\n    - order_id (Foreign Key)\n    - product_id (Foreign Key)\n    - quantity_ordered\n    - price_each\n\n6. **Shipping**\n    - shipping_id (Primary Key, Auto Increment)\n    - order_id (Foreign Key)\n    - shipping_address\n    - shipping_method (e.g., 'Standard', 'Express')\n    - tracking_number\n\n7. **Payments**\n    - payment_id (Primary Key, Auto Increment)\n    - customer_id (Foreign Key)\n    - order_id (Foreign Key)\n    - amount\n    - payment_date\n    - payment_method (e.g., 'Credit Card', 'PayPal')\n    - transaction_id\n\n8. **Reviews**\n    - review_id (Primary Key, Auto Increment)\n    - product_id (Foreign Key)\n    - customer_id (Foreign Key)\n    - rating (e.g., 1 to 5)\n    - review_text\n    - review_date\n\n### Relationships:\n\n1. **Products to Categories**: Many products can belong to one category (Many-to-One). `category_id` in the Products table will be a foreign key referencing `category_id` in the Categories table.\n\n2. **Customers to Orders**: One customer can have many orders (One-to-Many). `customer_id` in the Orders table will be a foreign key referencing `customer_id` in the Customers table.\n\n3. **Orders to OrderDetails**: One order can have many order details (One-to-Many). `order_id` in the OrderDetails table will be a foreign key referencing `order_id` in the Orders table.\n\n4. **Products to OrderDetails**: Many products can be in many order details (Many-to-Many). This relationship is represented through the OrderDetails table.\n\n5. **Orders to Shipping**: One order has one shipping detail (One-to-One). `order_id` in the Shipping table will be a foreign key referencing `order_id` in the Orders table.\n\n6. **Orders to Payments**: One order can have multiple payments, and one payment can be for multiple orders (Many-to-Many). However, in a more typical schema, it's often One-to-Many, where one order has one payment.\n\n7. **Customers to Payments**: One customer can make many payments (One-to-Many). `customer_id` in the Payments table will be a foreign key referencing `customer_id` in the Customers table.\n\n8. **Products to Reviews**: One product can have many reviews (One-to-Many). `product_id` in the Reviews table will be a foreign key referencing `product_id` in the Products table.\n\n9. **Customers to Reviews**: One customer can write many reviews (One-to-Many). `customer_id` in the Reviews table will be a foreign key referencing `customer_id` in the Customers table.\n\nThis schema can be expanded and adjusted based on specific business needs, but it provides a solid starting point for an online merch store.",
+      "created_at": "2023-08-10T22:16:27.987200",
+      "sequence_order": 1,
+      "parent_id": "aaa22ee3-9238-4046-9f42-0df077ed3b0b",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

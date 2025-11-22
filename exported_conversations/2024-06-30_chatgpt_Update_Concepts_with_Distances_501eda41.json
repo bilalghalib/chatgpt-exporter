@@ -1,0 +1,128 @@
+{
+  "id": "501eda41-1604-4567-a8ef-baad0577e5de",
+  "source": "chatgpt",
+  "title": "Update Concepts with Distances",
+  "created_at": "2024-06-30T11:40:52.610534",
+  "updated_at": "2024-06-30T11:59:30.210021",
+  "summary": null,
+  "message_count": 9,
+  "messages": [
+    {
+      "id": "aaa20f38-54fb-433a-a637-e582424a1842",
+      "role": "user",
+      "content": "update this code to take in the json to make the concept distance from as an arg:\nimport json\nimport numpy as np\nfrom sklearn.metrics.pairwise import cosine_similarity\nimport ollama\nimport yaml\nimport logging\nfrom concurrent.futures import ThreadPoolExecutor\n\n# Set up logging\nlogging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')\nlogger = logging.getLogger(__name__)\n\n# Load configuration\nwith open('config.yaml', 'r') as config_file:\n    config = yaml.safe_load(config_file)\n\ndef get_embedding(text):\n    logger.debug(f\"Getting embedding for: {text[:50]}...\")\n    response = ollama.embeddings(model=config['ollama']['model'], prompt=text)\n    return np.array(response['embedding'])\n\ndef calculate_distances(concepts):\n    logger.info(\"Calculating distances between concepts...\")\n    with ThreadPoolExecutor() as executor:\n        embeddings = list(executor.map(lambda c: get_embedding(c['name']), concepts))\n    embeddings = np.array(embeddings)\n    \n    # Calculate pairwise similarities\n    similarities = cosine_similarity(embeddings)\n    # Convert similarities to distances (range [0, 2])\n    distances = 1 - similarities\n    \n    # Create a list of distances for each concept\n    concept_distances = []\n    for i, concept in enumerate(concepts):\n        concept_distances.append({\n            'name': concept['name'],\n            'start': concept['start'],\n            'end': concept['end'],\n            'level': concept['level'],\n            'distances': distances[i].tolist()\n        })\n    \n    return concept_distances\n\ndef process_concepts(concepts):\n    flat_concepts = []\n    def flatten(concept, level=0):\n        flat_concepts.append({**concept, 'level': level})\n        for child in concept.get('children', []):\n            flatten(child, level + 1)\n    flatten(concepts)\n    \n    logger.info(f\"Processing {len(flat_concepts)} concepts\")\n    concept_distances = calculate_distances(flat_concepts)\n    \n    return concept_distances\n\ndef main():\n    logger.info(\"Starting concept distance calculation process\")\n    \n    # Load original JSON\n    with open('concept_analysis.json', 'r') as f:\n        data = json.load(f)\n    \n    # Process concepts and calculate distances\n    concept_distances = process_concepts(data['concepts'])\n    \n    # Create new JSON with original concepts and their distances\n    new_data = {\n        'text': data['text'],\n        'concepts': concept_distances\n    }\n    \n    # Save new JSON\n    output_file = 'concept_distances.json'\n    with open(output_file, 'w') as f:\n        json.dump(new_data, f, indent=2)\n    \n    logger.info(f\"Concept distances saved to {output_file}\")\n\nif __name__ == \"__main__\":\n    main() \n\n",
+      "created_at": "2024-06-30T11:40:52.618508",
+      "sequence_order": 0,
+      "parent_id": "cb5bbf4e-162e-4c83-a9dd-e4e0427fa3f9",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "5400d573-2506-4796-bfa4-6f42765c4ffa",
+      "role": "assistant",
+      "content": "### Updated Code with `concepts` as an Argument\n\nHere is the updated code to take in the `concepts` JSON as an argument:\n\n```python\nimport json\nimport numpy as np\nfrom sklearn.metrics.pairwise import cosine_similarity\nimport ollama\nimport yaml\nimport logging\nfrom concurrent.futures import ThreadPoolExecutor\nimport sys\n\n# Set up logging\nlogging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')\nlogger = logging.getLogger(__name__)\n\n# Load configuration\nwith open('config.yaml', 'r') as config_file:\n    config = yaml.safe_load(config_file)\n\ndef get_embedding(text):\n    logger.debug(f\"Getting embedding for: {text[:50]}...\")\n    response = ollama.embeddings(model=config['ollama']['model'], prompt=text)\n    return np.array(response['embedding'])\n\ndef calculate_distances(concepts):\n    logger.info(\"Calculating distances between concepts...\")\n    with ThreadPoolExecutor() as executor:\n        embeddings = list(executor.map(lambda c: get_embedding(c['name']), concepts))\n    embeddings = np.array(embeddings)\n    \n    # Calculate pairwise similarities\n    similarities = cosine_similarity(embeddings)\n    # Convert similarities to distances (range [0, 2])\n    distances = 1 - similarities\n    \n    # Create a list of distances for each concept\n    concept_distances = []\n    for i, concept in enumerate(concepts):\n        concept_distances.append({\n            'name': concept['name'],\n            'start': concept['start'],\n            'end': concept['end'],\n            'level': concept['level'],\n            'distances': distances[i].tolist()\n        })\n    \n    return concept_distances\n\ndef process_concepts(concepts):\n    flat_concepts = []\n    def flatten(concept, level=0):\n        flat_concepts.append({**concept, 'level': level})\n        for child in concept.get('children', []):\n            flatten(child, level + 1)\n    flatten(concepts)\n    \n    logger.info(f\"Processing {len(flat_concepts)} concepts\")\n    concept_distances = calculate_distances(flat_concepts)\n    \n    return concept_distances\n\ndef main(concepts_json):\n    logger.info(\"Starting concept distance calculation process\")\n    \n    # Load original JSON\n    data = json.loads(concepts_json)\n    \n    # Process concepts and calculate distances\n    concept_distances = process_concepts(data['concepts'])\n    \n    # Create new JSON with original concepts and their distances\n    new_data = {\n        'text': data['text'],\n        'concepts': concept_distances\n    }\n    \n    # Save new JSON\n    output_file = 'concept_distances.json'\n    with open(output_file, 'w') as f:\n        json.dump(new_data, f, indent=2)\n    \n    logger.info(f\"Concept distances saved to {output_file}\")\n\nif __name__ == \"__main__\":\n    if len(sys.argv) != 2:\n        logger.error(\"Usage: python script.py <concepts_json>\")\n        sys.exit(1)\n    \n    concepts_json = sys.argv[1]\n    main(concepts_json)\n```\n\n### Key Changes\n1. **Main Function**: Updated to take a JSON string as an argument.\n2. **Argument Handling**: Added argument handling to pass the JSON string directly via command line.\n\n### Usage\nTo run this script, you need to pass the JSON string containing the concepts as a command-line argument:\n\n```sh\npython script.py '{\"text\": \"Example text\", \"concepts\": [{\"name\": \"Concept1\", \"start\": 0, \"end\": 7, \"children\": [{\"name\": \"Child1\", \"start\": 8, \"end\": 14}]}]}'\n```\n\nMake sure that the JSON string is correctly formatted and that all quotation marks are properly escaped if running from the command line.",
+      "created_at": "2024-06-30T11:41:17.536304",
+      "sequence_order": 1,
+      "parent_id": "aaa20f38-54fb-433a-a637-e582424a1842",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2b2bd-4263-47d7-8aaa-f2f243ea2e4c",
+      "role": "user",
+      "content": "update it so it can handle files with concepts stored like this:\n.py\", line 64, in main\n    data = json.loads(concepts_json)\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/json/__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/json/decoder.py\", line 337, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/json/decoder.py\", line 355, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n(base) bilalghalib@Cruzer-2 FractalSlider % \n",
+      "created_at": "2024-06-30T11:43:18.291959",
+      "sequence_order": 2,
+      "parent_id": "5400d573-2506-4796-bfa4-6f42765c4ffa",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "8e05d873-b5c7-4975-bb80-dd88c52293c9",
+      "role": "tool",
+      "content": "",
+      "created_at": "2024-06-30T11:43:41.642122",
+      "sequence_order": 3,
+      "parent_id": "279a4fd3-8c60-45c8-b1df-09e433774441",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "f60f2edd-f03e-488e-ac45-cd3bc82eb557",
+      "role": "tool",
+      "content": "\nPlease remember to search the user's documents if an answer to their question is not contained in the above snippets.\n",
+      "created_at": "2024-06-30T11:43:41.642179",
+      "sequence_order": 4,
+      "parent_id": "8e05d873-b5c7-4975-bb80-dd88c52293c9",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "95d40f8b-832f-4534-8e6e-0f9c6f2fe4f5",
+      "role": "assistant",
+      "content": "Here's the updated code to handle a JSON file with concepts stored as in the provided `concept_analysis copy.json` file:\n\n```python\nimport json\nimport numpy as np\nfrom sklearn.metrics.pairwise import cosine_similarity\nimport ollama\nimport yaml\nimport logging\nfrom concurrent.futures import ThreadPoolExecutor\n\n# Set up logging\nlogging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')\nlogger = logging.getLogger(__name__)\n\n# Load configuration\nwith open('config.yaml', 'r') as config_file:\n    config = yaml.safe_load(config_file)\n\ndef get_embedding(text):\n    logger.debug(f\"Getting embedding for: {text[:50]}...\")\n    response = ollama.embeddings(model=config['ollama']['model'], prompt=text)\n    return np.array(response['embedding'])\n\ndef calculate_distances(concepts):\n    logger.info(\"Calculating distances between concepts...\")\n    with ThreadPoolExecutor() as executor:\n        embeddings = list(executor.map(lambda c: get_embedding(c['name']), concepts))\n    embeddings = np.array(embeddings)\n    \n    # Calculate pairwise similarities\n    similarities = cosine_similarity(embeddings)\n    # Convert similarities to distances (range [0, 2])\n    distances = 1 - similarities\n    \n    # Create a list of distances for each concept\n    concept_distances = []\n    for i, concept in enumerate(concepts):\n        concept_distances.append({\n            'name': concept['name'],\n            'start': concept['start'],\n            'end': concept['end'],\n            'level': concept['level'],\n            'distances': distances[i].tolist()\n        })\n    \n    return concept_distances\n\ndef process_concepts(concepts):\n    flat_concepts = []\n    def flatten(concept, level=0):\n        flat_concepts.append({**concept, 'level': level})\n        for child in concept.get('children', []):\n            flatten(child, level + 1)\n    flatten(concepts)\n    \n    logger.info(f\"Processing {len(flat_concepts)} concepts\")\n    concept_distances = calculate_distances(flat_concepts)\n    \n    return concept_distances\n\ndef main(concepts_file):\n    logger.info(\"Starting concept distance calculation process\")\n    \n    # Load original JSON\n    with open(concepts_file, 'r') as f:\n        data = json.load(f)\n    \n    # Process concepts and calculate distances\n    concept_distances = process_concepts(data['concepts'])\n    \n    # Create new JSON with original concepts and their distances\n    new_data = {\n        'text': data['text'],\n        'concepts': concept_distances\n    }\n    \n    # Save new JSON\n    output_file = 'concept_distances.json'\n    with open(output_file, 'w') as f:\n        json.dump(new_data, f, indent=2)\n    \n    logger.info(f\"Concept distances saved to {output_file}\")\n\nif __name__ == \"__main__\":\n    import sys\n    if len(sys.argv) != 2:\n        logger.error(\"Usage: python script.py <concepts_file>\")\n        sys.exit(1)\n    \n    concepts_file = sys.argv[1]\n    main(concepts_file)\n```\n\n### Key Changes\n1. **File Handling**: Updated to read from a file specified as a command-line argument.\n2. **Argument Handling**: Script now takes a file path as an argument.\n\n### Usage\nTo run this script, you need to provide the path to the JSON file containing the concepts as a command-line argument:\n\n```sh\npython script.py /path/to/concept_analysis.json\n```\n\nMake sure to replace `/path/to/concept_analysis.json` with the actual path to your JSON file. This way, the script will read the JSON file, process the concepts, calculate the distances, and save the output to `concept_distances.json`.",
+      "created_at": "2024-06-30T11:43:41.642223",
+      "sequence_order": 5,
+      "parent_id": "f60f2edd-f03e-488e-ac45-cd3bc82eb557",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa263cb-6b3b-487d-a476-c96a8187bbec",
+      "role": "user",
+      "content": "can you have this html have a \"save\" button that saves an updated json where the items are clustered based on the current distance slider - give them a uuid cluster name so we can then name them later - right now we just want to have the user decide how to set the distance appropriately and then save the json",
+      "created_at": "2024-06-30T11:58:27.462445",
+      "sequence_order": 6,
+      "parent_id": "95d40f8b-832f-4534-8e6e-0f9c6f2fe4f5",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "b56a6821-72d4-4840-b8dc-cfacded1fb35",
+      "role": "tool",
+      "content": "",
+      "created_at": "2024-06-30T11:59:29.933314",
+      "sequence_order": 7,
+      "parent_id": "aaa263cb-6b3b-487d-a476-c96a8187bbec",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "976db27a-adee-43d2-92ca-43abb7cbdd36",
+      "role": "assistant",
+      "content": "To add a \"Save\" button that saves the updated JSON with items clustered based on the current distance slider, we will modify the provided HTML and JavaScript as follows:\n\n1. Add a \"Save\" button to the HTML.\n2. Update the JavaScript to handle the click event for the \"Save\" button.\n3. Generate a UUID for each cluster and add it to the updated JSON.\n\nHere's the updated HTML code:\n\n```html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Enhanced Dynamic Concept Viewer</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            margin: 0;\n            padding: 0;\n            display: flex;\n            height: 100vh;\n            overflow: hidden;\n        }\n        #controls {\n            position: fixed;\n            top: 0;\n            left: 0;\n            right: 0;\n            background-color: #f0f0f0;\n            padding: 10px;\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n            z-index: 1000;\n        }\n        #concept-tree {\n            width: 300px;\n            overflow: auto;\n            padding: 20px;\n            background-color: #f5f5f5;\n            margin-top: 50px;\n        }\n        #divider {\n            width: 10px;\n            background-color: #ccc;\n            cursor: col-resize;\n        }\n        #text-content {\n            flex: 1;\n            padding: 20px;\n            overflow: auto;\n            white-space: pre-wrap;\n            margin-top: 50px;\n        }\n        .concept {\n            margin-bottom: 5px;\n            cursor: pointer;\n            padding: 3px;\n            border-radius: 3px;\n            transition: all 0.3s ease;\n        }\n        .concept:hover {\n            filter: brightness(90%);\n            transform: translateX(5px);\n        }\n        .highlighted {\n            border-radius: 3px;\n        }\n        .highlighted-underlined {\n            border-bottom: 2px dashed #000;\n        }\n        #distance-slider {\n            width: 200px;\n        }\n        .cluster {\n            margin-bottom: 15px;\n            padding: 5px;\n            border-radius: 5px;\n            border: 1px solid #ddd;\n        }\n        .active-concept {\n            font-weight: bold;\n        }\n    </style>\n</head>\n<body>\n    <div id=\"controls\">\n        <div>\n            <label for=\"distance-slider\">Clustering Distance: </label>\n            <input type=\"range\" id=\"distance-slider\" min=\"0\" max=\"1\" step=\"0.01\" value=\"0.5\">\n            <span id=\"slider-value\">0.5</span>\n        </div>\n        <button id=\"save-button\">Save</button>\n    </div>\n    <div id=\"concept-tree\"></div>\n    <div id=\"divider\"></div>\n    <div id=\"text-content\"></div>\n\n    <script>\n    let data;\n    let clusters = [];\n\n    fetch('concept_distances.json')\n        .then(response => response.json())\n        .then(jsonData => {\n            data = jsonData;\n            clusterConcepts(0.5);\n            renderConceptTree();\n            renderText();\n            setupEventListeners();\n        });\n\n    function clusterConcepts(threshold) {\n        clusters = [];\n        const visited = new Set();\n\n        data.concepts.forEach((concept, i) => {\n            if (!visited.has(i)) {\n                const cluster = [i];\n                visited.add(i);\n\n                data.concepts.forEach((otherConcept, j) => {\n                    if (i !== j && !visited.has(j) && concept.distances[j] <= threshold) {\n                        cluster.push(j);\n                        visited.add(j);\n                    }\n                });\n\n                clusters.push(cluster);\n            }\n        });\n\n        return clusters;\n    }\n\n    function renderConceptTree() {\n        const conceptTree = document.getElementById('concept-tree');\n        conceptTree.innerHTML = '';\n\n        clusters.forEach((cluster, index) => {\n            const clusterDiv = document.createElement('div');\n            clusterDiv.className = 'cluster';\n            clusterDiv.style.borderColor = getClusterColor(index);\n\n            cluster.forEach(conceptIndex => {\n                const concept = data.concepts[conceptIndex];\n                const conceptDiv = document.createElement('div');\n                conceptDiv.className = 'concept';\n                conceptDiv.textContent = concept.name;\n                conceptDiv.style.backgroundColor = getClusterColor(index);\n                conceptDiv.addEventListener('click', () => highlightCluster(cluster, index, conceptDiv, concept));\n                clusterDiv.appendChild(conceptDiv);\n            });\n\n            conceptTree.appendChild(clusterDiv);\n        });\n    }\n\n    function getClusterColor(index) {\n        const hue = (index * 137.5) % 360;\n        return `hsla(${hue}, 70%, 80%, 0.5)`;\n    }\n\n    function highlightCluster(cluster, clusterIndex, clickedConceptElement, clickedConcept) {\n        const textContent = document.getElementById('text-content');\n        const text = data.text;\n        let highlightedText = text;\n\n        // Remove active class from all concepts\n        document.querySelectorAll('.concept').forEach(el => el.classList.remove('active-concept'));\n        // Add active class to clicked concept\n        clickedConceptElement.classList.add('active-concept');\n\n        // Sort concepts by start index in descending order to avoid issues with overlapping highlights\n        const sortedConcepts = cluster.map(index => data.concepts[index])\n                                      .sort((a, b) => b.start - a.start);\n\n        sortedConcepts.forEach(concept => {\n            const color = getClusterColor(clusterIndex);\n            const conceptText = highlightedText.substring(concept.start, concept.end);\n            const highlightClass = concept === clickedConcept ? 'highlighted highlighted-underlined' : 'highlighted';\n            const highlightedConcept = `<span class=\"${highlightClass}\" style=\"background-color: ${color};\">${conceptText}</span>`;\n            highlightedText = highlightedText.substring(0, concept.start) + highlightedConcept + highlightedText.substring(concept.end);\n        });\n\n        textContent.innerHTML = highlightedText;\n\n        const highlightedElement = textContent.querySelector('.highlighted-underlined');\n        if (highlightedElement) {\n            highlightedElement.scrollIntoView({ behavior: 'smooth', block: 'center' });\n        }\n    }\n\n    function renderText() {\n        const textContent = document.getElementById('text-content');\n        textContent.textContent = data.text;\n    }\n\n    function setupEventListeners() {\n        const slider = document.getElementById('distance-slider');\n        const sliderValue = document.getElementById('slider-value');\n        const saveButton = document.getElementById('save-button');\n\n        slider.addEventListener('input', (e) => {\n            const threshold = parseFloat(e.target.value);\n            sliderValue.textContent = threshold.toFixed(2);\n            clusterConcepts(threshold);\n            renderConceptTree();\n        });\n\n        saveButton.addEventListener('click', saveClusters);\n\n        const divider = document.getElementById('divider');\n        let isResizing = false;\n\n        divider.addEventListener('mousedown', (e) => {\n            isResizing = true;\n            document.addEventListener('mousemove', resize);\n            document.addEventListener('mouseup', stopResize);\n        });\n\n        function resize(e) {\n            if (isResizing) {\n                document.getElementById('concept-tree').style.width = e.clientX + 'px';\n            }\n        }\n\n        function stopResize() {\n            isResizing = false;\n            document.removeEventListener('mousemove', resize);\n            document.removeEventListener('mouseup', stopResize);\n        }\n    }\n\n    function saveClusters() {\n        const updatedConcepts = data.concepts.map((concept, index) => {\n            const clusterIndex = clusters.findIndex(cluster => cluster.includes(index));\n            return { ...concept, cluster: generateUUID() + '-' + clusterIndex };\n        });\n\n        const updatedData = {\n            text: data.text,\n            concepts: updatedConcepts\n        };\n\n        const blob = new Blob([JSON.stringify(updatedData, null, 2)], { type: 'application/json' });\n        const url = URL.createObjectURL(blob);\n        const a = document.createElement('a');\n        a.href = url;\n        a.download = 'updated_concept_clusters.json';\n        a.click();\n        URL.revokeObjectURL(url);\n    }\n\n    function generateUUID() {\n        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {\n            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);\n            return v.toString(16);\n        });\n    }\n    </script>\n</body>\n</html>\n```\n\n### Key Changes\n1. **Save Button**: Added a \"Save\" button in the controls section.\n2. **Event Listener**: Added an event listener for the \"Save\" button to trigger the `saveClusters` function.\n3. **UUID Generation**: Included a `generateUUID` function to create unique identifiers for each cluster.\n4. **Save Clusters Function**: Implemented the `saveClusters` function to create and download a JSON file with the updated clusters.\n\n### Usage\n1. Load the HTML file in a web browser.\n2. Adjust the clustering distance using the slider.\n3. Click the \"Save\" button to download the",
+      "created_at": "2024-06-30T11:59:29.933375",
+      "sequence_order": 8,
+      "parent_id": "b56a6821-72d4-4840-b8dc-cfacded1fb35",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    }
+  ]
+}

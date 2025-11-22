@@ -1,0 +1,63 @@
+{
+  "id": "68264e70-7a90-8012-b01b-63d8722d6d9b",
+  "source": "chatgpt",
+  "title": "Code Search and Display",
+  "created_at": "2025-05-15T22:28:33.087091",
+  "updated_at": "2025-05-15T22:33:06.884635",
+  "summary": null,
+  "message_count": 4,
+  "messages": [
+    {
+      "id": "bb72609c-9a84-49ec-8d08-ad2697e0714f",
+      "role": "user",
+      "content": "",
+      "created_at": null,
+      "sequence_order": 0,
+      "parent_id": "00273484-89d0-427b-a1e7-14911a442dd2",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "1d4cb928-e327-456c-8510-aad001829885",
+      "role": "user",
+      "content": "make it so it prints all the content to the terminal # Find all files that might contain a chat input component\nfind ./src -type f -name \"*.tsx\" -o -name \"*.jsx\" | grep -i \"chat\\|input\" | sort\n\n# Find files that specifically use useState with 'input'\ngrep -r \"const \\[input\" --include=\"*.tsx\" --include=\"*.jsx\" ./src\n\n# Find components that might be using setInput incorrectly\ngrep -r \"setinput\" --include=\"*.tsx\" --include=\"*.jsx\" ./src\n\n# Look for chat panel components\nfind ./src -type f -name \"*.tsx\" -o -name \"*.jsx\" | grep -i \"chatpanel\\|chatinterface\" | sort",
+      "created_at": "2025-05-15T22:28:32.280000",
+      "sequence_order": 1,
+      "parent_id": "bb72609c-9a84-49ec-8d08-ad2697e0714f",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "fef2f0eb-b9fb-42fa-b63e-b147c56eed1d",
+      "role": "assistant",
+      "content": "",
+      "created_at": "2025-05-15T22:28:45.109097",
+      "sequence_order": 2,
+      "parent_id": "1d4cb928-e327-456c-8510-aad001829885",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "6cfcecad-d21c-4af4-b959-65a890b29e84",
+      "role": "assistant",
+      "content": "Here’s a revised script that **prints all relevant content to the terminal**, not just the filenames or matched lines. This includes the full contents of each matching file, and it will be formatted for clarity:\n\n```bash\n#!/bin/bash\n\necho \"🔍 Finding chat/input-related files...\"\nchat_input_files=$(find ./src -type f \\( -name \"*.tsx\" -o -name \"*.jsx\" \\) | grep -i \"chat\\|input\" | sort)\n\nfor file in $chat_input_files; do\n  echo -e \"\\n📄 --- File: $file ---\"\n  cat \"$file\"\ndone\n\necho -e \"\\n🔍 Files using \\`useState\\` with 'input':\"\ngrep -r \"const \\[input\" --include=\"*.tsx\" --include=\"*.jsx\" ./src | while read -r match; do\n  filepath=$(echo \"$match\" | cut -d: -f1)\n  echo -e \"\\n📄 --- File: $filepath (matched useState input) ---\"\n  cat \"$filepath\"\ndone\n\necho -e \"\\n🔍 Files with possible incorrect \\`setInput\\` usage:\"\ngrep -ri \"setinput\" --include=\"*.tsx\" --include=\"*.jsx\" ./src | while read -r match; do\n  filepath=$(echo \"$match\" | cut -d: -f1)\n  echo -e \"\\n📄 --- File: $filepath (matched setInput) ---\"\n  cat \"$filepath\"\ndone\n\necho -e \"\\n🔍 Looking for ChatPanel or ChatInterface components...\"\nchatpanel_files=$(find ./src -type f \\( -name \"*.tsx\" -o -name \"*.jsx\" \\) | grep -i \"chatpanel\\|chatinterface\" | sort)\n\nfor file in $chatpanel_files; do\n  echo -e \"\\n📄 --- File: $file ---\"\n  cat \"$file\"\ndone\n```\n\n### Notes:\n- You can save this script to a file (e.g., `show-chat-code.sh`) and run it with `bash show-chat-code.sh`.\n- This assumes files are not too large. If some files are huge, consider adding line limits or syntax highlighting (`bat`, `less`, or `grep --color`).\n\nLet me know if you want the output filtered by specific keywords or context-aware excerpts instead of full files.",
+      "created_at": "2025-05-15T22:28:33.605103",
+      "sequence_order": 3,
+      "parent_id": "fef2f0eb-b9fb-42fa-b63e-b147c56eed1d",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

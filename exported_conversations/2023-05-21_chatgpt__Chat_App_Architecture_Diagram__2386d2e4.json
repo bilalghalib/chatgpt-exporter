@@ -1,0 +1,76 @@
+{
+  "id": "2386d2e4-ca90-4bad-8f7d-901acdc0093c",
+  "source": "chatgpt",
+  "title": "\"Chat App Architecture Diagram\"",
+  "created_at": "2023-05-21T09:03:50.299644",
+  "updated_at": "2023-05-21T09:04:47",
+  "summary": null,
+  "message_count": 5,
+  "messages": [
+    {
+      "id": "aaa20826-2544-4bc2-a122-7dfe78bf0187",
+      "role": "user",
+      "content": "Here's my code structure with comments and definitions of classes. What does the app do and can you draw a diagram \n// ./parliament.js\nfunction ParliamentPage(websocket) {\n  websocket.onmessage = function (event) {\n    // Initialize the test parliament with the Six Thinking Hats configuration\n      // Check if the agent's pressure threshold has been reached or exceeded\n        // Trigger the agent to speak\n        // ...your code to make the agent speak...\n        // Reset the agent's speaking pressure\n        // Increment the agent's speaking pressure\n\n\n// ./_app.js\nfunction MyApp({ Component, pageProps }) {\n\n\n// ./indexold.js\nexport default function Home({websocket}) {\n  function startParliament(parliament) {\n\n\n// ./index.js\nexport default function Home({ websocket }) {\n  function startParliament(parliament) {\n\n\n// ./digestcode.py\ndef process_file(file_path):\n        elif \"class \" in stripped_line or \"def \" in stripped_line or \"function \" in stripped_line:  # Class and function definitions\ndef main(directory, output_file):\n\n\n// ./components/Chat.js\nfunction Message({ message, sender, handleReply }) {\nfunction AgentItem({ agent, handleClear, speakingQueue, handleReply }) {\nfunction Chat({ parliament, websocket }) {\n  function handleError(error) {\n  function setInitialMessages() {\n  function handleReceiveMessage(event) {\n  function handleClear(agentName) {\n    // Send a clear event to the server\n  function sendTypingStatus() {\n  async function sendMessage() {\n      // Call broadcast_message here\n  function handleReply(sender) {\n              // If both agents are in the queue, compare their positions\n              // If only one of the agents is in the queue, that agent comes first\n              // If neither agent is in the queue, compare their names alphabetically\n\n\n// ./components/Settings.js\nfunction Settings({ onStartParliament, websocket }) {\n  function addAgent() {\n  function removeAgent(index) {\n  function applyPreset(preset) {\n  function startParliament() {\n\n\n// ./api/hello.js\n// Next.js API route support: https://nextjs.org/docs/api-routes/introduction\nexport default function handler(req, res) {\n\n\n// ./parliament_backend/server.py\n# Constants\nclass ParliamentServer:\n    def __init__(self, host=\"localhost\", port=8080):\n    def configure_openai(self):\n    async def chat(self, websocket, path):\n    def handle_set_parliament(self, websocket, data):\n    async def handle_send_message(self, websocket, data):\n        # Sending agent info after broadcasting message\n    async def handle_add_agents(self, websocket, data):\n                #f\"Hello assistant, your name is: @{agent_data.get('name')} and your context is \"\n                #f\"{agent_data.get('context')}. Your job is to help {data.get('username')} by discussing {data.get('topic')} \"\n                #\"alongside your fellow agents in a parliament, which is a sort \"\n                #f\"of town hall or large meeting, called {self.parliament.name}. \"\n                #The other agents discussing \"\n                #f\"with you are {other_agents}, please prefix their name with an @ when mentioning them, and don't @mention yourself. Your talkativity is \"\n                #f\"{agent_data.get('speaking_pressure_increment')} out of 100\"\n            agent_class = self.parliament.agent_types.get(agent_type)  # Get OpenAIAgent or GPT4AllAgent\n        #now let's initialize the parliament's agents relevancy scores    \n    async def send_error(self, websocket, message):\n    def run(self):\n\n\n// ./parliament_backend/parliament.py\nclass Agent:\n    def __init__(self, parliament, agent_name, speaking_pressure_increment, initial_context, agent_type, agent_instance, websocket=None):\n    def set_typing_status(self, status: bool):\n    async def calculate_relevancy(self, chat_context):\n    async def get_agent_message(self, truncated_chat_history):\n    async def respond(self):\n    def reset_relevancy_score(self):\nclass ChatHistory:\n    def __init__(self):\n    def add(self, message, sender, timestamp):\n    def truncate_chat_history(self, max_length=2000):\n    def get_latest_message(self):\nclass SpeakerManager:\n    def __init__(self, parliament):\n    def should_speak(self, agent):\nclass GPT4AllAgent:\n    def __init__(self):\n        # Download and set up the GPT4All model\n    def _initialize_gpt4all_model(self):\n    def _initialize_llm_chain(self):\n    def get_response(self, chat_history, question):\nclass OpenAIAgent:\n    def __init__(self, initial_context: str):\n    def get_response(self, truncated_chat):\n                # Call the OpenAI API with the messages array\n                # Extract and return the assistant's response from the API response\nclass Parliament:\n    def __init__(self, name: str, topic: str) :  # Added name argument\n    async def startup(self):\n    async def handle_client(self, websocket, path):\n    async def send_agent_list(self, websocket):\n    def update_agents(self, agents, websocket):\n    def add_agent_type(self, agent_type_name, agent_type_class):\n    def add_agent_instance(self, agent_instance_name, agent_instance):\n    def add_agent(self, agent):\n    async def broadcast_message(self, message, sender, timestamp):\n#        await asyncio.sleep(BROADCAST_DELAY)\n    def identify_and_tag_mentioned_agents(self, message):\n    def increment_speaking_pressure(self, mentioned_agents):\n    async def get_agents_info(self) -> List[dict]:\n\n\n// ./parliament_backend/websockets_toimport.py\nclass WebSocketManager:\n    def __init__(self, parliament):\n    async def handle_connection(self, websocket, path):\n        # Register handler methods\n        # Handle incoming messages\n    async def handle_send_message(self, websocket, data):\n        # Broadcast the message to other clients\n        # Add the message to the parliament chat history\n    async def handle_typing(self, websocket, data):\n        # Broadcast the typing status to other clients\n    async def handle_set_parliament(self, websocket, data):\n        # Send inital state to client\n    async def handle_add_agents(self, websocket, data):\n        # Add the agents to the parliament\n        # Send updated agent info to client\n\n\n// ./parliament_backend/main.py\nasync def websocket_endpoint(websocket: WebSocket, parliament_name: str):\n    def on_chat_update(chat_history: List[str]):\ndef api_call_create_parliament(parliament_input: ParliamentCreationInput):\ndef api_call_initialize_parliament(parliament_init_input: ParliamentInitializationInput):\ndef api_send_message(parliament_name: str, message: str):\n\n\n",
+      "created_at": "2023-05-21T09:03:52.629646",
+      "sequence_order": 0,
+      "parent_id": "2d6ac776-050c-4373-9a33-c9e54bed0ec7",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "93aac1a0-1c03-4302-bb72-8c24ffc97bac",
+      "role": "assistant",
+      "content": "Based on the code structure and comments, it seems like this application is a chat application that uses a \"Parliament\" model. The Parliament model seems to be a metaphor for a group of chat agents that interact with each other and users in a chat room. Each agent has a speaking pressure that determines when it should speak. The agents can be of different types, such as OpenAIAgent or GPT4AllAgent, and they can respond to messages based on their own logic.\n\nHere's a simplified diagram of how the application works:\n\n```mermaid\ngraph TB\n  A[\"User\"] -- \"Interacts with\" --> B[\"Chat App\"]\n  B -- \"Sends/Receives Messages\" --> C[\"Websocket\"]\n  C -- \"Communicates with\" --> D[\"Parliament Server\"]\n  D -- \"Manages\" --> E[\"Parliament\"]\n  E -- \"Contains\" --> F[\"Agents\"]\n  F -- \"Responds to\" --> G[\"Messages\"]\n  F -- \"Updates\" --> H[\"Speaking Pressure\"]\n  G -- \"Updates\" --> I[\"Chat History\"]\n```\n\nLet's generate this diagram using the `show_me` plugin.",
+      "created_at": "2023-05-21T09:04:47.917558",
+      "sequence_order": 1,
+      "parent_id": "aaa20826-2544-4bc2-a122-7dfe78bf0187",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    },
+    {
+      "id": "22ad14b5-1de5-4452-bd6a-63f89fa33897",
+      "role": "assistant",
+      "content": "{\n  \"mermaid\": \"graph TB\\n  A[\\\"User\\\"] -- \\\"Interacts with\\\" --> B[\\\"Chat App\\\"]\\n  B -- \\\"Sends/Receives Messages\\\" --> C[\\\"Websocket\\\"]\\n  C -- \\\"Communicates with\\\" --> D[\\\"Parliament Server\\\"]\\n  D -- \\\"Manages\\\" --> E[\\\"Parliament\\\"]\\n  E -- \\\"Contains\\\" --> F[\\\"Agents\\\"]\\n  F -- \\\"Responds to\\\" --> G[\\\"Messages\\\"]\\n  F -- \\\"Updates\\\" --> H[\\\"Speaking Pressure\\\"]\\n  G -- \\\"Updates\\\" --> I[\\\"Chat History\\\"]\"\n}",
+      "created_at": "2023-05-21T09:04:47.918021",
+      "sequence_order": 2,
+      "parent_id": "93aac1a0-1c03-4302-bb72-8c24ffc97bac",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    },
+    {
+      "id": "f35db5c9-8f42-4511-ae55-55e28d14ea09",
+      "role": "tool",
+      "content": "{\"results\":[{\"image\":\"https://showme.redstarplugin.com/s/lOnPvPQa\",\"editDiagramOnline\":\"https://showme.redstarplugin.com/s/WlFVZGR4\",\"contributeToOpenSourceProject\":\"https://github.com/bra1nDump/show-me-chatgpt-plugin/issues\"}]}",
+      "created_at": "2023-05-21T09:04:47.918391",
+      "sequence_order": 3,
+      "parent_id": "22ad14b5-1de5-4452-bd6a-63f89fa33897",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "6589c181-59c5-4541-8061-8f221ed9902e",
+      "role": "assistant",
+      "content": "Here's the diagram of your application:\n\n![Diagram](https://showme.redstarplugin.com/s/lOnPvPQa)\n\n[You can edit this diagram online if you want to make any changes.](https://showme.redstarplugin.com/s/WlFVZGR4)\n\nIn this diagram:\n\n- The User interacts with the Chat App.\n- The Chat App sends and receives messages through a Websocket.\n- The Websocket communicates with the Parliament Server.\n- The Parliament Server manages a Parliament.\n- The Parliament contains multiple Agents.\n- The Agents respond to Messages and update their Speaking Pressure.\n- The Messages update the Chat History.\n\nIf you're interested in contributing to the open-source project that powers this diagramming tool, you can check out the [GitHub issues page](https://github.com/bra1nDump/show-me-chatgpt-plugin/issues).",
+      "created_at": "2023-05-21T09:04:47.918682",
+      "sequence_order": 4,
+      "parent_id": "f35db5c9-8f42-4511-ae55-55e28d14ea09",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

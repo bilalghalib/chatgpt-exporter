@@ -1,0 +1,89 @@
+{
+  "id": "25f50954-8a0a-462f-a91d-f75e8b71b29e",
+  "source": "chatgpt",
+  "title": "GPT-4 Does Not Exist",
+  "created_at": "2023-06-14T15:03:56.557948",
+  "updated_at": "2023-06-15T10:14:31",
+  "summary": null,
+  "message_count": 6,
+  "messages": [
+    {
+      "id": "aaa2c0c3-e3a8-4998-aa74-25c7d473c345",
+      "role": "user",
+      "content": "openai.error.InvalidRequestError: The model: `gpt-4` does not exist\nI'm trying to use the new models gpt-3.5-turbo-0613 that just came out here: https://openai.com/blog/function-calling-and-other-api-updates\nHere:\nimport os\nimport pickle\nimport gradio as gr\nfrom dotenv import load_dotenv\nfrom PyPDF2 import PdfReader\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.chains.question_answering import load_qa_chain\nfrom langchain.callbacks import get_openai_callback\nfrom langchain.document_loaders import DirectoryLoader\nfrom langchain.chat_models import ChatOpenAI\nimport openai\nimport tiktoken\n\n# Load environment variables\nload_dotenv()\n\n# Try to get the OpenAI API Key from the environment variables\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\n# Initialize OpenAI\nllm = ChatOpenAI(openai_api_key=openai.api_key, model_name=\"gpt-4\")\n\ndef num_tokens_from_string(string: str, encoding_name: str) -> int:\n    encoding = tiktoken.get_encoding(encoding_name)\n    num_tokens = len(encoding.encode(string))\n    return num_tokens\n\ndef main(query):\n    loaders = [DirectoryLoader('./data/', glob=\"**/*.txt\")]\n    documents = [doc for loader in loaders for doc in loader.load()]\n\n    text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=200)\n    chunks = text_splitter.split_documents(documents)    \n\n    store_name = \"talkToAssessmentData\"\n\n    # Load or create embeddings\n    if os.path.exists('./'+f\"{store_name}.pkl\"):\n        with open('./'+f\"{store_name}.pkl\", \"rb\") as f:\n            VectorStore = pickle.load(f)\n    else:\n        embeddings = OpenAIEmbeddings()\n        VectorStore = FAISS.from_documents(chunks, embedding=embeddings)\n        with open('./'+f\"{store_name}.pkl\", \"wb\") as f:\n            pickle.dump(VectorStore, f)\n\n    # Accept user questions/query\n    if query:\n        # Count tokens in query\n        num_tokens = num_tokens_from_string(query, \"cl100k_base\")\n\n        # Check if number of tokens is below the limit\n        if num_tokens > 4096:\n            return f\"Your query is too long ({num_tokens} tokens). Please shorten it to less than 4096 tokens.\"\n        else:\n            docs = VectorStore.similarity_search(query=query, k=2)\n            chain = load_qa_chain(llm=llm, chain_type=\"stuff\")\n            with get_openai_callback() as cb:\n                response = chain.run(input_documents=docs, question=query)\n                print(cb)\n            return response\n\niface = gr.Interface(fn=main, \n                     inputs=\"text\", \n                     outputs=\"text\", \n                     description=\"Welcome to the Bloom Assessment conversation tool\", \n                     layout='vertical')\niface.launch()\n",
+      "created_at": "2023-06-14T15:03:56.559482",
+      "sequence_order": 0,
+      "parent_id": "900b637a-190e-43cd-97e1-3b9125ee87e5",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "ad7865bb-74c5-4af8-ac49-1b9ce544c17b",
+      "role": "assistant",
+      "content": "The error message you're getting indicates that you're trying to initialize a model called \"gpt-4\", but that model doesn't exist. \n\nIn the provided code, you can see that the model name \"gpt-4\" is hard-coded in this line:\n\n```python\nllm = ChatOpenAI(openai_api_key=openai.api_key, model_name=\"gpt-4\")\n```\n\nTo use the new model \"gpt-3.5-turbo-0613\", you should replace \"gpt-4\" with \"gpt-3.5-turbo-0613\". The line should look like this:\n\n```python\nllm = ChatOpenAI(openai_api_key=openai.api_key, model_name=\"gpt-3.5-turbo-0613\")\n```\n\nThat should initialize the ChatOpenAI object with the new model. Please note that you need to make sure that the OpenAI API and the ChatOpenAI class in your code support the new model, \"gpt-3.5-turbo-0613\". \n\nPlease also note that as of my knowledge cutoff in September 2021, the latest GPT model was \"gpt-3\", and I'm unable to provide direct information about any new models or APIs released after that. If \"gpt-3.5-turbo-0613\" is a newer model that was released after my training data, you might need to check the OpenAI API documentation or the blog post you mentioned for specific usage details.\n\nDo you want me to look up more information about the \"gpt-3.5-turbo-0613\" model using the `browser` tool?",
+      "created_at": "2023-06-14T15:04:42.558400",
+      "sequence_order": 1,
+      "parent_id": "aaa2c0c3-e3a8-4998-aa74-25c7d473c345",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa269dd-e10d-4da7-9d38-c40969fc3012",
+      "role": "user",
+      "content": "  File \"/usr/local/lib/python3.10/dist-packages/gradio/routes.py\", line 422, in run_predict\n    output = await app.get_blocks().process_api(\n  File \"/usr/local/lib/python3.10/dist-packages/gradio/blocks.py\", line 1323, in process_api\n    result = await self.call_function(\n  File \"/usr/local/lib/python3.10/dist-packages/gradio/blocks.py\", line 1051, in call_function\n    prediction = await anyio.to_thread.run_sync(\n  File \"/usr/local/lib/python3.10/dist-packages/anyio/to_thread.py\", line 31, in run_sync\n    return await get_asynclib().run_sync_in_worker_thread(\n  File \"/usr/local/lib/python3.10/dist-packages/anyio/_backends/_asyncio.py\", line 937, in run_sync_in_worker_thread\n    return await future\n  File \"/usr/local/lib/python3.10/dist-packages/anyio/_backends/_asyncio.py\", line 867, in run\n    result = context.run(func, *args)\n  File \"/var/www/vhosts/blm.pm/datachat.blm.pm/streamChatPDF/gradio_app.py\", line 32, in main\n    documents = [doc for loader in loaders for doc in loader.load()]\n  File \"/var/www/vhosts/blm.pm/datachat.blm.pm/streamChatPDF/gradio_app.py\", line 32, in <listcomp>\n    documents = [doc for loader in loaders for doc in loader.load()]\n  File \"/usr/local/lib/python3.10/dist-packages/langchain/document_loaders/directory.py\", line 84, in load\n    raise e\n  File \"/usr/local/lib/python3.10/dist-packages/langchain/document_loaders/directory.py\", line 78, in load\n    sub_docs = self.loader_cls(str(i), **self.loader_kwargs).load()\n  File \"/usr/local/lib/python3.10/dist-packages/langchain/document_loaders/unstructured.py\", line 61, in load\n    elements = self._get_elements()\n  File \"/usr/local/lib/python3.10/dist-packages/langchain/document_loaders/unstructured.py\", line 95, in _get_elements\n    return partition(filename=self.file_path, **self.unstructured_kwargs)\n  File \"/usr/local/lib/python3.10/dist-packages/unstructured/partition/auto.py\", line 184, in partition\n    elements = partition_text(\n  File \"/usr/local/lib/python3.10/dist-packages/unstructured/file_utils/filetype.py\", line 483, in wrapper\n    elements = func(*args, **kwargs)\n  File \"/usr/local/lib/python3.10/dist-packages/unstructured/partition/text.py\", line 64, in partition_text\n    encoding, file_text = read_txt_file(filename=filename, encoding=encoding)\n  File \"/usr/local/lib/python3.10/dist-packages/unstructured/file_utils/encoding.py\", line 93, in read_txt_file\n    encoding, file_text = detect_file_encoding(filename)\n  File \"/usr/local/lib/python3.10/dist-packages/unstructured/file_utils/encoding.py\", line 74, in detect_file_encoding\n    file_text = byte_data.decode(encoding)\n  File \"/usr/lib/python3.10/encodings/cp1254.py\", line 15, in decode\n    return codecs.charmap_decode(input,errors,decoding_table)\nUnicodeDecodeError: 'charmap' codec can't decode byte 0x8e in position 402: character maps to <undefined>\n",
+      "created_at": "2023-06-14T17:45:21.943102",
+      "sequence_order": 2,
+      "parent_id": "ad7865bb-74c5-4af8-ac49-1b9ce544c17b",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "81a7f1b5-5268-4fd2-9299-067356152519",
+      "role": "assistant",
+      "content": "The error you're seeing is a `UnicodeDecodeError`, which typically arises when there's a mismatch between the encoding used to read a file and the actual encoding of the file.\n\nIn this case, it seems that the Python program is trying to read a file using the 'charmap' codec, which is failing to decode the byte 0x8e at position 402 in the file.\n\nTo fix this issue, you can try the following approaches:\n\n1. **Explicitly specify the encoding**: If you know the correct encoding of the file, you can specify it when opening the file. For instance, if the file is encoded as UTF-8, you can open it like this: `open(filename, 'r', encoding='utf-8')`.\n\n2. **Use a more tolerant encoding**: If you don't know the exact encoding, you can use an encoding like 'ISO-8859-1' (also known as 'latin1'), which is more tolerant and can read most characters in a text file without errors. Example: `open(filename, 'r', encoding='ISO-8859-1')`.\n\n3. **Handle encoding errors**: Python allows you to specify how it should handle encoding errors when they occur. One option is to replace problematic characters with a replacement character. You can do this with the 'replace' error handler: `open(filename, 'r', encoding='utf-8', errors='replace')`.\n\nIn your code, the error seems to be happening in the `load()` method of the `DirectoryLoader` class from the `langchain` package, specifically in the `unstructured.partition` function. If you have control over these modules, you could modify them to use one of the above methods. If you don't, you might need to pre-process your files to ensure they're in a compatible encoding before feeding them into the loader.",
+      "created_at": "2023-06-14T17:46:20.865542",
+      "sequence_order": 3,
+      "parent_id": "aaa269dd-e10d-4da7-9d38-c40969fc3012",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2884b-58f0-47dd-becb-b4a0e1ae5f83",
+      "role": "user",
+      "content": "what is 0x8e byte in unicode?",
+      "created_at": "2023-06-15T10:14:31.922675",
+      "sequence_order": 4,
+      "parent_id": "81a7f1b5-5268-4fd2-9299-067356152519",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "80776b25-546f-42d9-93d3-e46e360399df",
+      "role": "assistant",
+      "content": "The byte 0x8E in hexadecimal (or 142 in decimal) does not directly map to a Unicode character. Unicode uses a different mapping system. \n\nHowever, in some encodings, 0x8E does map to specific characters. For example, in the Windows-1252 encoding (commonly used for Western European languages), 0x8E maps to the Latin capital letter Ž (U+017D in Unicode). In the ISO-8859-1 encoding (also known as Latin-1), 0x8E is undefined.\n\nPlease note that the actual character represented by a byte can vary depending on the encoding used. Therefore, it's important to know the correct encoding of a file when reading it.",
+      "created_at": "2023-06-15T10:14:47.010350",
+      "sequence_order": 5,
+      "parent_id": "aaa2884b-58f0-47dd-becb-b4a0e1ae5f83",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

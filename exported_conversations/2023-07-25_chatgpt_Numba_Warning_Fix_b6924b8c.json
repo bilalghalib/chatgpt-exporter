@@ -1,0 +1,63 @@
+{
+  "id": "b6924b8c-dac8-4b67-9f43-b2f796395ddf",
+  "source": "chatgpt",
+  "title": "Numba Warning Fix",
+  "created_at": "2023-07-25T15:32:52.832776",
+  "updated_at": "2023-07-25T15:45:14",
+  "summary": null,
+  "message_count": 4,
+  "messages": [
+    {
+      "id": "aaa2a05e-d14c-4506-a6fd-80ae0d8e8620",
+      "role": "user",
+      "content": "error, help me fix it: /Users/bilalghalib/mambaforge/lib/python3.10/site-packages/whisper/timing.py:58: NumbaDeprecationWarning: The 'nopython' keyword argument was not supplied to the 'numba.jit' decorator. The implicit default value for this argument is currently False, but it will be changed to True in Numba 0.59.0. See https://numba.readthedocs.io/en/stable/reference/deprecation.html#deprecation-of-object-mode-fall-back-behaviour-when-using-jit for details.\n  def backtrace(trace: np.ndarray):",
+      "created_at": "2023-07-25T15:32:52.837553",
+      "sequence_order": 0,
+      "parent_id": "79cdee70-3378-4077-9106-1c8e6a4fdfb0",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "a8559fd1-7013-4285-b220-ad22a9e05501",
+      "role": "assistant",
+      "content": "Your code is raising a deprecation warning, which is coming from the Numba library. A deprecation warning is a message that a feature, function, or behavior in the library is going to be removed or changed in a future version. \n\nThe specific warning you're seeing is due to not supplying a 'nopython' keyword argument to the 'numba.jit' decorator. Numba is a Python library used for numerical computations and the 'jit' (just-in-time) decorator is used for function optimization. The 'nopython' keyword argument, when set to True, forces Numba to use only code that can be fully optimized and does not rely on the Python interpreter.\n\nTo fix this, you need to modify the function decorated with '@jit' in the timing.py file to explicitly include the 'nopython' argument. Here's an example:\n\n```python\n@numba.jit(nopython=True)\ndef backtrace(trace: np.ndarray):\n    # rest of your code\n```\n\nThis will ensure that your code remains compatible with future versions of Numba that have 'nopython' set to True by default. \n\nIt's worth noting that while deprecation warnings like this one are not immediate issues, they can become problems when you update the libraries your project depends on. Addressing these warnings as they arise is a good practice for maintaining long-term software health.",
+      "created_at": "2023-07-25T15:33:15.946584",
+      "sequence_order": 1,
+      "parent_id": "aaa2a05e-d14c-4506-a6fd-80ae0d8e8620",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa20a46-f510-4c44-9d72-04c93ed8ef36",
+      "role": "user",
+      "content": "what about this error?   File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/whisper/audio.py\", line 46, in load_audio\n    ffmpeg.input(file, threads=0)\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/ffmpeg/_run.py\", line 325, in run\n    raise Error('ffmpeg', out, err)\nffmpeg._run.Error: ffmpeg error (see stderr output for detail)\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"<stdin>\", line 1, in <module>\n  File \"<stdin>\", line 7, in test_transcribe\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/whisper/transcribe.py\", line 121, in transcribe\n    mel = log_mel_spectrogram(audio, padding=N_SAMPLES)\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/whisper/audio.py\", line 130, in log_mel_spectrogram\n    audio = load_audio(audio)\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/whisper/audio.py\", line 51, in load_audio\n    raise RuntimeError(f\"Failed to load audio: {e.stderr.decode()}\") from e\nRuntimeError: Failed to load audio: ffmpeg version 6.0 Copyright (c) 2000-2023 the FFmpeg developers\n  built with Apple clang version 14.0.3 (clang-1403.0.22.14.1)\n  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/6.0 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon\n  libavutil      58.  2.100 / 58.  2.100\n  libavcodec     60.  3.100 / 60.  3.100\n  libavformat    60.  3.100 / 60.  3.100\n  libavdevice    60.  1.100 / 60.  1.100\n  libavfilter     9.  3.100 /  9.  3.100\n  libswscale      7.  1.100 /  7.  1.100\n  libswresample   4. 10.100 /  4. 10.100\n  libpostproc    57.  1.100 / 57.  1.100\n/Users/bilalghalib/Downloads/all\\ Audio/AllVoiceMemos/FeedbackCRI.m4a: No such file or directory\n",
+      "created_at": "2023-07-25T15:45:14.963447",
+      "sequence_order": 2,
+      "parent_id": "a8559fd1-7013-4285-b220-ad22a9e05501",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "544ec517-c00d-4967-bce8-60044d595bda",
+      "role": "assistant",
+      "content": "The error message you're seeing is quite informative about what's going wrong. Specifically, this line gives us the key insight:\n\n```plaintext\n/Users/bilalghalib/Downloads/all\\ Audio/AllVoiceMemos/FeedbackCRI.m4a: No such file or directory\n```\n\nThis means that the Python script is trying to open the file at the path `/Users/bilalghalib/Downloads/all\\ Audio/AllVoiceMemos/FeedbackCRI.m4a`, but it can't find a file at that location.\n\nThere are a few potential reasons for this:\n\n1. **The file doesn't exist at all.** In this case, you'll need to either create the file or change your script to point to the correct file.\n\n2. **The file path is incorrect.** Maybe there's a typographical error in the path, or perhaps it's not properly escaped. Remember that spaces in file paths can cause issues if they're not properly dealt with. In your file path, you've escaped the space with a backslash (`all\\ Audio`). In Python, however, you should use a raw string or double backslashes for paths. \n\nHere's how you could rewrite the path:\n\n```python\nfile_path = r\"/Users/bilalghalib/Downloads/all Audio/AllVoiceMemos/FeedbackCRI.m4a\"\n```\nor\n```python\nfile_path = \"/Users/bilalghalib/Downloads/all\\\\ Audio/AllVoiceMemos/FeedbackCRI.m4a\"\n```\n\n3. **Permissions issue.** It's possible that the Python script doesn't have the necessary permissions to access the file. If you think this might be the case, you'll need to adjust the permissions on the file or directory so that the script can access it.\n\nYou can verify the path and the file existence in your operating system, if you are on a Unix-based system (like Linux or MacOS), you can use `ls` command in terminal to check if the file exists:\n\n```bash\nls \"/Users/bilalghalib/Downloads/all Audio/AllVoiceMemos/FeedbackCRI.m4a\"\n```\nThis will list the file if it exists or give a \"No such file or directory\" error if it does not.",
+      "created_at": "2023-07-25T15:45:56.482560",
+      "sequence_order": 3,
+      "parent_id": "aaa20a46-f510-4c44-9d72-04c93ed8ef36",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

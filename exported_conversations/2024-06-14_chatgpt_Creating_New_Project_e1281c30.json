@@ -1,0 +1,245 @@
+{
+  "id": "e1281c30-6cc7-444e-91a2-1929950b1a8f",
+  "source": "chatgpt",
+  "title": "Creating New Project",
+  "created_at": "2024-06-14T07:13:15.274448",
+  "updated_at": "2024-06-14T07:25:19.983141",
+  "summary": null,
+  "message_count": 18,
+  "messages": [
+    {
+      "id": "925976dd-ccd3-44db-97c7-fdcc72c7a6f9",
+      "role": "user",
+      "content": "I want to make a...",
+      "created_at": "2024-06-14T07:13:15.280653",
+      "sequence_order": 0,
+      "parent_id": "92239a18-464d-410a-b744-a19d07217a23",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "8997301c-002b-465b-ae09-0344af0d5072",
+      "role": "assistant",
+      "content": "",
+      "created_at": "2024-06-14T07:13:17.919958",
+      "sequence_order": 1,
+      "parent_id": "925976dd-ccd3-44db-97c7-fdcc72c7a6f9",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "f213303b-e2cd-414c-81ad-3d74564f47ac",
+      "role": "assistant",
+      "content": "It sounds like you have a new idea! What kind of project are you thinking about?",
+      "created_at": "2024-06-14T07:13:17.920018",
+      "sequence_order": 2,
+      "parent_id": "8997301c-002b-465b-ae09-0344af0d5072",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "2a00b642-ff86-455c-99fa-93dd0d0714d2",
+      "role": "user",
+      "content": "I want to make a Flask app that will be able to communicate with email, or somehow I want to be able to use Python to be able to receive emails and then act as kind of an intermediary between an email receiver and an email sender. For instance, someone sends a very long-winded email to somebody, and then the Python application will run it through ChatGPT, summarize it, and then send the summary and initial email onward to the other email in the CC. So for instance, instead of sending an email directly, someone would send an email to the other person's email address at the chatgptintermediaryappemailaddress.com. So it would be able to parse it or find it in the subject line or something. What's the best and easiest way of making an app that does this, and what's the tech stack for it?",
+      "created_at": "2024-06-14T07:14:24.246298",
+      "sequence_order": 3,
+      "parent_id": "f213303b-e2cd-414c-81ad-3d74564f47ac",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "0859ca39-6057-413e-84f3-cbb7ee5609be",
+      "role": "assistant",
+      "content": "Creating a Flask app to serve as an intermediary email handler that summarizes messages using ChatGPT sounds like a great idea! Here’s a general plan and tech stack that you can use to get started:\n\n### Tech Stack:\n1. **Flask** - for the web framework.\n2. **Flask-Mail** or **SMTP** library - for sending and receiving emails.\n3. **Python** - for backend logic and handling email parsing and summarization.\n4. **ChatGPT API** - for summarizing the emails.\n5. **Database** (e.g., SQLite, PostgreSQL) - to store email data and logs if needed.\n\n### Steps to Build the App:\n\n1. **Set up the Flask App:**\n   - Install Flask and create a basic Flask application.\n   - Configure the app to handle incoming email data.\n\n2. **Email Handling:**\n   - Use an email library like `imaplib` to connect to the email server and fetch emails.\n   - Alternatively, you can use webhooks or email forwarding services to send incoming emails to your Flask app.\n\n3. **Processing Emails:**\n   - Parse the email content to extract the body, subject, and other relevant details.\n   - Send the email content to the ChatGPT API to get the summarized version.\n\n4. **Sending Emails:**\n   - Use `smtplib` or `Flask-Mail` to send the summarized email and the original email to the intended recipient.\n\n5. **Deployment:**\n   - Deploy the Flask app on a cloud service like Heroku, AWS, or any other preferred platform.\n\n### Sample Code Snippet:\n\n#### Flask Setup:\n```python\nfrom flask import Flask, request, jsonify\nimport smtplib\nfrom email.mime.text import MIMEText\nfrom imaplib import IMAP4_SSL\nimport email\nimport openai\n\napp = Flask(__name__)\n\n# Configurations\napp.config['MAIL_SERVER'] = 'smtp.your-email-provider.com'\napp.config['MAIL_PORT'] = 587\napp.config['MAIL_USERNAME'] = 'your-email@example.com'\napp.config['MAIL_PASSWORD'] = 'your-email-password'\n\n# ChatGPT API Key\nopenai.api_key = 'your-openai-api-key'\n\ndef fetch_emails():\n    # Connect to the email server and fetch emails\n    mail = IMAP4_SSL('imap.your-email-provider.com')\n    mail.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])\n    mail.select('inbox')\n    \n    status, data = mail.search(None, 'ALL')\n    email_ids = data[0].split()\n    \n    emails = []\n    for e_id in email_ids:\n        status, data = mail.fetch(e_id, '(RFC822)')\n        msg = email.message_from_bytes(data[0][1])\n        emails.append(msg)\n    \n    return emails\n\ndef summarize_email(content):\n    response = openai.Completion.create(\n        model=\"text-davinci-003\",\n        prompt=f\"Summarize the following email: {content}\",\n        max_tokens=150\n    )\n    summary = response.choices[0].text.strip()\n    return summary\n\ndef send_email(subject, to, body):\n    msg = MIMEText(body)\n    msg['Subject'] = subject\n    msg['From'] = app.config['MAIL_USERNAME']\n    msg['To'] = to\n    \n    with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT']) as server:\n        server.starttls()\n        server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])\n        server.sendmail(app.config['MAIL_USERNAME'], to, msg.as_string())\n\n@app.route('/receive_email', methods=['POST'])\ndef receive_email():\n    emails = fetch_emails()\n    for email_msg in emails:\n        email_body = email_msg.get_payload(decode=True).decode()\n        summarized_content = summarize_email(email_body)\n        recipient = email_msg['To']\n        send_email(email_msg['Subject'], recipient, f\"Summary: {summarized_content}\\n\\nOriginal: {email_body}\")\n    return jsonify({\"status\": \"Emails processed and sent.\"})\n\nif __name__ == '__main__':\n    app.run(debug=True)\n```\n\n### Important Considerations:\n- **Security:** Ensure you handle email data securely, especially when dealing with sensitive information.\n- **Error Handling:** Implement robust error handling to manage email parsing and API calls.\n- **Rate Limiting:** Be mindful of the rate limits for the ChatGPT API.\n- **Testing:** Thoroughly test the application with various email formats and sizes.\n\nThis should give you a good starting point for your project. Do you have any specific questions or areas where you need more detail?",
+      "created_at": "2024-06-14T07:14:46.673200",
+      "sequence_order": 4,
+      "parent_id": "2a00b642-ff86-455c-99fa-93dd0d0714d2",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "6a10f7cd-d00f-4867-9eda-fe52f29d51a5",
+      "role": "user",
+      "content": "Yeah, you mentioned webhooks and a few other approaches for being able to capture the emails. What are those approaches?",
+      "created_at": "2024-06-14T07:16:29.879644",
+      "sequence_order": 5,
+      "parent_id": "0859ca39-6057-413e-84f3-cbb7ee5609be",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "110a0089-0377-4d06-80ff-0e01e64155d5",
+      "role": "assistant",
+      "content": "Sure! Here are a few approaches you can use to capture emails for your Flask app:\n\n### 1. **IMAP and POP3 Protocols:**\nThese are standard protocols for retrieving emails from a mail server. You can periodically check an email inbox using these protocols to fetch new emails.\n\n#### IMAP Example:\n- Connect to the email server using the IMAP protocol.\n- Fetch new emails at regular intervals.\n\n#### Code Snippet:\n```python\nimport imaplib\nimport email\n\ndef fetch_emails():\n    mail = imaplib.IMAP4_SSL('imap.your-email-provider.com')\n    mail.login('your-email@example.com', 'your-password')\n    mail.select('inbox')\n\n    status, data = mail.search(None, 'UNSEEN')\n    email_ids = data[0].split()\n    \n    emails = []\n    for e_id in email_ids:\n        status, data = mail.fetch(e_id, '(RFC822)')\n        raw_email = data[0][1]\n        msg = email.message_from_bytes(raw_email)\n        emails.append(msg)\n    \n    return emails\n```\n\n### 2. **SMTP Server with Email Forwarding:**\nSet up an SMTP server and use email forwarding rules to redirect incoming emails to your Flask app.\n\n#### Email Forwarding Setup:\n- Configure email forwarding rules on your email provider to forward all incoming emails to a designated address or webhook endpoint that your Flask app can handle.\n\n### 3. **Email Forwarding Services:**\nUse services like Mailgun, SendGrid, or AWS SES, which provide webhooks for incoming emails. These services can forward incoming emails to a webhook endpoint on your Flask app.\n\n#### Mailgun Example:\n- Configure Mailgun to forward incoming emails to a webhook endpoint.\n- Handle the incoming email data in your Flask app.\n\n#### Flask Webhook Example:\n```python\nfrom flask import Flask, request, jsonify\n\napp = Flask(__name__)\n\n@app.route('/email_webhook', methods=['POST'])\ndef email_webhook():\n    email_data = request.json\n    # Process the email data\n    sender = email_data['sender']\n    subject = email_data['subject']\n    body = email_data['body-plain']\n    \n    # Summarize the email body and send the summary\n    summarized_content = summarize_email(body)\n    recipient = email_data['recipient']\n    send_email(subject, recipient, f\"Summary: {summarized_content}\\n\\nOriginal: {body}\")\n    \n    return jsonify({\"status\": \"Email received and processed.\"})\n\nif __name__ == '__main__':\n    app.run(debug=True)\n```\n\n### 4. **Gmail API:**\nUse the Gmail API to read and manage Gmail messages directly. This requires OAuth 2.0 authentication and setting up a project in Google Cloud.\n\n#### Gmail API Example:\n- Set up OAuth 2.0 and obtain the necessary credentials.\n- Use the Gmail API to fetch new emails.\n\n#### Code Snippet:\n```python\nfrom googleapiclient.discovery import build\nfrom google.oauth2.credentials import Credentials\n\nSCOPES = ['https://www.googleapis.com/auth/gmail.readonly']\n\ndef fetch_gmail_emails():\n    creds = Credentials.from_authorized_user_file('token.json', SCOPES)\n    service = build('gmail', 'v1', credentials=creds)\n\n    results = service.users().messages().list(userId='me', labelIds=['INBOX'], q='is:unread').execute()\n    messages = results.get('messages', [])\n\n    emails = []\n    for message in messages:\n        msg = service.users().messages().get(userId='me', id=message['id']).execute()\n        email_data = msg['snippet']\n        emails.append(email_data)\n    \n    return emails\n```\n\n### 5. **Using a Custom Domain and MX Records:**\n- Set up a custom domain and configure MX (Mail Exchange) records to route emails to your server.\n- Set up an email server on your Flask app to handle incoming emails.\n\n### Conclusion:\nEach approach has its own pros and cons, and the choice depends on your specific needs, such as ease of setup, cost, and scalability. Using webhooks provided by email services like Mailgun or SendGrid is often the simplest and most reliable method for capturing emails and forwarding them to your Flask app.\n\nWhich approach sounds like it would work best for your project?",
+      "created_at": "2024-06-14T07:16:54.184979",
+      "sequence_order": 6,
+      "parent_id": "6a10f7cd-d00f-4867-9eda-fe52f29d51a5",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "f263b5a2-d6d0-40b9-94d4-ef54e7cc1950",
+      "role": "user",
+      "content": "I'm wondering which one has best deliverability as well, and also if it's a thing that would change how we can do it. So for instance, if I wanted to have them send an email to us at our domain name and have the other person's email be in the first place in the subject line, or if I wanted to have a CC in the email and then we sent a duplicate email that contains a summary, which way would work best and which one would make that process possible?",
+      "created_at": "2024-06-14T07:19:21.902953",
+      "sequence_order": 7,
+      "parent_id": "110a0089-0377-4d06-80ff-0e01e64155d5",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "24d9a932-fd77-43f1-8715-0103a1661a6b",
+      "role": "assistant",
+      "content": "User is creating a Flask app that summarizes long-winded emails using ChatGPT and forwards the summary along with the original email to the intended recipient. They are evaluating the best method for capturing and forwarding emails with high deliverability.",
+      "created_at": "2024-06-14T07:19:46.383492",
+      "sequence_order": 8,
+      "parent_id": "f263b5a2-d6d0-40b9-94d4-ef54e7cc1950",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    },
+    {
+      "id": "38b8802b-e3b8-4cf2-89e2-9dc5c0e53aee",
+      "role": "tool",
+      "content": "Model set context updated.",
+      "created_at": "2024-06-14T07:19:46.383551",
+      "sequence_order": 9,
+      "parent_id": "24d9a932-fd77-43f1-8715-0103a1661a6b",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "aedbeffe-6176-4b1f-922c-d78bea5c8c9d",
+      "role": "assistant",
+      "content": "To achieve high deliverability and handle the email forwarding and summarizing process effectively, using an email forwarding service like Mailgun, SendGrid, or AWS SES is likely the best option. These services are designed for reliable email delivery and provide webhooks that make it easy to integrate with your Flask app.\n\n### Using Mailgun with Webhooks:\nThis approach will allow you to capture incoming emails, process them, and forward them as needed. Here’s how you can do it:\n\n1. **Set Up Mailgun:**\n   - Sign up for a Mailgun account.\n   - Configure a domain in Mailgun for your email forwarding service (e.g., `yourdomain.com`).\n\n2. **Configure Mailgun Routes:**\n   - Set up routes in Mailgun to forward incoming emails to your Flask app’s webhook endpoint.\n\n3. **Parse Email and Process:**\n   - In your Flask app, handle incoming emails, extract the recipient’s email from the subject line or the CC field, summarize the email, and forward it.\n\n### Example Flow for Subject Line Method:\n- Users send an email to `summary@yourdomain.com`.\n- The intended recipient's email address is included in the subject line.\n\n#### Flask App Setup:\n```python\nfrom flask import Flask, request, jsonify\nimport requests\nfrom email.mime.text import MIMEText\nimport smtplib\nimport openai\n\napp = Flask(__name__)\n\n# Mailgun and ChatGPT API configurations\nMAILGUN_DOMAIN = 'yourdomain.com'\nMAILGUN_API_KEY = 'your-mailgun-api-key'\nopenai.api_key = 'your-openai-api-key'\n\ndef send_email(subject, to, body):\n    msg = MIMEText(body)\n    msg['Subject'] = subject\n    msg['From'] = 'summary@yourdomain.com'\n    msg['To'] = to\n    \n    with smtplib.SMTP('smtp.your-email-provider.com', 587) as server:\n        server.starttls()\n        server.login('your-email@example.com', 'your-password')\n        server.sendmail('summary@yourdomain.com', to, msg.as_string())\n\ndef summarize_email(content):\n    response = openai.Completion.create(\n        model=\"text-davinci-003\",\n        prompt=f\"Summarize the following email: {content}\",\n        max_tokens=150\n    )\n    summary = response.choices[0].text.strip()\n    return summary\n\n@app.route('/email_webhook', methods=['POST'])\ndef email_webhook():\n    email_data = request.form\n    subject = email_data['subject']\n    recipient_email = subject.split()[0]  # Assuming recipient email is the first word in the subject\n    body = email_data['body-plain']\n    \n    summarized_content = summarize_email(body)\n    \n    # Send summarized email\n    send_email(subject, recipient_email, f\"Summary: {summarized_content}\\n\\nOriginal: {body}\")\n    \n    return jsonify({\"status\": \"Email received and processed.\"})\n\nif __name__ == '__main__':\n    app.run(debug=True)\n```\n\n### Example Flow for CC Method:\n- Users send an email to `summary@yourdomain.com` with the intended recipient in the CC field.\n\n#### Flask App Setup:\n```python\n@app.route('/email_webhook', methods=['POST'])\ndef email_webhook():\n    email_data = request.form\n    subject = email_data['subject']\n    cc_list = email_data['Cc'].split(', ')\n    body = email_data['body-plain']\n    \n    summarized_content = summarize_email(body)\n    \n    # Send summarized email to each CC recipient\n    for recipient in cc_list:\n        send_email(subject, recipient, f\"Summary: {summarized_content}\\n\\nOriginal: {body}\")\n    \n    return jsonify({\"status\": \"Email received and processed.\"})\n```\n\n### Key Considerations:\n- **Deliverability:** Email forwarding services like Mailgun and SendGrid are optimized for high deliverability.\n- **Ease of Integration:** These services provide webhooks that make integration with your Flask app straightforward.\n- **Scalability:** As your usage grows, these services can scale accordingly.\n- **Security:** Ensure you handle email data securely, especially when dealing with personal information.\n\nUsing a service like Mailgun or SendGrid will streamline the process, provide reliable email delivery, and allow you to focus on the core functionality of your app. Do you need more details on setting up Mailgun or any other specific aspect?",
+      "created_at": "2024-06-14T07:19:46.383592",
+      "sequence_order": 10,
+      "parent_id": "38b8802b-e3b8-4cf2-89e2-9dc5c0e53aee",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "bcce6547-38e4-493a-b65d-9e1e352cb983",
+      "role": "user",
+      "content": "Yeah, sure. Is there a big difference between making the person's email in the initial email, or the CC, or the CC, or the initial email? Does it matter? Can I just do either?",
+      "created_at": "2024-06-14T07:21:43.470611",
+      "sequence_order": 11,
+      "parent_id": "aedbeffe-6176-4b1f-922c-d78bea5c8c9d",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "dd2226a5-99e4-4dbd-b44b-7e96ac699f18",
+      "role": "assistant",
+      "content": "",
+      "created_at": "2024-06-14T07:22:08.213546",
+      "sequence_order": 12,
+      "parent_id": "bcce6547-38e4-493a-b65d-9e1e352cb983",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "5d263f33-c11e-4491-b570-9a3eda9fd3af",
+      "role": "assistant",
+      "content": "You can use either method (placing the recipient's email in the subject line or the CC field) to capture the intended recipient's address for summarization and forwarding. Here are some considerations for each approach:\n\n### Using the Subject Line:\n- **Simplicity:** This approach is straightforward as it uses the subject line to specify the recipient.\n- **Flexibility:** You can easily parse the subject line to extract the recipient's email.\n- **Potential Issues:** The subject line might get cluttered, and there's a risk of users not following the format correctly.\n\n### Using the CC Field:\n- **Standard Practice:** Using the CC field is a common practice for specifying additional recipients.\n- **Clarity:** It keeps the subject line clean and makes it clear who the intended recipient is.\n- **Reliability:** Less prone to user errors since CC is a standard email feature.\n\n### Implementing Both:\nYou can design your app to handle both methods, making it more flexible and user-friendly. Here's how you can do it:\n\n#### Flask App Setup for Both Methods:\n```python\nfrom flask import Flask, request, jsonify\nimport requests\nfrom email.mime.text import MIMEText\nimport smtplib\nimport openai\n\napp = Flask(__name__)\n\n# Mailgun and ChatGPT API configurations\nMAILGUN_DOMAIN = 'yourdomain.com'\nMAILGUN_API_KEY = 'your-mailgun-api-key'\nopenai.api_key = 'your-openai-api-key'\n\ndef send_email(subject, to, body):\n    msg = MIMEText(body)\n    msg['Subject'] = subject\n    msg['From'] = 'summary@yourdomain.com'\n    msg['To'] = to\n    \n    with smtplib.SMTP('smtp.your-email-provider.com', 587) as server:\n        server.starttls()\n        server.login('your-email@example.com', 'your-password')\n        server.sendmail('summary@yourdomain.com', to, msg.as_string())\n\ndef summarize_email(content):\n    response = openai.Completion.create(\n        model=\"text-davinci-003\",\n        prompt=f\"Summarize the following email: {content}\",\n        max_tokens=150\n    )\n    summary = response.choices[0].text.strip()\n    return summary\n\n@app.route('/email_webhook', methods=['POST'])\ndef email_webhook():\n    email_data = request.form\n    subject = email_data['subject']\n    cc_list = email_data['Cc'].split(', ') if 'Cc' in email_data else []\n    \n    # Check if recipient email is in the subject line\n    if ' ' in subject:\n        recipient_email = subject.split()[0]\n        subject = ' '.join(subject.split()[1:])\n    else:\n        recipient_email = None\n    \n    # If recipient email is not in the subject line, use the CC field\n    if not recipient_email and cc_list:\n        recipient_email = cc_list[0]\n        cc_list = cc_list[1:]\n    \n    body = email_data['body-plain']\n    summarized_content = summarize_email(body)\n    \n    # Send summarized email to the recipient\n    if recipient_email:\n        send_email(subject, recipient_email, f\"Summary: {summarized_content}\\n\\nOriginal: {body}\")\n    \n    # Send summarized email to any additional CC recipients\n    for recipient in cc_list:\n        send_email(subject, recipient, f\"Summary: {summarized_content}\\n\\nOriginal: {body}\")\n    \n    return jsonify({\"status\": \"Email received and processed.\"})\n\nif __name__ == '__main__':\n    app.run(debug=True)\n```\n\n### Key Points:\n- **Parsing Logic:** The app checks if the recipient email is in the subject line first. If not, it falls back to the CC field.\n- **User Flexibility:** Users can choose either method, making it easier for different use cases.\n- **Clean Implementation:** The email forwarding logic remains clean and understandable.\n\nBy implementing both methods, you provide flexibility to the users while ensuring high deliverability and clarity. Would you like more details on setting up Mailgun or any other part of this implementation?",
+      "created_at": "2024-06-14T07:22:08.213601",
+      "sequence_order": 13,
+      "parent_id": "dd2226a5-99e4-4dbd-b44b-7e96ac699f18",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "4b0e9f9e-af1a-4db6-8112-dc2d47890698",
+      "role": "user",
+      "content": "I'm wondering if we can send them our context window and chat history as if it's a context window and chat history for a standard ChatGPT agent as an attachment and to use that always rather than saving anything in our SQL server. That way we don't have any risk of having private information with us and it's always with them including their own AI chat history.",
+      "created_at": "2024-06-14T07:23:55.973698",
+      "sequence_order": 14,
+      "parent_id": "5d263f33-c11e-4491-b570-9a3eda9fd3af",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "14bd494c-468d-441c-b411-73f62a1d215c",
+      "role": "assistant",
+      "content": "Yes, you can achieve that by including the conversation history in the email as an attachment. This way, the conversation history is always sent along with the email, and you don't need to store any data on your server.\n\n### Steps to Implement This:\n1. **Generate the Context and History:**\n   - Create a file (e.g., a text file) containing the chat context and history each time an email is processed.\n\n2. **Attach the File to the Email:**\n   - Include this file as an attachment in the forwarded email.\n\n### Code Example:\nHere's an updated version of the Flask app that includes generating and attaching the chat history:\n\n```python\nfrom flask import Flask, request, jsonify\nimport requests\nfrom email.mime.text import MIMEText\nfrom email.mime.multipart import MIMEMultipart\nfrom email.mime.application import MIMEApplication\nimport smtplib\nimport openai\nimport os\n\napp = Flask(__name__)\n\n# Mailgun and ChatGPT API configurations\nMAILGUN_DOMAIN = 'yourdomain.com'\nMAILGUN_API_KEY = 'your-mailgun-api-key'\nopenai.api_key = 'your-openai-api-key'\n\ndef send_email_with_attachment(subject, to, body, attachment_path):\n    msg = MIMEMultipart()\n    msg['Subject'] = subject\n    msg['From'] = 'summary@yourdomain.com'\n    msg['To'] = to\n    \n    msg.attach(MIMEText(body, 'plain'))\n\n    with open(attachment_path, 'rb') as attachment:\n        part = MIMEApplication(attachment.read(), Name=os.path.basename(attachment_path))\n        part['Content-Disposition'] = f'attachment; filename=\"{os.path.basename(attachment_path)}\"'\n        msg.attach(part)\n\n    with smtplib.SMTP('smtp.your-email-provider.com', 587) as server:\n        server.starttls()\n        server.login('your-email@example.com', 'your-password')\n        server.sendmail('summary@yourdomain.com', to, msg.as_string())\n\ndef summarize_email(content):\n    response = openai.Completion.create(\n        model=\"text-davinci-003\",\n        prompt=f\"Summarize the following email: {content}\",\n        max_tokens=150\n    )\n    summary = response.choices[0].text.strip()\n    return summary\n\ndef create_chat_history_file(email_body, summary, history):\n    filename = \"chat_history.txt\"\n    with open(filename, 'w') as file:\n        file.write(\"Previous Chat History:\\n\")\n        file.write(history + \"\\n\\n\")\n        file.write(\"New Email:\\n\")\n        file.write(email_body + \"\\n\\n\")\n        file.write(\"Summary:\\n\")\n        file.write(summary + \"\\n\")\n    return filename\n\n@app.route('/email_webhook', methods=['POST'])\ndef email_webhook():\n    email_data = request.form\n    subject = email_data['subject']\n    cc_list = email_data['Cc'].split(', ') if 'Cc' in email_data else []\n    \n    # Check if recipient email is in the subject line\n    if ' ' in subject:\n        recipient_email = subject.split()[0]\n        subject = ' '.join(subject.split()[1:])\n    else:\n        recipient_email = None\n    \n    # If recipient email is not in the subject line, use the CC field\n    if not recipient_email and cc_list:\n        recipient_email = cc_list[0]\n        cc_list = cc_list[1:]\n    \n    body = email_data['body-plain']\n    summarized_content = summarize_email(body)\n    \n    # Create chat history file\n    previous_history = email_data.get('previous_history', '')\n    attachment_path = create_chat_history_file(body, summarized_content, previous_history)\n    \n    # Send summarized email to the recipient with attachment\n    if recipient_email:\n        send_email_with_attachment(subject, recipient_email, f\"Summary: {summarized_content}\\n\\nOriginal: {body}\", attachment_path)\n    \n    # Send summarized email to any additional CC recipients with attachment\n    for recipient in cc_list:\n        send_email_with_attachment(subject, recipient, f\"Summary: {summarized_content}\\n\\nOriginal: {body}\", attachment_path)\n    \n    # Clean up the chat history file\n    os.remove(attachment_path)\n    \n    return jsonify({\"status\": \"Email received and processed.\"})\n\nif __name__ == '__main__':\n    app.run(debug=True)\n```\n\n### Key Points:\n- **Chat History File:** The `create_chat_history_file` function generates a text file containing the previous chat history, the new email, and the summary.\n- **Attachment Handling:** The `send_email_with_attachment` function attaches this file to the email.\n- **Clean-Up:** The attachment file is deleted after sending the email to ensure no data is stored on the server.\n\nThis way, each email processed will include the chat history as an attachment, ensuring privacy and security while providing context to the recipients. Do you need further details or adjustments?",
+      "created_at": "2024-06-14T07:24:24.557004",
+      "sequence_order": 15,
+      "parent_id": "4b0e9f9e-af1a-4db6-8112-dc2d47890698",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "2f7d5a05-4080-41cf-af4f-11ccf636c5d3",
+      "role": "user",
+      "content": "Okay, thank you.",
+      "created_at": "2024-06-14T07:25:18.130147",
+      "sequence_order": 16,
+      "parent_id": "14bd494c-468d-441c-b411-73f62a1d215c",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "255d2d1f-3be2-496f-b0b6-29b5f3d4ea3d",
+      "role": "assistant",
+      "content": "You're welcome! If you have any more questions or need further assistance as you work on your project, feel free to ask. Good luck with your Flask app!",
+      "created_at": "2024-06-14T07:25:19.735351",
+      "sequence_order": 17,
+      "parent_id": "2f7d5a05-4080-41cf-af4f-11ccf636c5d3",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

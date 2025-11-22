@@ -1,0 +1,63 @@
+{
+  "id": "6808e553-58d4-8012-9c61-dd1a4e30cd63",
+  "source": "chatgpt",
+  "title": "AppleScripts for Personal Growth",
+  "created_at": "2025-04-23T15:04:20.237385",
+  "updated_at": "2025-04-23T15:05:49.669749",
+  "summary": null,
+  "message_count": 4,
+  "messages": [
+    {
+      "id": "8c6918ec-29a3-4c84-bd3a-4e12595f5fa4",
+      "role": "user",
+      "content": "",
+      "created_at": null,
+      "sequence_order": 0,
+      "parent_id": "b49650b1-8f0d-439e-80f8-dc4a5ea26029",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "2738ac6f-104b-4a0a-8692-a5231db6b3a4",
+      "role": "user",
+      "content": "given what you know about me - what are some apple scripts that might be incredible helpful for me to run - think about my entire context and make some inferences ",
+      "created_at": "2025-04-23T15:04:18.165000",
+      "sequence_order": 1,
+      "parent_id": "8c6918ec-29a3-4c84-bd3a-4e12595f5fa4",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "4c6f9040-fbee-4c25-976b-48b7d4b63b88",
+      "role": "assistant",
+      "content": "",
+      "created_at": "2025-04-23T15:04:32.269655",
+      "sequence_order": 2,
+      "parent_id": "2738ac6f-104b-4a0a-8692-a5231db6b3a4",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "dbd1c769-3e2b-4b0a-9a13-6aba153cdc7b",
+      "role": "assistant",
+      "content": "Given your context — spanning creativity, reflection, research, family life, remote work, ADHD, spirituality, voice memo processing, and a desire for deeper relational connection — here are **high-leverage AppleScripts** that could support your life beautifully by automating friction points and creating ambient nudges for meaning:\n\n---\n\n### 🍎📁 **1. Auto-Organize & Rename Voice Memos by Date + Snippet**\nYou often reflect through voice memos. This script will:\n- Rename files like `2025-04-23_Reflections_About_Belonging.m4a`\n- Move them into folders by month/year\n- (Optional: generate `.txt` files with transcription prompts)\n\n```applescript\n-- Rename and move voice memos\nset memoFolder to \"/Users/yourname/Desktop/VoiceMemos\"\ntell application \"Finder\"\n\tset memoFiles to every file of folder memoFolder whose name ends with \".m4a\"\n\trepeat with f in memoFiles\n\t\tset oldName to name of f\n\t\tset creationDate to creation date of f\n\t\tset newName to (do shell script \"date -j -f '%a %b %d %T %Z %Y' '\" & creationDate & \"' +'%Y-%m-%d'\") & \"_\" & \"Memo.m4a\"\n\t\tset name of f to newName\n\t\tset newFolder to memoFolder & \"/\" & (do shell script \"date -j -f '%a %b %d %T %Z %Y' '\" & creationDate & \"' +'%Y-%m'\")\n\t\tif not (exists folder newFolder) then\n\t\t\tmake new folder at memoFolder with properties {name:(do shell script \"date -j -f '%a %b %d %T %Z %Y' '\" & creationDate & \"' +'%Y-%m'\")}\n\t\tend if\n\t\tmove f to folder newFolder\n\tend repeat\nend tell\n```\n\n---\n\n### 🧘‍♂️📿 **2. Daily Kindness Reminder via Calendar + Notification**\nEvery morning, suggest a small act of kindness from your own \"Kindness Kiwi\" dataset.\n\n```applescript\nset kindnessActs to {\"Send a voice message to your mom\", \"Draw a thank you doodle for your wife\", \"Share a memory with a friend\"}\nset todayAct to some item of kindnessActs\ndisplay notification todayAct with title \"🌱 Kindness Today\" subtitle \"Tiny, meaningful acts\"\n```\n\n(Optional: Hook this into `launchd` to run every morning.)\n\n---\n\n### 📤🧠 **3. Summarize and Email a Voice Memo**\nAuto-forward a memo and summary to yourself or collaborators (useful for your TextRay project or thesis reflections).\n\n```applescript\nset memoPath to \"/Users/yourname/Desktop/LatestMemo.m4a\"\n-- Optional: Use `transcribe` CLI or Whisper to generate a summary\nset summaryText to \"Summary: Need to explore connection between generosity and self/other collapse.\"\ntell application \"Mail\"\n\tset newMessage to make new outgoing message with properties {subject:\"📓 Voice Memo Summary\", content:summaryText, visible:true}\n\ttell newMessage\n\t\tmake new to recipient at end of to recipients with properties {address:\"your@email.com\"}\n\t\tmake new attachment with properties {file name:memoPath as POSIX file} at after the last paragraph\n\tend tell\n\tsend newMessage\nend tell\n```\n\n---\n\n### ⏱️🧘 **4. Auto Launch a “Deep Work” Session Timer**\nSets your status, mutes distractions, plays a focus sound, and logs your start time.\n\n```applescript\ndo shell script \"osascript -e 'tell application \\\"System Events\\\" to set volume output muted true'\"\ndo shell script \"open -a 'Music' '/Users/yourname/Music/FocusPlaylist'\"\ndisplay notification \"Deep Work session started — ends in 45 min\" with title \"🚀 Focus Mode\"\n```\n\n---\n\n### 📦🎯 **5. Weekly Review Pop-Up (Sunday Night or Monday AM)**\nPrompts you with reflection questions to help redirect energy and close loops.\n\n```applescript\ndisplay dialog \"🌿 Weekly Check-In:\n1. What gave me energy last week?\n2. What drained me?\n3. What is one act of kindness I can do this week?\n4. What deserves closure?\" buttons {\"Done\"} default button \"Done\"\n```\n\n---\n\n### 🎙️📚 **6. Voice Memo to Structured Insight File**\nWhen a voice memo is added to a folder, this script:\n- Generates a dated `.md` file\n- Includes placeholders like:\n  ```markdown\n  ## Memo Insights\n  **Date:** 2025-04-23  \n  **Topics:**  \n  **Notable Quotes:**  \n  **Actions to Consider:**  \n  ```\n\n---\n\nWould you like me to package some of these as Automator services, add Whisper API integration, or connect to Airtable/Notion? I can also help make an onboarding script for your Mac that sets these all up with a single command.",
+      "created_at": "2025-04-23T15:04:20.649782",
+      "sequence_order": 3,
+      "parent_id": "4c6f9040-fbee-4c25-976b-48b7d4b63b88",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

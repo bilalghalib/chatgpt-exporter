@@ -1,0 +1,154 @@
+{
+  "id": "ab198bf5-2003-4349-96a8-0a89f79ace6e",
+  "source": "claude",
+  "title": "Debugging Private Card Access",
+  "created_at": "2024-12-31T16:53:45.005629Z",
+  "updated_at": "2024-12-31T16:54:07.829875Z",
+  "summary": "",
+  "message_count": 2,
+  "messages": [
+    {
+      "id": "eaec48df-1585-43f4-8659-6ebcaad1335f",
+      "role": "human",
+      "content": "be sure to update this file so that if the card is private you don't get the content and it just asks you to start your own reflection and let's move the make private button down to near the checkbox at the end\nI'll modify the code to handle private cards and move the privacy toggle. Here are the key changes:\n**Untitled**\nClick to open code\nKey changes:\n1. Modified the error handling to show a specific message for private cards\n2. Moved the privacy toggle button to be alongside the reminder checkbox\n3. Added a \"Start Your Reflection\" button\nCopyRetry\nClaude’s response was limited as it hit the maximum length allowed at this time.\n**BG**\nthe make private doesn't work i can still see it if i go to it besure it's not visible can you poll the private key it's an \"is_public\" bool in supabase db\nI'll modify the data loading logic to strictly enforce the privacy check:\n**Untitled**\nClick to open code\nThe modification ensures that:\n* If the card is not public\n* AND the user is not logged in\n* OR the logged-in user is not the card owner Then the card cannot be accessed, throwing a \"This card is not public\" error.\nThis means only the card's owner can view their own private card, and no one else can access it.\nCopyRetry\n**BG**\nadd logs, i went to a private card i was sure was private in the DB and i saw it in an incognito window\nI'll add comprehensive logging to help diagnose the privacy issue:\n**Untitled**\nClick to open code\nI've added extensive logging to:\n1. Capture all relevant privacy-related details\n2. Log potential privacy violation attempts\n3. Provide clear console output about card access\nThis will help diagnose:\n* If the privacy flag is being correctly read\n* Who is attempting to access the card\n* Specific details about the access attempt\nCould you try accessing the private card again and share the console logs? This will help pinpoint exactly why the privacy check might not be working.\nupdate the code with the logging and the privacy checks",
+      "created_at": "2024-12-31T16:53:45.792946Z",
+      "sequence_order": 0,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": null,
+            "stop_timestamp": null,
+            "flags": null,
+            "type": "text",
+            "text": "be sure to update this file so that if the card is private you don't get the content and it just asks you to start your own reflection and let's move the make private button down to near the checkbox at the end\nI'll modify the code to handle private cards and move the privacy toggle. Here are the key changes:\n**Untitled**\nClick to open code\nKey changes:\n1. Modified the error handling to show a specific message for private cards\n2. Moved the privacy toggle button to be alongside the reminder checkbox\n3. Added a \"Start Your Reflection\" button\nCopyRetry\nClaude’s response was limited as it hit the maximum length allowed at this time.\n**BG**\nthe make private doesn't work i can still see it if i go to it besure it's not visible can you poll the private key it's an \"is_public\" bool in supabase db\nI'll modify the data loading logic to strictly enforce the privacy check:\n**Untitled**\nClick to open code\nThe modification ensures that:\n* If the card is not public\n* AND the user is not logged in\n* OR the logged-in user is not the card owner Then the card cannot be accessed, throwing a \"This card is not public\" error.\nThis means only the card's owner can view their own private card, and no one else can access it.\nCopyRetry\n**BG**\nadd logs, i went to a private card i was sure was private in the DB and i saw it in an incognito window\nI'll add comprehensive logging to help diagnose the privacy issue:\n**Untitled**\nClick to open code\nI've added extensive logging to:\n1. Capture all relevant privacy-related details\n2. Log potential privacy violation attempts\n3. Provide clear console output about card access\nThis will help diagnose:\n* If the privacy flag is being correctly read\n* Who is attempting to access the card\n* Specific details about the access attempt\nCould you try accessing the private card again and share the console logs? This will help pinpoint exactly why the privacy check might not be working.\nupdate the code with the logging and the privacy checks",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-12-31T16:53:45.792946Z",
+        "attachments": [
+          {
+            "file_name": "paste.txt",
+            "file_size": 14013,
+            "file_type": "txt",
+            "extracted_content": "// app/card/[shareKey]/page.tsx\n'use client';\n\nimport { useEffect, useState } from 'react';\nimport { Card, CardHeader, CardContent } from '@/components/ui/card';\nimport { Button } from '@/components/ui/button';\nimport { Input } from '@/components/ui/input';\nimport { Checkbox } from '@/components/ui/checkbox';\nimport { supabase } from '@/lib/supabase';\nimport type { ValuesCard as ValuesCardType, FriendPerspective } from '@/lib/types';\nimport Link from 'next/link';\nimport { User } from '@supabase/supabase-js';\nimport Image from 'next/image';\nimport { Header } from '@/components/layout/Header';\n\ninterface PageProps {\n  params: { shareKey: string }\n}\n\nexport default function CardViewPage({ params }: PageProps) {\n  const shareKey = params.shareKey || params?.['sharekey'];\n  \n  const [card, setCard] = useState<ValuesCardType | null>(null);\n  const [friendPerspectives, setFriendPerspectives] = useState<FriendPerspective[]>([]);\n  const [isLoading, setIsLoading] = useState(true);\n  const [errorMessage, setErrorMessage] = useState<string | null>(null);\n  const [user, setUser] = useState<User | null>(null);\n\n  // Reminder state\n  const [reminderEnabled, setReminderEnabled] = useState(false);\n  const [showEmailInput, setShowEmailInput] = useState(false);\n  const [email, setEmail] = useState('');\n  const [isSavingReminder, setIsSavingReminder] = useState(false);\n\n  // Privacy state\n  const [isPublic, setIsPublic] = useState(true);\n  const [isSavingPrivacy, setIsSavingPrivacy] = useState(false);\n\n  useEffect(() => {\n    const checkAuth = async () => {\n      const { data: { session } } = await supabase.auth.getSession();\n      setUser(session?.user || null);\n    };\n\n    checkAuth();\n  }, []);\n\n  useEffect(() => {\n    const loadCardAndPerspectives = async () => {\n      if (!shareKey) {\n        setErrorMessage('No share key provided');\n        setIsLoading(false);\n        return;\n      }\n\n      try {\n        const { data: cardData, error: cardError } = await supabase\n          .from('values_cards')\n          .select('*')\n          .eq('share_key', shareKey)\n          .single();\n\n        if (cardError || !cardData) {\n          throw new Error(cardError?.message || 'Card not found');\n        }\n\n        // Check card privacy if user is not the owner\n        if (user && user.id !== cardData.user_id && !cardData.is_public) {\n          throw new Error('This card is not public');\n        }\n\n        setCard(cardData as ValuesCardType);\n        setReminderEnabled(cardData.reminder_enabled || false);\n        setIsPublic(cardData.is_public);\n\n        if (cardData.id) {\n          const { data: perspectivesData } = await supabase\n            .from('friend_perspectives')\n            .select('*')\n            .eq('card_id', cardData.id)\n            .order('created_at', { ascending: false });\n\n          setFriendPerspectives(perspectivesData || []);\n        }\n      } catch (err) {\n        setErrorMessage(err instanceof Error ? err.message : 'Error loading card');\n      } finally {\n        setIsLoading(false);\n      }\n    };\n\n    loadCardAndPerspectives();\n  }, [shareKey, user]);\n\n  const handleReminderToggle = async (checked: boolean) => {\n    if (!card?.id || !user) return;\n\n    setReminderEnabled(checked);\n\n    if (checked && !user.email) {\n      setShowEmailInput(true);\n      return;\n    }\n\n    setIsSavingReminder(true);\n    try {\n      await supabase\n        .from('values_cards')\n        .update({ reminder_enabled: checked })\n        .eq('id', card.id);\n\n      if (!checked) {\n        await supabase\n          .from('reminder_subscriptions')\n          .delete()\n          .eq('values_card_id', card.id)\n          .eq('email', user.email);\n      }\n    } catch (error) {\n      console.error('Error updating reminder preference:', error);\n      setReminderEnabled(!checked);\n      alert('Failed to update reminder preference. Please try again.');\n    } finally {\n      setIsSavingReminder(false);\n    }\n  };\n\n  const handleEmailSubmit = async () => {\n    if (!card?.id || !email || isSavingReminder) return;\n\n    setIsSavingReminder(true);\n    try {\n      await supabase\n        .from('values_cards')\n        .update({ reminder_enabled: true })\n        .eq('id', card.id);\n\n      await supabase\n        .from('reminder_subscriptions')\n        .insert([{ email, values_card_id: card.id }]);\n\n      setShowEmailInput(false);\n      setReminderEnabled(true);\n    } catch (error) {\n      console.error('Error saving reminder subscription:', error);\n      alert('Failed to save reminder preference. Please try again.');\n      setReminderEnabled(false);\n    } finally {\n      setIsSavingReminder(false);\n    }\n  };\n\n  const toggleCardPrivacy = async () => {\n    if (!card?.id || !user || card.user_id !== user.id) return;\n\n    setIsSavingPrivacy(true);\n    try {\n      const { error } = await supabase\n        .from('values_cards')\n        .update({ is_public: !isPublic })\n        .eq('id', card.id);\n\n      if (error) throw error;\n\n      setIsPublic(!isPublic);\n    } catch (error) {\n      console.error('Error updating card privacy:', error);\n      alert('Failed to update card privacy. Please try again.');\n    } finally {\n      setIsSavingPrivacy(false);\n    }\n  };\n\n  if (isLoading) {\n    return (\n      <div className=\"min-h-screen bg-gray-50\">\n        <Header />\n        <div className=\"max-w-4xl mx-auto px-4 py-12 pt-24\">\n          <div className=\"animate-pulse space-y-4\">\n            <div className=\"h-8 bg-gray-200 rounded w-3/4 mx-auto\"></div>\n            <div className=\"h-64 bg-gray-200 rounded\"></div>\n          </div>\n        </div>\n      </div>\n    );\n  }\n\n  if (errorMessage || !card) {\n    return (\n      <div className=\"min-h-screen bg-gray-50\">\n        <Header />\n        <div className=\"max-w-4xl mx-auto px-4 py-12 pt-24\">\n          <Card className=\"bg-white shadow-lg\">\n            <CardContent className=\"p-8 text-center\">\n              <h2 className=\"text-xl text-red-600 font-semibold mb-4\">\n                {errorMessage || 'Card not found'}\n              </h2>\n              <p className=\"text-gray-600 mb-6\">\n                {errorMessage === 'This card is not public' \n                  ? \"This card is private. Start your own reflection journey!\" \n                  : \"This link might be invalid or have expired.\"}\n              </p>\n              <Link href=\"/reflection/new\">\n                <Button variant=\"outline\">Start Your Reflection</Button>\n              </Link>\n            </CardContent>\n          </Card>\n        </div>\n      </div>\n    );\n  }\n\n  return (\n    <div className=\"min-h-screen bg-gray-50\">\n      <Header />\n      <div className=\"max-w-4xl mx-auto px-4 pt-24 pb-12\">\n        <Card className=\"w-full bg-white shadow-lg mb-8\">\n          <CardHeader className=\"border-b border-gray-100 bg-gray-50\">\n            <h1 className=\"text-3xl font-bold text-gray-900 text-center\">\n              {card.title || 'Untitled Card'}\n            </h1>\n          </CardHeader>\n          <CardContent className=\"space-y-6 p-8\">\n            {/* Story section */}\n            {card.story && (\n              <div className=\"bg-gray-50 p-4 rounded-lg mb-4\">\n                <h3 className=\"text-xl font-bold text-gray-900 mb-2\">My Story</h3>\n                <p className=\"text-gray-700 text-lg leading-relaxed whitespace-pre-wrap\">{card.story}</p>\n              </div>\n            )}\n\n            {/* Photo section */}\n            {card.photo_url && (\n              <div\n                onClick={() => {\n                  window.open(card.photo_url, '_blank');\n                }}\n                className=\"w-full aspect-video relative overflow-hidden rounded-lg shadow-inner cursor-pointer\"\n              >\n                <Image\n                  src={card.photo_url}\n                  alt=\"Meaningful moment\"\n                  fill\n                  className=\"object-cover hover:opacity-90 transition-opacity\"\n                />\n              </div>\n            )}\n\n            {/* Description section */}\n            {card.description && (\n              <div className=\"bg-gray-50 p-4 rounded-lg\">\n                <h3 className=\"text-xl font-bold text-gray-900 mb-2\">Description</h3>\n                <p className=\"text-gray-700 text-lg leading-relaxed\">{card.description}</p>\n              </div>\n            )}\n\n            {/* Attention patterns section */}\n            {Array.isArray(card.attention_patterns) && card.attention_patterns.length > 0 && (\n              <div className=\"bg-gray-50 p-4 rounded-lg\">\n                <h3 className=\"text-xl font-bold text-gray-900 mb-3\">\n                  {user && card.user_id === user.id \n                    ? \"What I Pay Attention To\" \n                    : \"What They Pay Attention To\"}\n                </h3>\n                <ul className=\"space-y-2\">\n                  {card.attention_patterns.map((pattern, index) => (\n                    <li key={index} className=\"text-gray-700 flex items-start\">\n                      <span className=\"text-blue-500 mr-2\">•</span>\n                      {pattern}\n                    </li>\n                  ))}\n                </ul>\n              </div>\n            )}\n\n            {/* Practices section */}\n            {Array.isArray(card.practices) && card.practices.length > 0 && (\n              <div className=\"bg-gray-50 p-4 rounded-lg\">\n                <h3 className=\"text-xl font-bold text-gray-900 mb-3\">\n                  {user && card.user_id === user.id \n                    ? \"Ways I Live This Value\" \n                    : \"Ways They Live This Value\"}\n                </h3>\n                <ul className=\"space-y-2\">\n                  {card.practices.map((practice, index) => (\n                    <li key={index} className=\"text-gray-700 flex items-start\">\n                      <span className=\"text-blue-500 mr-2\">•</span>\n                      {practice}\n                    </li>\n                  ))}\n                </ul>\n              </div>\n            )}\n\n            {/* Value promise section */}\n            {card.value_promise && (\n              <div className=\"bg-gray-50 p-4 rounded-lg\">\n                <h3 className=\"text-xl font-bold text-gray-900 mb-2\">\n                  {user && card.user_id === user.id \n                    ? \"My Value Promise\" \n                    : \"Their Value Promise\"}\n                </h3>\n                <p className=\"text-gray-700\">{card.value_promise}</p>\n              </div>\n            )}\n\n            {/* Reminder section - only show for the card owner */}\n            {user && card.user_id === user.id && (\n              <div className=\"space-y-3 border-t pt-6\">\n                <div className=\"flex justify-between items-center\">\n                  <div className=\"flex items-start space-x-3\">\n                    <Checkbox\n                      id=\"reminder-toggle\"\n                      checked={reminderEnabled}\n                      onCheckedChange={handleReminderToggle}\n                      disabled={isSavingReminder}\n                    />\n                    <label\n                      htmlFor=\"reminder-toggle\"\n                      className=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\"\n                    >\n                      Send me quarterly reminders to live my values\n                    </label>\n                  </div>\n\n                  {/* Privacy toggle moved here */}\n                  <Button \n                    onClick={toggleCardPrivacy}\n                    disabled={isSavingPrivacy}\n                    variant=\"outline\"\n                    size=\"sm\"\n                  >\n                    {isPublic ? 'Make Private' : 'Make Public'}\n                  </Button>\n                </div>\n\n                {showEmailInput && (\n                  <div className=\"mt-4 p-4 bg-blue-50 rounded-lg\">\n                    <p className=\"text-sm text-blue-800 mb-3\">\n                      Enter your email address to receive quarterly reminders\n                    </p>\n                    <div className=\"flex gap-2\">\n                      <Input\n                        type=\"email\"\n                        placeholder=\"Enter your email\"\n                        value={email}\n                        onChange={(e) => setEmail(e.target.value)}\n                        className=\"flex-1\"\n                      />\n                      <Button\n                        onClick={handleEmailSubmit}\n                        disabled={!email || isSavingReminder}\n                        className=\"bg-blue-600 hover:bg-blue-700 text-white\"\n                      >\n                        {isSavingReminder ? 'Saving...' : 'Save'}\n                      </Button>\n                    </div>\n                  </div>\n                )}\n              </div>\n            )}\n          </CardContent>\n        </Card>\n\n        {/* Friend perspectives section */}\n        {friendPerspectives.length > 0 && (\n          <Card className=\"w-full bg-white shadow-lg mt-8\">\n            <CardHeader>\n              <h2 className=\"text-2xl font-bold text-gray-900\">\n                Values Others See In Their Actions\n              </h2>\n            </CardHeader>\n            <CardContent className=\"p-8\">\n              <div className=\"space-y-4\">\n                {friendPerspectives.map((perspective) => (\n                  <Link \n                    key={perspective.id} \n                    href={`/perspective/${perspective.id}`}\n                  >\n                    <div className=\"p-4 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors\">\n                      <h3 className=\"text-xl font-semibold text-gray-900 mb-2\">\n                        {perspective.title}\n                      </h3>\n                      <p className=\"text-gray-600 line-clamp-2\">\n                        {perspective.description}\n                      </p>\n                    </div>\n                  </Link>\n                ))}\n              </div>\n            </CardContent>\n          </Card>\n        )}\n      </div>\n    </div>\n  );\n}"
+          }
+        ],
+        "files": [
+          {
+            "file_name": "paste.txt"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a6cf1702-b168-45b8-8e82-c3435ec2685b",
+      "role": "assistant",
+      "content": " <antThinking>This needs code changes to properly enforce privacy and add logging. Since this will require substantial changes to the existing code, I'll create an update.</antThinking>\n```\nViewing artifacts created via the Analysis Tool web feature preview isn’t yet supported on mobile.\n```\n\n\n```\nViewing artifacts created via the Analysis Tool web feature preview isn’t yet supported on mobile.\n```\n\n\n\nThese changes:\n1. Add detailed logging for privacy-related actions\n2. Implement strict privacy checks\n3. Improve the privacy toggle UI with explicit messaging\n4. Move privacy controls below reminder toggle\n\nYou should now see relevant logs in the console when accessing private cards, helping diagnose any remaining issues.",
+      "created_at": "2024-12-31T16:54:06.711767Z",
+      "sequence_order": 1,
+      "metadata": {
+        "content": [
+          {
+            "start_timestamp": null,
+            "stop_timestamp": null,
+            "flags": null,
+            "type": "text",
+            "text": " <antThinking>This needs code changes to properly enforce privacy and add logging. Since this will require substantial changes to the existing code, I'll create an update.</antThinking>",
+            "citations": []
+          },
+          {
+            "start_timestamp": null,
+            "stop_timestamp": null,
+            "flags": null,
+            "type": "tool_use",
+            "name": "artifacts",
+            "input": {
+              "id": "privacy-check",
+              "command": "update",
+              "new_str": "      try {\n        const { data: cardData, error: cardError } = await supabase\n          .from('values_cards')\n          .select('*')\n          .eq('share_key', shareKey)\n          .single();\n\n        if (cardError || !cardData) {\n          console.error('Card load error:', cardError);\n          throw new Error(cardError?.message || 'Card not found');\n        }\n\n        console.log('Card access attempt:', {\n          cardId: cardData.id,\n          isPublic: cardData.is_public,\n          cardOwnerId: cardData.user_id,\n          currentUserId: user?.id || 'not logged in'\n        });\n\n        // Strict privacy check\n        const isOwner = user?.id === cardData.user_id;\n        if (!cardData.is_public && !isOwner) {\n          console.log('Privacy violation attempt:', {\n            cardId: cardData.id,\n            attemptedBy: user?.id || 'anonymous'\n          });\n          throw new Error('This card is not public');\n        }",
+              "old_str": "      try {\n        const { data: cardData, error: cardError } = await supabase\n          .from('values_cards')\n          .select('*')\n          .eq('share_key', shareKey)\n          .single();\n\n        if (cardError || !cardData) {\n          throw new Error(cardError?.message || 'Card not found');\n        }\n\n        // Check card privacy if user is not the owner\n        if (user && user.id !== cardData.user_id && !cardData.is_public) {\n          throw new Error('This card is not public');\n        }",
+              "version_uuid": "2378cc9a-b422-4011-b736-1fe56f5c33c1"
+            },
+            "message": null,
+            "integration_name": null,
+            "integration_icon_url": null,
+            "context": null,
+            "display_content": null,
+            "approval_options": null,
+            "approval_key": null
+          },
+          {
+            "start_timestamp": null,
+            "stop_timestamp": null,
+            "flags": null,
+            "type": "tool_result",
+            "name": "artifacts",
+            "content": [
+              {
+                "type": "text",
+                "text": "OK",
+                "uuid": "05a1f076-00db-4527-99ea-845088650667"
+              }
+            ],
+            "is_error": false,
+            "message": null,
+            "integration_name": null,
+            "integration_icon_url": null,
+            "display_content": null
+          },
+          {
+            "start_timestamp": null,
+            "stop_timestamp": null,
+            "flags": null,
+            "type": "tool_use",
+            "name": "artifacts",
+            "input": {
+              "id": "privacy-check",
+              "command": "update",
+              "new_str": "              <div className=\"space-y-4\">\n                <div className=\"flex items-start space-x-3\">\n                  <Checkbox\n                    id=\"reminder-toggle\"\n                    checked={reminderEnabled}\n                    onCheckedChange={handleReminderToggle}\n                    disabled={isSavingReminder}\n                  />\n                  <label\n                    htmlFor=\"reminder-toggle\"\n                    className=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\"\n                  >\n                    Send me quarterly reminders to live my values\n                  </label>\n                </div>\n                \n                <div className=\"flex items-center space-x-2\">\n                  <Button \n                    onClick={toggleCardPrivacy}\n                    disabled={isSavingPrivacy}\n                    variant=\"outline\"\n                    size=\"sm\"\n                    className=\"w-full\"\n                  >\n                    {isPublic ? 'Make This Card Private' : 'Make This Card Public'}\n                  </Button>\n                  <p className=\"text-sm text-gray-500\">\n                    {isPublic ? 'Anyone with the link can view' : 'Only you can view'}\n                  </p>\n                </div>\n              </div>",
+              "old_str": "              <div className=\"flex justify-between items-center\">\n                  <div className=\"flex items-start space-x-3\">\n                    <Checkbox\n                      id=\"reminder-toggle\"\n                      checked={reminderEnabled}\n                      onCheckedChange={handleReminderToggle}\n                      disabled={isSavingReminder}\n                    />\n                    <label\n                      htmlFor=\"reminder-toggle\"\n                      className=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\"\n                    >\n                      Send me quarterly reminders to live my values\n                    </label>\n                  </div>\n\n                  {/* Privacy toggle moved here */}\n                  <Button \n                    onClick={toggleCardPrivacy}\n                    disabled={isSavingPrivacy}\n                    variant=\"outline\"\n                    size=\"sm\"\n                  >\n                    {isPublic ? 'Make Private' : 'Make Public'}\n                  </Button>\n                </div>",
+              "version_uuid": "19bd97a2-e8db-452d-8d87-6b114645ec43"
+            },
+            "message": null,
+            "integration_name": null,
+            "integration_icon_url": null,
+            "context": null,
+            "display_content": null,
+            "approval_options": null,
+            "approval_key": null
+          },
+          {
+            "start_timestamp": null,
+            "stop_timestamp": null,
+            "flags": null,
+            "type": "tool_result",
+            "name": "artifacts",
+            "content": [
+              {
+                "type": "text",
+                "text": "OK",
+                "uuid": "8165b06b-0163-4b6a-844b-faf4100c1529"
+              }
+            ],
+            "is_error": false,
+            "message": null,
+            "integration_name": null,
+            "integration_icon_url": null,
+            "display_content": null
+          },
+          {
+            "start_timestamp": null,
+            "stop_timestamp": null,
+            "flags": null,
+            "type": "text",
+            "text": "\n\nThese changes:\n1. Add detailed logging for privacy-related actions\n2. Implement strict privacy checks\n3. Improve the privacy toggle UI with explicit messaging\n4. Move privacy controls below reminder toggle\n\nYou should now see relevant logs in the console when accessing private cards, helping diagnose any remaining issues.",
+            "citations": []
+          }
+        ],
+        "updated_at": "2024-12-31T16:54:06.711767Z",
+        "attachments": [],
+        "files": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "d693a733-e3cf-4a3b-ab54-979519e46865",
+  "source": "chatgpt",
+  "title": "New chat",
+  "created_at": "2023-05-19T13:27:16.438642",
+  "updated_at": "2023-05-19T13:27:16",
+  "summary": null,
+  "message_count": 1,
+  "messages": [
+    {
+      "id": "aaa22ca9-b9ca-4fbb-8d84-2b1634116458",
+      "role": "user",
+      "content": "\n(base) bilalghalib@macbook-pro ~ % curl -X POST -H \"Content-Type: application/json\" -d '{\"messages\":[{\"role\": \"user\", \"content\": \"Hello!\"}]}' http://165.22.123.78:3001/chat \n{\n  \"task_id\": \"1d94099b-bbba-4b00-88d8-614645357781\"\n}\nFor this API example:\nimport os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\ncompletion = openai.ChatCompletion.create(\n  model=\"gpt-3.5-turbo\",\n  messages=[\n    {\"role\": \"user\", \"content\": \"Hello!\"}\n  ]\n)\n\nprint(completion.choices[0].message)here's the code on the server:\n\ngpt3_endpoint = \"https://api.openai.com/v1/engines/text-davinci-003/completions\"\ngpt3_image_endpoint = \"https://api.openai.com/v1/images/generations\"\ngpt3_api_key = os.getenv(\"OPEN_AI_KEY\")\nopenai.api_key = gpt3_api_key\n\n\n@celery.task\n\ndef generate_text(messages):\n    # Send request to GPT-3.5 Turbo\n    response = openai.ChatCompletion.create(\n        model=\"gpt-3.5-turbo\",\n        messages=messages,\n    )\n\n    # Return response\n    return response.json()\n\n\n@app.route('/chat', methods=['POST'])\n@cross_origin()\ndef chat():\n    # Get prompt from client\n    prompt = request.json.get('prompt')\n\n    # Run GPT-3 task asynchronously\n    task = generate_text.apply_async(args=(prompt,))\n\n    # Return task id\n    return jsonify({'task_id': task.id})\n\nHow should I modify It so it sends the appropriately formatted message ",
+      "created_at": "2023-05-19T13:27:16.441539",
+      "sequence_order": 0,
+      "parent_id": "4a8b90c8-0e35-4c3e-8c6e-03d05a3fc716",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    }
+  ]
+}

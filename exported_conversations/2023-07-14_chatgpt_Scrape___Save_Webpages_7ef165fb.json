@@ -1,0 +1,115 @@
+{
+  "id": "7ef165fb-abb5-4137-b89f-f0e060339675",
+  "source": "chatgpt",
+  "title": "Scrape & Save Webpages",
+  "created_at": "2023-07-14T15:39:27.361342",
+  "updated_at": "2023-07-14T15:53:19",
+  "summary": null,
+  "message_count": 8,
+  "messages": [
+    {
+      "id": "aaa2d188-9f11-4c66-866b-716a56864d1e",
+      "role": "user",
+      "content": "can you write me a scrapper to download all the text from a website starting from a root and only staying within links that are within the sites domain? I don't need images and it should all save to one file separators between each page, save title and then content no need to keep saving header and footer for each page. you can use python and whatever libraries that would help. The site I want to scrape is: https://learnprompting.org/docs/intro",
+      "created_at": "2023-07-14T15:39:27.374917",
+      "sequence_order": 0,
+      "parent_id": "1365f3ba-db9c-4b37-b044-0ab655c0479b",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "5d3a5627-6f21-4ba5-92e3-6987e522f7dd",
+      "role": "assistant",
+      "content": "Sure, I can provide you with a basic Python script that uses the BeautifulSoup and requests libraries to scrape a website. However, please note that web scraping should be done in accordance with the website's terms of service and with respect to the website's robots.txt file. Some websites explicitly disallow web scraping, and it's important to respect that. \n\nHere's a basic script that should do what you're asking for:\n\n```python\nimport requests\nfrom bs4 import BeautifulSoup\nfrom urllib.parse import urlparse, urljoin\n\n# Ensure links are within the same website\ndef is_valid(url, domain):\n    parsed = urlparse(url)\n    return bool(parsed.netloc) and parsed.netloc == domain\n\ndef get_all_website_links(url):\n    domain = urlparse(url).netloc\n    urls = set()\n    soup = BeautifulSoup(requests.get(url).content, \"html.parser\")\n    for a_tag in soup.findAll(\"a\"):\n        href = a_tag.attrs.get(\"href\")\n        if href == \"\" or href is None:\n            continue\n        href = urljoin(url, href)\n        if is_valid(href, domain):\n            urls.add(href)\n    return urls\n\ndef scrape_and_save(url, filename):\n    domain = urlparse(url).netloc\n    urls = get_all_website_links(url)\n    with open(filename, 'w') as f:\n        for url in urls:\n            res = requests.get(url)\n            soup = BeautifulSoup(res.content, 'html.parser')\n            title = soup.find('title')\n            if title:\n                f.write(title.text + '\\n')\n            for script in soup([\"script\", \"style\", \"header\", \"footer\"]):\n                script.extract()\n            text = soup.get_text()\n            f.write(text + '\\n' + '-'*100 + '\\n')\n\n# Start scraping\nscrape_and_save(\"https://learnprompting.org/docs/intro\", \"output.txt\")\n```\n\nThis script starts at the given URL, finds all links on that page that are within the same domain, and then downloads the text from each of those pages, excluding script, style, header, and footer elements. The title of each page and its content are saved to a file, separated by a line of dashes.\n\nPlease note that this is a very basic script and may not work perfectly for all websites, depending on their structure and content. It also doesn't handle things like login pages, CAPTCHAs, or other more complex situations. For more advanced web scraping, you might want to look into tools like Scrapy or Selenium.",
+      "created_at": "2023-07-14T15:39:59.211852",
+      "sequence_order": 1,
+      "parent_id": "aaa2d188-9f11-4c66-866b-716a56864d1e",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2df06-59f8-4ed3-9486-108369fc2c41",
+      "role": "user",
+      "content": "ok never mind i want all the text in a page no need to pick header/footer/title etc",
+      "created_at": "2023-07-14T15:42:05.873250",
+      "sequence_order": 2,
+      "parent_id": "5d3a5627-6f21-4ba5-92e3-6987e522f7dd",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "b0c3163f-36bc-494e-9387-90d32b157ad3",
+      "role": "assistant",
+      "content": "If you want to scrape all the text from a webpage without excluding any elements, you can simplify the script. Here's a modified version of the script that does that:\n\n```python\nimport requests\nfrom bs4 import BeautifulSoup\nfrom urllib.parse import urlparse, urljoin\n\n# Ensure links are within the same website\ndef is_valid(url, domain):\n    parsed = urlparse(url)\n    return bool(parsed.netloc) and parsed.netloc == domain\n\ndef get_all_website_links(url):\n    domain = urlparse(url).netloc\n    urls = set()\n    soup = BeautifulSoup(requests.get(url).content, \"html.parser\")\n    for a_tag in soup.findAll(\"a\"):\n        href = a_tag.attrs.get(\"href\")\n        if href == \"\" or href is None:\n            continue\n        href = urljoin(url, href)\n        if is_valid(href, domain):\n            urls.add(href)\n    return urls\n\ndef scrape_and_save(url, filename):\n    domain = urlparse(url).netloc\n    urls = get_all_website_links(url)\n    with open(filename, 'w') as f:\n        for url in urls:\n            res = requests.get(url)\n            soup = BeautifulSoup(res.content, 'html.parser')\n            text = soup.get_text()\n            f.write(text + '\\n' + '-'*100 + '\\n')\n\n# Start scraping\nscrape_and_save(\"https://learnprompting.org/docs/intro\", \"output.txt\")\n```\n\nThis script will now scrape all the text from each page, including headers, footers, and other elements. It still separates each page with a line of dashes.",
+      "created_at": "2023-07-14T15:42:25.179694",
+      "sequence_order": 3,
+      "parent_id": "aaa2df06-59f8-4ed3-9486-108369fc2c41",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa24851-cc00-483a-9e74-088575109e04",
+      "role": "user",
+      "content": "can you just be sure to add the url in between. Also last time there were a lot of words without spaces between them, where'd they go?",
+      "created_at": "2023-07-14T15:42:48.336769",
+      "sequence_order": 4,
+      "parent_id": "b0c3163f-36bc-494e-9387-90d32b157ad3",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "9b9087ab-a29a-4b86-8cd7-6cc0a0cf426b",
+      "role": "assistant",
+      "content": "The issue of words without spaces between them might be due to the way `get_text()` function works. It simply concatenates all the text together, which can sometimes result in missing spaces. A better way to extract the text might be to iterate over the individual elements and add a space after each one.\n\nHere's the updated script:\n\n```python\nimport requests\nfrom bs4 import BeautifulSoup\nfrom urllib.parse import urlparse, urljoin\n\n# Ensure links are within the same website\ndef is_valid(url, domain):\n    parsed = urlparse(url)\n    return bool(parsed.netloc) and parsed.netloc == domain\n\ndef get_all_website_links(url):\n    domain = urlparse(url).netloc\n    urls = set()\n    soup = BeautifulSoup(requests.get(url).content, \"html.parser\")\n    for a_tag in soup.findAll(\"a\"):\n        href = a_tag.attrs.get(\"href\")\n        if href == \"\" or href is None:\n            continue\n        href = urljoin(url, href)\n        if is_valid(href, domain):\n            urls.add(href)\n    return urls\n\ndef scrape_and_save(url, filename):\n    domain = urlparse(url).netloc\n    urls = get_all_website_links(url)\n    with open(filename, 'w') as f:\n        for url in urls:\n            res = requests.get(url)\n            soup = BeautifulSoup(res.content, 'html.parser')\n            f.write(url + '\\n' + '-'*100 + '\\n')\n            for element in soup.recursiveChildGenerator():\n                if isinstance(element, str):\n                    f.write(element + ' ')\n            f.write('\\n' + '-'*100 + '\\n')\n\n# Start scraping\nscrape_and_save(\"https://learnprompting.org/docs/intro\", \"output.txt\")\n```\n\nThis script now includes the URL of each page in the output file, and it adds a space after each text element to help prevent words from running together.",
+      "created_at": "2023-07-14T15:43:08.087865",
+      "sequence_order": 5,
+      "parent_id": "aaa24851-cc00-483a-9e74-088575109e04",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2d709-44c8-4537-9e52-d97042a93ba0",
+      "role": "user",
+      "content": "I have a folder with called docs with .md files with text in them, i want to combine all the text files into one file. there are subfolders, can you write a script to do that with python?",
+      "created_at": "2023-07-14T15:53:19.597650",
+      "sequence_order": 6,
+      "parent_id": "9b9087ab-a29a-4b86-8cd7-6cc0a0cf426b",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "9e155c2d-92e1-43c3-9e94-68490148b810",
+      "role": "assistant",
+      "content": "Sure, here's a simple Python script that will recursively go through all the directories and subdirectories starting from the \"docs\" directory, open all the .md files it finds, and append their contents to a single output file:\n\n```python\nimport os\n\ndef combine_md_files(start_dir, output_file):\n    with open(output_file, 'w') as outfile:\n        for root, dirs, files in os.walk(start_dir):\n            for file in files:\n                if file.endswith('.md'):\n                    with open(os.path.join(root, file), 'r') as infile:\n                        outfile.write(infile.read())\n                        outfile.write('\\n\\n')\n\ncombine_md_files('docs', 'combined.md')\n```\n\nThis script uses `os.walk()` to recursively go through all directories and subdirectories. It checks each file to see if it ends with '.md', and if it does, it opens the file, reads its contents, and writes those contents to the output file. It adds two newline characters after each file's contents to ensure that the contents of different files don't run together.\n\nPlease replace `'docs'` and `'combined.md'` with your actual directory and output file path if they are different.",
+      "created_at": "2023-07-14T15:53:35.304250",
+      "sequence_order": 7,
+      "parent_id": "aaa2d709-44c8-4537-9e52-d97042a93ba0",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

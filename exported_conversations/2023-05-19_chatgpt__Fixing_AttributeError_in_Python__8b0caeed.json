@@ -1,0 +1,102 @@
+{
+  "id": "8b0caeed-7906-4434-b445-c09266c1ca9f",
+  "source": "chatgpt",
+  "title": "\"Fixing AttributeError in Python\"",
+  "created_at": "2023-05-19T13:28:15.898695",
+  "updated_at": "2023-05-19T18:43:18",
+  "summary": null,
+  "message_count": 7,
+  "messages": [
+    {
+      "id": "aaa2e3d7-eb5d-4737-a29e-d1e207aacbad",
+      "role": "user",
+      "content": "sending this to a server:\n(base) bilalghalib@macbook-pro ~ % curl -X POST -H \"Content-Type: application/json\" -d '{\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Hello!\"\n    }\n  ]\n}'  http://165.22.123.78:3001/chat\n{\n  \"task_id\": \"6254bf26-7849-40a9-b095-8dc32b7ca37b\"\n}\n\nComing back with this error:\nAttributeError\nAttributeError: json\n\nTraceback (most recent call last)\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 2213, in __call__\nreturn self.wsgi_app(environ, start_response)\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 2193, in wsgi_app\nresponse = self.handle_exception(e)\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 2190, in wsgi_app\nresponse = self.full_dispatch_request()\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1486, in full_dispatch_request\nrv = self.handle_user_exception(e)\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1484, in full_dispatch_request\nrv = self.dispatch_request()\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1469, in dispatch_request\nreturn self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nFile \"/usr/local/lib/python3.8/site-packages/flask_cors/decorator.py\", line 128, in wrapped_function\nresp = make_response(f(*args, **kwargs))\nFile \"/app/app.py\", line 92, in result\nresponse = generate_text.AsyncResult(task_id).get()\nSErver:\nNU nano 2.9.3                                                  app.py                                                            \n\nimport os\nimport json\nimport requests\nfrom dotenv import load_dotenv\nfrom flask import Flask, request, jsonify, render_template\nfrom flask_cors import cross_origin\nfrom celery import Celery\nimport openai\n\napp = Flask(__name__)\n\nload_dotenv()\n\n# Configure Celery here we use radis\napp.config['CELERY_BROKER_URL'] = os.getenv('CELERY_BROKER_URL')\napp.config['CELERY_RESULT_BACKEND'] = os.getenv('CELERY_RESULT_BACKEND')\n\ncelery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])\ncelery.conf.update(app.config)\n\n# GPT-3 endpoint and credentials\ngpt3_endpoint = \"https://api.openai.com/v1/engines/text-davinci-003/completions\"\ngpt3_image_endpoint = \"https://api.openai.com/v1/images/generations\"\ngpt3_api_key = os.getenv(\"OPEN_AI_KEY\")\nopenai.api_key = gpt3_api_key\n\n\n@celery.task\n\ndef generate_text(messages):\n    # Send request to GPT-3.5 Turbo\n    response = openai.ChatCompletion.create(\n        model=\"gpt-3.5-turbo\",\n        messages=messages,\n    )\n\n    # Return response\n    return json.loads(response.json)\n@app.route('/chat', methods=['POST'])\n@cross_origin()\ndef chat():\n    # Get messages from client\n    data = request.json\n    messages = data['messages']\n    # Run GPT-3 task asynchronously\n    task = generate_text.apply_async(args=(messages,))\n    return jsonify({'task_id': task.id})\n\n",
+      "created_at": "2023-05-19T13:28:15.900042",
+      "sequence_order": 0,
+      "parent_id": "6c6c2bd5-4f99-45b4-872a-cf419611854b",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "f6db2806-2549-4913-970b-f6477292296b",
+      "role": "assistant",
+      "content": "The error `AttributeError: json` is likely occurring because the response object returned from `openai.ChatCompletion.create()` might already be a python dictionary (it depends on the SDK version). The `json()` method is used on a requests object to convert the JSON response to a Python dictionary, but if the response is already a dictionary, trying to convert it again will result in an AttributeError.\n\nHere is a suggested fix: in your `generate_text` function, just return the `response` object directly, without trying to convert it with `json.loads(response.json)`. Like so:\n\n```python\n@celery.task\ndef generate_text(messages):\n    # Send request to GPT-3.5 Turbo\n    response = openai.ChatCompletion.create(\n        model=\"gpt-3.5-turbo\",\n        messages=messages,\n    )\n\n    # Return response\n    return response  # No need to convert to json\n```\n\nThis assumes that the OpenAI SDK you're using returns the response as a dictionary. If it doesn't, you may need to find the correct way to convert the response to a dictionary",
+      "created_at": "2023-05-19T13:29:56.149798",
+      "sequence_order": 1,
+      "parent_id": "aaa2e3d7-eb5d-4737-a29e-d1e207aacbad",
+      "metadata": {
+        "status": "in_progress",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "aaa2922b-5032-4079-8784-069e2eaf26ec",
+      "role": "user",
+      "content": "sending this to a server:\n(base) bilalghalib@macbook-pro ~ % curl -X POST -H \"Content-Type: application/json\" -d '{\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Hello!\"\n    }\n  ]\n}'  http://165.22.123.78:3001/chat\n{\n  \"task_id\": \"6254bf26-7849-40a9-b095-8dc32b7ca37b\"\n}\n\nComing back with this error:\nAttributeError\nAttributeError: json\n\nTraceback (most recent call last)\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 2213, in __call__\nreturn self.wsgi_app(environ, start_response)\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 2193, in wsgi_app\nresponse = self.handle_exception(e)\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 2190, in wsgi_app\nresponse = self.full_dispatch_request()\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1486, in full_dispatch_request\nrv = self.handle_user_exception(e)\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1484, in full_dispatch_request\nrv = self.dispatch_request()\nFile \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1469, in dispatch_request\nreturn self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nFile \"/usr/local/lib/python3.8/site-packages/flask_cors/decorator.py\", line 128, in wrapped_function\nresp = make_response(f(*args, **kwargs))\nFile \"/app/app.py\", line 92, in result\nresponse = generate_text.AsyncResult(task_id).get()\nSErver:\nNU nano 2.9.3                                                  app.py                                                            \n\nimport os\nimport json\nimport requests\nfrom dotenv import load_dotenv\nfrom flask import Flask, request, jsonify, render_template\nfrom flask_cors import cross_origin\nfrom celery import Celery\nimport openai\n\napp = Flask(__name__)\n\nload_dotenv()\n\n# Configure Celery here we use radis\napp.config['CELERY_BROKER_URL'] = os.getenv('CELERY_BROKER_URL')\napp.config['CELERY_RESULT_BACKEND'] = os.getenv('CELERY_RESULT_BACKEND')\n\ncelery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])\ncelery.conf.update(app.config)\n\n# GPT-3 endpoint and credentials\ngpt3_endpoint = \"https://api.openai.com/v1/engines/text-davinci-003/completions\"\ngpt3_image_endpoint = \"https://api.openai.com/v1/images/generations\"\ngpt3_api_key = os.getenv(\"OPEN_AI_KEY\")\nopenai.api_key = gpt3_api_key\n\n\n@celery.task\n\ndef generate_text(messages):\n    # Send request to GPT-3.5 Turbo\n    response = openai.ChatCompletion.create(\n        model=\"gpt-3.5-turbo\",\n        messages=messages,\n    )\n\n    # Return response\n    return json.loads(response.json)\n@app.route('/chat', methods=['POST'])\n@cross_origin()\ndef chat():\n    # Get messages from client\n    data = request.json\n    messages = data['messages']\n    # Run GPT-3 task asynchronously\n    task = generate_text.apply_async(args=(messages,))\n    return jsonify({'task_id': task.id})\n\n\nthis is the response from the api documentation:\n{\n 'id': 'chatcmpl-6p9XYPYSTTRi0xEviKjjilqrWU2Ve',\n 'object': 'chat.completion',\n 'created': 1677649420,\n 'model': 'gpt-3.5-turbo',\n 'usage': {'prompt_tokens': 56, 'completion_tokens': 31, 'total_tokens': 87},\n 'choices': [\n   {\n    'message': {\n      'role': 'assistant',\n      'content': 'The 2020 World Series was played in Arlington, Texas at the Globe Life Field, which was the new home stadium for the Texas Rangers.'},\n    'finish_reason': 'stop',\n    'index': 0\n   }\n  ]\n}",
+      "created_at": "2023-05-19T13:30:02.063844",
+      "sequence_order": 2,
+      "parent_id": "6c6c2bd5-4f99-45b4-872a-cf419611854b",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "eb6c7d6a-25c5-42a6-8263-08a0328d883c",
+      "role": "assistant",
+      "content": "The issue is this line of code:\n\n```python\nreturn json.loads(response.json)\n```\n\nThe `response` object you're getting from `openai.ChatCompletion.create` is already a Python dictionary (according to OpenAI's Python library documentation). When you call `.json` on it, you're trying to use a method that doesn't exist, hence the `AttributeError: json`.\n\nIf you want to return the result in JSON format, you don't need to load it again with `json.loads`. You can return the response directly:\n\n```python\nreturn response\n```\n\nIn case you want to extract the assistant's message from the response, you can do it like this:\n\n```python\ndef generate_text(messages):\n    # Send request to GPT-3.5 Turbo\n    response = openai.ChatCompletion.create(\n        model=\"gpt-3.5-turbo\",\n        messages=messages,\n    )\n\n    # Extract the assistant's message\n    assistant_message = response['choices'][0]['message']['content']\n\n    # Return the assistant's message\n    return assistant_message\n```\n\nThis will return the content of the message sent by the assistant. Be aware that this assumes that the API call was successful and that the response format matches what you're expecting. You may want to include error handling for cases where the API call fails or the response format is different.",
+      "created_at": "2023-05-19T13:32:01.871075",
+      "sequence_order": 3,
+      "parent_id": "aaa2922b-5032-4079-8784-069e2eaf26ec",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2a37d-1b7f-43a9-bcc7-dce17d0ce179",
+      "role": "user",
+      "content": "error now: \n[2023-05-19 11:31:40,590: INFO/MainProcess] mingle: all alone\n[2023-05-19 11:31:40,603: INFO/MainProcess] celery@6b7268f56d71 ready.\n[2023-05-19 11:31:43,229: INFO/MainProcess] Task app.generate_text[29d520b2-7c7f-49c0-b9a4-be2edbdb1db3] received\n81.49.251.190 - - [19/May/2023 11:31:43] \"POST /chat HTTP/1.1\" 200 -\n[2023-05-19 11:31:45,138: INFO/ForkPoolWorker-2] Task app.generate_text[29d520b2-7c7f-49c0-b9a4-be2edbdb1db3] succeeded in 1.9077315840040683s: {'id': 'chatcmpl-7HschKrms82Cy0KNLou3FeyhRC91H', 'object': 'chat.completion', 'created': 1684495903, 'model': 'gpt-3.5-turbo-0301', 'usage': {'prompt_tokens': 10, 'completion_tokens': 10, 'total_tokens': 20}, 'choices': [{'message': {...}, 'finish_reason': 'stop', 'index': 0}]}\n81.49.251.190 - - [19/May/2023 11:31:53] \"GET /result/29d520b2-7c7f-49c0-b9a4-be2edbdb1db3 HTTP/1.1\" 500 -\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 2213, in __call__\n    return self.wsgi_app(environ, start_response)\n  File \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 2193, in wsgi_app\n    response = self.handle_exception(e)\n  File \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 2190, in wsgi_app\n    response = self.full_dispatch_request()\n  File \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1486, in full_dispatch_request\n    rv = self.handle_user_exception(e)\n  File \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1484, in full_dispatch_request\n    rv = self.dispatch_request()\n  File \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1469, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\n  File \"/usr/local/lib/python3.8/site-packages/flask_cors/decorator.py\", line 128, in wrapped_function\n    resp = make_response(f(*args, **kwargs))\n  File \"/app/app.py\", line 93, in result\n    result = response['choices'][0]['text']\nKeyError: 'text'\n81.49.251.190 - - [19/May/2023 11:31:53] \"GET /result/29d520b2-7c7f-49c0-b9a4-be2edbdb1db3?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1\" 200 -\n81.49.251.190 - - [19/May/2023 11:31:53] \"GET /result/29d520b2-7c7f-49c0-b9a4-be2edbdb1db3?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1\" 200 -\n81.49.251.190 - - [19/May/2023 11:31:53] \"GET /result/29d520b2-7c7f-49c0-b9a4-be2edbdb1db3?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1\" 200 -\n81.49.251.190 - - [19/May/2023 11:31:53] \"GET /result/29d520b2-7c7f-49c0-b9a4-be2edbdb1db3?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1\" 304 -\n",
+      "created_at": "2023-05-19T13:32:23.246078",
+      "sequence_order": 4,
+      "parent_id": "eb6c7d6a-25c5-42a6-8263-08a0328d883c",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "1187913c-6a63-46a8-b08a-179711d65880",
+      "role": "assistant",
+      "content": "The error is caused by the line:\n\n```python\nresult = response['choices'][0]['text']\n```\n\nIn the GPT-3 API response, the assistant's content is not stored under 'text'. Instead, it should be extracted like this:\n\n```python\nresult = response['choices'][0]['message']['content']\n```\n\nSo, you need to modify your code accordingly to extract the assistant's message from the result. \n\nPlease note that it's always important to properly handle potential errors. For example, you could verify that 'choices' is in the response and that it's not empty, and that 'message' and 'content' are in the first choice. If not, you should handle these cases appropriately (e.g., by returning an error message or by using a default value).",
+      "created_at": "2023-05-19T13:33:36.057073",
+      "sequence_order": 5,
+      "parent_id": "aaa2a37d-1b7f-43a9-bcc7-dce17d0ce179",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa22050-e4ad-4a48-8be4-1daf9249a3e6",
+      "role": "user",
+      "content": "error:\ncaught (in promise) TypeError: Cannot read properties of undefined (reading 'local')\n    at foreground.js:82:24\n    at new Promise (<anonymous>)\n    at sendMessageToExtension (foreground.js:80:12)\n  In: //this is the foreground script\n\n// Helper function to wait for a DOM element to appear\nconst waitForElement = (selector, timeout = 7000) => {\n    const start = Date.now();\n    return new Promise((resolve, reject) => {\n      const interval = setInterval(() => {\n        const element = document.querySelector(selector);\n        if (element) {\n          clearInterval(interval);\n          resolve(element);\n        } else if (Date.now() - start >= timeout) {\n          clearInterval(interval);\n          reject(new Error(`Timeout waiting for ${selector}`));\n        }\n      }, 100);\n    });\n  };\n  \n  // Function to gather tasks from the page\n  async function gatherTasks() {\n    let tasks = [];\n    try {\n      let columnElement = await waitForElement('h3.m-2.p-2');\n      let columnName = columnElement.innerText;\n  \n      let taskCards = Array.from(document.querySelectorAll('div[data-name=\"task-card\"]'));\n      taskCards.forEach((taskCard) => {\n        // Extract task data\n        tasks.push(extractTaskData(taskCard, columnName));\n      });\n    } catch (error) {\n      console.error(error);\n    }\n    return tasks;\n  }\n\n// Function to gather and store tasks\nfunction gatherAndStoreTasks() {\n    gatherTasks().then((tasks) => {\n      chrome.storage.local.set({ tasks: tasks }, () => {\n        if (chrome.runtime.lastError) {\n          console.error(chrome.runtime.lastError);\n        } else {\n          console.log(\"Tasks successfully stored.\");\n          console.log(tasks);\n        }\n      });\n    }).catch(error => {\n      console.error(error);\n    });\n  }\n  \n  // Function to extract task data from a task card element\n  function extractTaskData(taskCard, columnName) {\n    let dateElement = taskCard.querySelector('p.text-muted.fw-bold.d-block.m-2');\n    let date = dateElement ? dateElement.innerText : \"No date provided\";\n  \n    let taskDescriptionElement = taskCard.querySelector('p.white-space-normal.text-truncate-3-lines.max-h-90px');\n    let taskDescription = taskDescriptionElement ? taskDescriptionElement.innerText : \"No task description provided\";\n  \n    let badges = Array.from(taskCard.querySelectorAll('.badge')).map(badge => badge.innerText);\n    badges = badges.length > 0 ? badges : [\"No badges\"];\n  \n    let assignedPersonElement = taskCard.querySelector('.sb-avatar__image');\n    let assignedPerson = assignedPersonElement ? assignedPersonElement.alt : \"No person assigned\";\n  \n    return {\n      date: date,\n      taskDescription: taskDescription,\n      badges: badges,\n      assignedPerson: assignedPerson,\n      columnName: columnName\n    };\n  }\n  \n  // Function to send a message to the extension and handle potential errors\nfunction sendMessageToExtension(message) {\n    console.log(\"Sending message to extension:\", message);\n    return new Promise((resolve, reject) => {\n      try {\n        chrome.storage.local.set({ tasks: message.tasks }, () => {\n          if (chrome.runtime.lastError) {\n            reject(chrome.runtime.lastError);\n          } else {\n            resolve({ success: true });\n          }\n        });\n      } catch (error) {\n        console.log(\"Caught error:\", error);\n        reject(error);\n      }\n    });\n  }\n  \n\n  // Function to set up mutation observer for the body of the page\n  function setUpMutationObserver() {\n    const targetElement = document.body;\n  \n    let debounceTimeout;\n    const debounceDelay = 500; // Set delay as needed\n  \n    const observer = new MutationObserver(() => {\n      clearTimeout(debounceTimeout);\n      debounceTimeout = setTimeout(() => {\n        gatherTasks().then((tasks) => {\n          sendMessageToExtension({ message: \"tasksUpdated\", tasks });\n        });\n      }, debounceDelay);\n    });\n  \n    const observerConfig = { childList: true, subtree: true };\n    observer.observe(targetElement, observerConfig);\n  }\n  \n  // Entry point for the script\n  function main() {\n\n    setUpMutationObserver();\n    console.log(\"This prints to the console of the page (injected only if the page URL matches)\");\n    // When a message is received, simply gather and store tasks\n    chrome.runtime.onMessage.addListener((request, sender) => {\n        if (request.message === \"goForeground\") {\n            \n        console.log(\"We in foreground and button was clicked!\");\n        gatherAndStoreTasks();\n        }\n    });\n    \n  }\n  \n  main();\n ",
+      "created_at": "2023-05-19T18:38:35.624695",
+      "sequence_order": 6,
+      "parent_id": "1187913c-6a63-46a8-b08a-179711d65880",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    }
+  ]
+}

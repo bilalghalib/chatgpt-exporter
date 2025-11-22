@@ -1,0 +1,115 @@
+{
+  "id": "684dfa45-cb54-8012-9ca4-46f224db4a2b",
+  "source": "chatgpt",
+  "title": "Hugging Face Rate Limit",
+  "created_at": "2025-06-15T00:40:06.489035",
+  "updated_at": "2025-06-15T00:59:19.447412",
+  "summary": null,
+  "message_count": 8,
+  "messages": [
+    {
+      "id": "4505ec3b-aa11-47fe-ada8-d406ea8fe0a8",
+      "role": "user",
+      "content": "",
+      "created_at": null,
+      "sequence_order": 0,
+      "parent_id": "719e43d7-5568-4ee4-9144-98ed3efb7381",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "825b2bd1-cee9-4a50-ad36-23d224181909",
+      "role": "user",
+      "content": "what is this 2025-06-15 00:39:47,227 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-mpnet-base-v2\n2025-06-15 00:39:47,565 - embedding_extractor - ERROR - Error initializing embedding model: 429 Client Error: Too Many Requests for url: https://huggingface.co/api/models/sentence-transformers/all-mpnet-base-v2\nTraceback (most recent call last):\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/huggingface_hub/utils/_errors.py\", line 304, in hf_raise_for_status\n    response.raise_for_status()\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/requests/models.py\", line 1024, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 429 Client Error: Too Many Requests for url: https://huggingface.co/api/models/sentence-transformers/all-mpnet-base-v2\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/bilalghalib/Projects/experiments/Extraction/live_demo/app.py\", line 114, in <module>\n    extraction_pipeline = ExtractionPipeline()\n  File \"/Users/bilalghalib/Projects/experiments/Extraction/live_demo/embedding_extractor.py\", line 1671, in __init__\n    self.embedding_generator = EmbeddingGenerator()\n  File \"/Users/bilalghalib/Projects/experiments/Extraction/live_demo/embedding_extractor.py\", line 40, in __init__\n    self.model = SentenceTransformer(model_name)\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/sentence_transformers/SentenceTransformer.py\", line 87, in __init__\n    snapshot_download(model_name_or_path,\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/sentence_transformers/util.py\", line 442, in snapshot_download\n    model_info = _api.model_info(repo_id=repo_id, revision=revision, token=token)\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py\", line 114, in _inner_fn\n    return fn(*args, **kwargs)\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/huggingface_hub/hf_api.py\", line 2301, in model_info\n    hf_raise_for_status(r)\n  File \"/Users/bilalghalib/mambaforge/lib/python3.10/site-packages/huggingface_hub/utils/_errors.py\", line 371, in hf_raise_for_status\n    raise HfHubHTTPError(str(e), response=response) from e\nhuggingface_hub.utils._errors.HfHubHTTPError: 429 Client Error: Too Many Requests for url: https://huggingface.co/api/models/sentence-transformers/all-mpnet-base-v2\n(base) bilalghalib@Cruzer-2 live_demo % ",
+      "created_at": "2025-06-15T00:40:05.577000",
+      "sequence_order": 1,
+      "parent_id": "4505ec3b-aa11-47fe-ada8-d406ea8fe0a8",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "8bfbe95f-3e40-4f9d-9828-3f4200f131b0",
+      "role": "assistant",
+      "content": "",
+      "created_at": "2025-06-15T00:40:15.033798",
+      "sequence_order": 2,
+      "parent_id": "825b2bd1-cee9-4a50-ad36-23d224181909",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "e1aa552f-4de3-41b1-875b-86aed6087bdd",
+      "role": "assistant",
+      "content": "The error you're seeing is due to **rate limiting** from Hugging Face's servers:\n\n```\n429 Client Error: Too Many Requests\n```\n\n### 🔍 What Happened\n\nYour script is trying to load the model `sentence-transformers/all-mpnet-base-v2` using:\n\n```python\nself.model = SentenceTransformer(model_name)\n```\n\nBut Hugging Face has **temporarily blocked or throttled your requests** because:\n- You made too many requests in a short time.\n- You are unauthenticated or using a public IP that's rate-limited.\n\n---\n\n### 🛠 How to Fix It\n\nHere are several options:\n\n#### ✅ 1. **Use a Hugging Face Token (Recommended)**\nAuthenticate using your [Hugging Face access token](https://huggingface.co/settings/tokens):\n\n```python\nfrom huggingface_hub import login\nlogin(\"your_HF_token_here\")\n```\n\nOr, set the environment variable:\n\n```bash\nexport HUGGINGFACE_HUB_TOKEN=your_token_here\n```\n\nThen rerun your script. This bypasses most rate limits.\n\n---\n\n#### ✅ 2. **Cache the Model Locally**\nOnce downloaded, the model will be cached. To avoid future requests:\n\n```python\nmodel = SentenceTransformer(\"sentence-transformers/all-mpnet-base-v2\", cache_folder=\"/your/cache/path\")\n```\n\n---\n\n#### ✅ 3. **Avoid Repeated Reloads**\nMake sure you’re not repeatedly reloading the model in a loop or on each script run. Load once and reuse if possible.\n\n---\n\n#### ✅ 4. **Wait and Retry**\nIf unauthenticated, you can:\n- Wait ~1–10 minutes.\n- Try again (but this is unreliable long-term).\n\n---\n\nLet me know if you'd like help embedding this into your code or choosing an alternative model to test locally.",
+      "created_at": "2025-06-15T00:40:09.530494",
+      "sequence_order": 3,
+      "parent_id": "8bfbe95f-3e40-4f9d-9828-3f4200f131b0",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "5ed18f08-baa3-482c-b548-c5d17f8f8787",
+      "role": "user",
+      "content": "what is all-mpnet-base-v2 ",
+      "created_at": "2025-06-15T00:40:33.883000",
+      "sequence_order": 4,
+      "parent_id": "e1aa552f-4de3-41b1-875b-86aed6087bdd",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "13673eb5-41e3-4e13-85fd-3b60f8e46f35",
+      "role": "assistant",
+      "content": "`all-mpnet-base-v2` is a **pretrained sentence embedding model** developed by the team behind [Sentence-Transformers](https://www.sbert.net/). It's widely used to convert text into dense vector representations (embeddings) that capture semantic meaning.\n\n---\n\n### 🔍 What it is\n\n- **Full name**: `sentence-transformers/all-mpnet-base-v2`\n- **Architecture**: Based on Microsoft’s **MPNet** (Masked and Permuted Pretraining for Language Understanding)\n- **Purpose**: Maps sentences or paragraphs to fixed-size, 768-dimensional vectors that can be compared using cosine similarity or other distance metrics\n\n---\n\n### 🧠 What it's good for\n\n`all-mpnet-base-v2` is designed to **embed short texts** (sentences, paragraphs) into a vector space where **semantically similar texts are close**. It’s useful for:\n\n- Semantic search\n- Clustering\n- Text classification\n- Duplicate detection\n- Information retrieval\n- Question answering (embedding-based)\n\n---\n\n### 📈 Performance\n\nAccording to benchmarks (e.g., [MTEB](https://huggingface.co/spaces/mteb/leaderboard)), it performs very well for a wide range of sentence-level tasks. It's known to outperform earlier models like:\n\n- `all-MiniLM-L6-v2` (smaller, faster)\n- `distilroberta-base-paraphrase-v1` (older)\n\n---\n\n### 📦 Model details\n\n- **Base model**: `microsoft/mpnet-base`\n- **Trained on**: A large and diverse dataset of sentence pairs using contrastive learning\n- **Output**: 768-dimensional vector for each sentence\n\n---\n\n### Example Usage\n\n```python\nfrom sentence_transformers import SentenceTransformer\n\nmodel = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')\n\nsentences = [\"This is a test\", \"That was a test\"]\nembeddings = model.encode(sentences)\n\nprint(embeddings.shape)  # (2, 768)\n```\n\n---\n\nLet me know if you want a lighter model, a multilingual one, or one that works offline.",
+      "created_at": "2025-06-15T00:40:34.351839",
+      "sequence_order": 5,
+      "parent_id": "5ed18f08-baa3-482c-b548-c5d17f8f8787",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "714eac14-f689-4462-a3ce-e6776e5d699d",
+      "role": "user",
+      "content": "i just did this: (base) bilalghalib@Cruzer-2 live_demo % python app.py \n2025-06-15 00:58:16,016 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-mpnet-base-v2\nmodel_O2.onnx:   0%|                                                                                                                                                             | 0.00/436M [00:00<?, ?B/s]^CTraceback (most recent call last):\n  File \"/Users/bilalghalib/Projects/experiments/Extraction/live_demo/app.py\", line 114, in <module>\n    extraction_pipeline = ExtractionPipeline() \nwhy is it downloading again how can i get th eold one",
+      "created_at": "2025-06-15T00:59:00.729000",
+      "sequence_order": 6,
+      "parent_id": "13673eb5-41e3-4e13-85fd-3b60f8e46f35",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "fce9f91f-e698-4f7e-8814-49f777ab9fbe",
+      "role": "assistant",
+      "content": "Great question — if `all-mpnet-base-v2` is downloading **again**, it usually means your script:\n\n1. **Didn't complete the download before**, or\n2. **Doesn’t see the local cache**, so it tries again.\n\n---\n\n### ✅ What to Do\n\nHere’s how to fix or avoid re-downloading:\n\n---\n\n### **1. Use the Local Cache Properly**\n\nBy default, Hugging Face caches models in:\n\n```\n~/.cache/huggingface/hub/\n```\n\nBut your code might not be recognizing this cache if:\n\n- It's running in a different environment.\n- You deleted the cache.\n- You interrupted a previous download (e.g., with `Ctrl+C` like now).\n\n✅ **Solution: Set an explicit `cache_folder` path.**\n\n```python\nmodel = SentenceTransformer(\"sentence-transformers/all-mpnet-base-v2\", cache_folder=\"/Users/bilalghalib/.cache/huggingface\")\n```\n\nOr wherever your actual cache lives.\n\n---\n\n### **2. Check If the Cache Exists**\n\nRun this command in your terminal to check if the model is cached:\n\n```bash\nls ~/.cache/huggingface/hub/models--sentence-transformers--all-mpnet-base-v2\n```\n\nIf you see something like `snapshots/...` — it’s there.\n\nIf it’s empty or corrupted (from Ctrl+C during download), you may need to:\n\n```bash\nrm -rf ~/.cache/huggingface/hub/models--sentence-transformers--all-mpnet-base-v2\n```\n\nThen **let it download once fully** without interruption.\n\n---\n\n### **3. (Optional) Pre-download manually**\n\nTo make sure it downloads just once:\n\n```bash\nfrom huggingface_hub import snapshot_download\n\nsnapshot_download(repo_id=\"sentence-transformers/all-mpnet-base-v2\", cache_dir=\"/your/cache/path\")\n```\n\nThen load it with:\n\n```python\nmodel = SentenceTransformer(\"/your/cache/path/models--sentence-transformers--all-mpnet-base-v2/snapshots/<hash>\")\n```\n\n---\n\nLet me know if you want help setting up a local mirror, bundling the model with your repo, or locking your download to avoid future headaches.",
+      "created_at": "2025-06-15T00:59:01.363529",
+      "sequence_order": 7,
+      "parent_id": "714eac14-f689-4462-a3ce-e6776e5d699d",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "id": "f8556e68-e973-450f-ab07-0a3c43de7f68",
+  "source": "chatgpt",
+  "title": "Troubleshooting Gatsby Setup Error",
+  "created_at": "2023-05-24T18:23:20.204468",
+  "updated_at": "2023-05-24T19:00:29",
+  "summary": null,
+  "message_count": 10,
+  "messages": [
+    {
+      "id": "aaa2dfe3-289b-4cfb-9b3a-f683238b59f7",
+      "role": "user",
+      "content": "Error on gatsby setup:\n\n18:18:05 PM:\nERROR  gatsby-source-wordpress  Error: connect ECONNREFUSED ::1:80\n18:18:05 PM:\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1494:16) \n18:18:05 PM:\nGraphQL request to bloom.pm/wordpress/graphql failed.\n18:18:05 PM:\nPlease ensure the following statements are true \n18:18:06 PM:\n  - your WordPress URL is correct in gatsby-config.js\n18:18:06 PM:\n  - your server is responding to requests \n18:18:06 PM:\n  - WPGraphQL and WPGatsby are installed and active in your WordPress backend\n18:18:06 PM:\n  - Your WordPress debug.log does not contain critical errors\n18:18:06 PM:\nnot finished createSchemaCustomization - 0.232s\n18:18:06 PM:\nnot finished  gatsby-source-wordpress  ensuring plugin requirements are met - 0.192s\nFor this gatsby config:\n/**\n * Configure your Gatsby site with this file.\n *\n * See: https://www.gatsbyjs.com/docs/reference/config-files/gatsby-config/\n */\n\n/**\n * @type {import('gatsby').GatsbyConfig}\n */\nmodule.exports = {\n  siteMetadata: {\n    title: `Gatsby Default Starter`,\n    description: `Kick off your next, great Gatsby project with this default starter. This barebones starter ships with the main Gatsby configuration files you might need.`,\n    author: `@gatsbyjs`,\n    siteUrl: `https://gatsbystarterdefaultsource.gatsbyjs.io/`,\n  },\n  plugins: [\n    `gatsby-plugin-image`,\n    {\n      resolve: `gatsby-source-filesystem`,\n      options: {\n        name: `images`,\n        path: `${__dirname}/src/images`,\n      },\n    },\n    `gatsby-transformer-sharp`,\n    `gatsby-plugin-sharp`,\n    {\n      resolve: `gatsby-plugin-manifest`,\n      options: {\n        name: `gatsby-starter-default`,\n        short_name: `starter`,\n        start_url: `/`,\n        background_color: `#663399`,\n        // This will impact how browsers show your PWA/website\n        // https://css-tricks.com/meta-theme-color-and-trickery/\n        // theme_color: `#663399`,\n        display: `minimal-ui`,\n        icon: `src/images/gatsby-icon.png`, // This path is relative to the root of the site.\n      },\n    }, \n      {\n          resolve: `gatsby-source-wordpress`,\n          options: {\n              // Specify the URL of the WordPress source\n              url: `bloom.pm/wordpress/graphql`,\n              protocol: `https`,\n              // Indicates if a site is hosted on WordPress.com\n              hostingWPCOM: false,\n              // Specify which URL structures to fetch\n              includedRoutes: [\n                '**/pages',\n                '**/posts',\n                '**/tags',\n                '**/categories'\n              ]\n          }\n      }\n  ],\n}",
+      "created_at": "2023-05-24T18:23:28.617737",
+      "sequence_order": 0,
+      "parent_id": "1801ac68-d184-401d-af13-9746d09ab872",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "425b68a2-13c8-42f7-8bcd-04c6301e93c0",
+      "role": "assistant",
+      "content": "The error message you're seeing (`Error: connect ECONNREFUSED ::1:80`) suggests that the Gatsby source plugin is unable to connect to your WordPress site at the URL you've specified in your `gatsby-config.js` file.\n\nHere are a few things you can check to troubleshoot this issue:\n\n1. **WordPress URL**: Ensure that the URL of your WordPress site is correct in the `gatsby-config.js` file. The URL you've specified is `bloom.pm/wordpress/graphql`. Make sure this is the correct URL and that it is accessible.\n\n2. **Server Response**: Verify that your server is responding to requests. You can do this by visiting the URL in your web browser or using a tool like `curl` or `wget` from the command line.\n\n3. **WPGraphQL and WPGatsby Plugins**: Check that the WPGraphQL and WPGatsby plugins are installed and active in your WordPress backend. These plugins are necessary for the Gatsby source plugin to fetch data from your WordPress site.\n\n4. **WordPress Debug Log**: Check your WordPress debug.log for any critical errors that might be preventing the Gatsby source plugin from connecting to your WordPress site.\n\n5. **Protocol**: In your `gatsby-source-wordpress` plugin configuration, you've specified `https` as the protocol. Make sure your WordPress site supports HTTPS. If it doesn't, you might need to change this to `http`.\n\n6. **URL Format**: The URL format in the `gatsby-source-wordpress` options should be a fully qualified URL. Try changing the URL to `https://bloom.pm/wordpress/graphql`.\n\nIf you've checked all of these and you're still encountering the issue, there might be a problem with your network configuration or your WordPress server might be down or experiencing issues.",
+      "created_at": "2023-05-24T18:24:10.045555",
+      "sequence_order": 1,
+      "parent_id": "aaa2dfe3-289b-4cfb-9b3a-f683238b59f7",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa22e2c-6746-4026-b2fc-10b222451c50",
+      "role": "user",
+      "content": "going to bloom.pm/wordpress/graphql\nI get:{\"errors\":[{\"message\":\"GraphQL Request must include at least one of those two parameters: \\\"query\\\" or \\\"queryId\\\"\",\"extensions\":{\"category\":\"request\"}}],\"extensions\":{\"debug\":[{\"type\":\"DEBUG_LOGS_INACTIVE\",\"message\":\"GraphQL Debug logging is not active. To see debug logs, GRAPHQL_DEBUG must be enabled.\"}]}}\nLooks good\ncan you give me a curl to test? \nPlugins are on I believe ",
+      "created_at": "2023-05-24T18:25:38.242412",
+      "sequence_order": 2,
+      "parent_id": "425b68a2-13c8-42f7-8bcd-04c6301e93c0",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "80ba2534-4627-44a7-8021-5bb328f4f181",
+      "role": "assistant",
+      "content": "Sure, you can use the `curl` command to send a POST request to your GraphQL endpoint. Since GraphQL requires a query to be sent as part of the request, you'll need to include a simple query in your `curl` command. Here's an example:\n\n```bash\ncurl -X POST -H \"Content-Type: application/json\" --data '{ \"query\": \"{ posts { nodes { id, title } } }\" }' https://bloom.pm/wordpress/graphql\n```\n\nThis command sends a POST request to your GraphQL endpoint with a simple query that fetches the ID and title of all posts. If your server is up and running and the WPGraphQL plugin is working correctly, you should get a JSON response with the data for your posts.\n\nPlease replace the query part with a valid query according to your WordPress GraphQL schema. The above is just a simple example and might not work if your schema is different.",
+      "created_at": "2023-05-24T18:25:58.645576",
+      "sequence_order": 3,
+      "parent_id": "aaa22e2c-6746-4026-b2fc-10b222451c50",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa29025-fb1f-4f2b-af1d-6dc63ed02fb3",
+      "role": "user",
+      "content": "{\"data\":{\"posts\":{\"nodes\":[{\"id\":\"cG9zdDoxNzEyMg==\",\"title\":\"Artificial Intelligence: From Ideation to Growth Workshop\"},{\"id\":\"cG9zdDoxNzA2Ng==\",\"title\":\"EON Open House: Fuel Your Entrepreneurial Fire!\"},{\"id\":\"cG9zdDoxNjk0NQ==\",\"title\":\"Launch of TheKnowHer: A Free Online Directory of Women-led SMEs\"},{\"id\":\"cG9zdDoxNjkwOA==\",\"title\":\"Monthly Calendar | Positive Emotions April\"},{\"id\":\"cG9zdDoxNjgwOA==\",\"title\":\"Growth Hacking \\u2013 Virtual Workshop\"},{\"id\":\"cG9zdDoxNjc2NA==\",\"title\":\"Designing entrepreneurship programs that help people thrive in difficult times \\u2013 Workshop\"},{\"id\":\"cG9zdDoxNjc1Mw==\",\"title\":\"Women Entrepreneurs: The Untapped Potential for Growth and Economic Impact\"},{\"id\":\"cG9zdDoxNjc0OA==\",\"title\":\"Storytelling with Numbers \\u2013 Virtual Workshop\"},{\"id\":\"cG9zdDoxNjc0MA==\",\"title\":\"Monthly Calendar | Humanity March\"},{\"id\":\"cG9zdDoxNjY4Ng==\",\"title\":\"The Power of Brand Awareness \\u2013 HubSpot Virtual Workshop\"}]}},\"extensions\":{\"debug\":[{\"type\":\"DEBUG_LOGS_INACTIVE\",\"message\":\"GraphQL Debug logging is not active. To see debug logs, GRAPHQL_DEBUG must be enabled.\"}]}}%       (base) bilalghalib@macbook-pro ~ % \n",
+      "created_at": "2023-05-24T18:26:21.154258",
+      "sequence_order": 4,
+      "parent_id": "80ba2534-4627-44a7-8021-5bb328f4f181",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "87e82580-c255-40c3-8ca3-ff6e0e0f18a7",
+      "role": "assistant",
+      "content": "Great! The curl command worked correctly and you received a response with a list of posts from your WordPress site. This means that your WordPress server is up and running and the WPGraphQL plugin is working correctly.\n\nGiven this, the issue with your Gatsby setup might be related to the configuration of the `gatsby-source-wordpress` plugin in your `gatsby-config.js` file. \n\nAs I mentioned earlier, the URL format in the `gatsby-source-wordpress` options should be a fully qualified URL. Try changing the URL to `https://bloom.pm/wordpress/graphql`.\n\nHere's how the updated configuration should look:\n\n```javascript\n{\n    resolve: `gatsby-source-wordpress`,\n    options: {\n        // Specify the URL of the WordPress source\n        url: `https://bloom.pm/wordpress/graphql`,\n        protocol: `https`,\n        // Indicates if a site is hosted on WordPress.com\n        hostingWPCOM: false,\n        // Specify which URL structures to fetch\n        includedRoutes: [\n          '**/pages',\n          '**/posts',\n          '**/tags',\n          '**/categories'\n        ]\n    }\n}\n```\n\nAfter making this change, try running your Gatsby site again and see if the issue is resolved.",
+      "created_at": "2023-05-24T18:26:49.364023",
+      "sequence_order": 5,
+      "parent_id": "aaa29025-fb1f-4f2b-af1d-6dc63ed02fb3",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa2cacc-6800-458b-8861-f791563fed65",
+      "role": "user",
+      "content": "18:28:43 PM:\nERROR  gatsby-source-wordpress  Error: Request failed with status code 502\n18:28:43 PM:\n    at handleFetchErrors (/usr/src/app/www/node_modules/gatsby-source-wordpress/src/utils/fetch-graphql.ts:344:38)\n18:28:43 PM:\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n18:28:43 PM:\n    at fetchGraphql (/usr/src/app/www/node_modules/gatsby-source-wordpress/src/utils/fetch-graphql.ts:780:5)\n18:28:43 PM:\n    at paginatedWpNodeFetch (/usr/src/app/www/node_modules/gatsby-source-wordpress/src/steps/source-nodes/fetch-nodes/fetch-nodes-paginated.js:68:20)\n18:28:43 PM:\n    at fetchWPGQLContentNodes (/usr/src/app/www/node_modules/gatsby-source-wordpress/src/steps/source-nodes/fetch-nodes/fetch-nodes.js:47:26)\n18:28:43 PM:\n    at /usr/src/app/www/node_modules/gatsby-source-wordpress/src/steps/source-nodes/fetch-nodes/fetch-nodes.js:173:30\n18:28:43 PM:\n    at /usr/src/app/www/node_modules/gatsby-source-wordpress/src/steps/source-nodes/fetch-nodes/fetch-nodes.js:163:9\n18:28:43 PM:\n    at async Promise.all (index 8)\n18:28:43 PM:\n    at runFnForEachNodeQuery (/usr/src/app/www/node_modules/gatsby-source-wordpress/src/steps/source-nodes/fetch-nodes/fetch-nodes.js:150:5)\n18:28:44 PM:\n    at fetchWPGQLContentNodesByContentType (/usr/src/app/www/node_modules/gatsby-source-wordpress/src/steps/source-nodes/fetch-nodes/fetch-nodes.js:172:3)\n18:28:44 PM:\n    at fetchAndCreateAllNodes (/usr/src/app/www/node_modules/gatsby-source-wordpress/src/steps/source-nodes/fetch-nodes/fetch-nodes.js:207:37)\n18:28:44 PM:\n    at sourceNodes (/usr/src/app/www/node_modules/gatsby-source-wordpress/src/steps/source-nodes/index.ts:54:5)\n18:28:44 PM:\n    at runSteps (/usr/src/app/www/node_modules/gatsby-source-wordpress/src/utils/run-steps.ts:41:9)\n18:28:44 PM:\n    at runAPI (/usr/src/app/www/node_modules/gatsby/src/utils/api-runner-node.js:509:16)\n18:28:44 PM:\nERROR  gatsby-source-wordpress  Your WordPress server at https://bloom.pm/wordpress/graphql appears to be overloaded.\n18:28:44 PM:\nTry reducing the requestConcurrency for content updates or the previewRequestConcurrency for previews, and/or reducing the schema.perPage option:\n18:28:44 PM:\n{\n18:28:44 PM:\n  resolve: 'gatsby-source-wordpress',\n18:28:44 PM:\n  options: {\n18:28:44 PM:\n    schema: {\n18:28:44 PM:\n      perPage: 20, // currently set to 100\n18:28:44 PM:\n      requestConcurrency: 5, // currently set to 15\n18:28:44 PM:\n      previewRequestConcurrency: 2, // currently set to 5\n18:28:44 PM:\n    }\n18:28:44 PM:\n  },\n18:28:44 PM:\n}\n18:28:44 PM:\nnot finished source and transform nodes - 104.122s\n18:28:44 PM:\nnot finished  gatsby-source-wordpress  fetching nodes - 104.018s - 373 total\n18:28:44 PM:\nnot finished  gatsby-source-wordpress  Post - 104.004s",
+      "created_at": "2023-05-24T18:31:08.453704",
+      "sequence_order": 6,
+      "parent_id": "87e82580-c255-40c3-8ca3-ff6e0e0f18a7",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "8ec9253f-ab6c-4c2c-a2ea-15a40125ae5a",
+      "role": "assistant",
+      "content": "The new error message (`Error: Request failed with status code 502`) suggests that your WordPress server is overloaded and unable to handle the number of requests being sent by the Gatsby source plugin.\n\nThe error message also provides a suggestion for how to resolve this issue. You can reduce the `perPage`, `requestConcurrency`, and `previewRequestConcurrency` options in your `gatsby-source-wordpress` plugin configuration.\n\nHere's how you can update your configuration:\n\n```javascript\n{\n    resolve: `gatsby-source-wordpress`,\n    options: {\n        // Specify the URL of the WordPress source\n        url: `https://bloom.pm/wordpress/graphql`,\n        protocol: `https`,\n        // Indicates if a site is hosted on WordPress.com\n        hostingWPCOM: false,\n        // Specify which URL structures to fetch\n        includedRoutes: [\n          '**/pages',\n          '**/posts',\n          '**/tags',\n          '**/categories'\n        ],\n        schema: {\n            perPage: 20, // Reduce the number of items fetched per request\n            requestConcurrency: 5, // Reduce the number of concurrent requests\n            previewRequestConcurrency: 2, // Reduce the number of concurrent preview requests\n        }\n    }\n}\n```\n\nThis configuration reduces the load on your WordPress server by fetching fewer items per request and making fewer concurrent requests. After making these changes, try running your Gatsby site again and see if the issue is resolved.",
+      "created_at": "2023-05-24T18:31:39.442564",
+      "sequence_order": 7,
+      "parent_id": "aaa2cacc-6800-458b-8861-f791563fed65",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    },
+    {
+      "id": "aaa29573-1b23-4a37-b58e-8505a88d454c",
+      "role": "user",
+      "content": "\n18:58:24 PM:\nsuccess Clean up stale nodes - 0.061s - 0/0 0.00/s\n18:58:24 PM:\nverbose 171.964305197 Checking for deleted pages\n18:58:24 PM:\nverbose 171.964886862 Deleted 0 pages\n18:58:24 PM:\nverbose 171.964985311 Found 0 changed pages\n18:58:24 PM:\nsuccess source and transform nodes - 152.506s\n18:58:24 PM:\nsuccess Checking for changed pages - 0.001s\n18:58:25 PM:\ninfo Writing GraphQL type definitions to /usr/src/app/www/.cache/schema.gql\n18:58:25 PM:\nsuccess building schema - 1.166s\n18:58:26 PM:\nERROR There was an error in your GraphQL query:\n18:58:26 PM:\nCannot query field \"allWordpressPost\" on type \"Query\".\n18:58:26 PM:\nIf you don't expect \"allWordpressPost\" to exist on the type \"Query\" it is most likely a typo. However, if you expect \"allWordpressPost\" to exist there are a couple of solutions to common problems:\n18:58:26 PM:\n- If you added a new data source and/or changed something inside gatsby-node/gatsby-config, please try a restart of your development server.\n18:58:26 PM:\nIt is recommended to explicitly type your GraphQL schema if you want to use optional fields.\n18:58:26 PM:\n- You want to optionally use your field \"allWordpressPost\" and right now it is not used anywhere.\n18:58:26 PM:\nnot finished createPages - 0.325s\nGatsbynode:\n/**\n * Implement Gatsby's Node APIs in this file.\n *\n * See: https://www.gatsbyjs.com/docs/reference/config-files/gatsby-node/\n */\n\n/**\n * @type {import('gatsby').GatsbyNode['createPages']}\n */\nexports.createPages = async ({ actions }) => {\n  const { createPage } = actions\n  createPage({\n    path: \"/using-dsg\",\n    component: require.resolve(\"./src/templates/using-dsg.js\"),\n    context: {},\n    defer: true,\n  })\n}\nconst path = require(`path`)\n\nexports.createPages = ({ graphql, actions }) => {\n  const { createPage } = actions\n  return graphql(`\n    {\n      allWordpressPost(sort: {fields: [date]}) {\n        edges {\n          node {\n            title\n            excerpt\n            slug\n            date(formatString: \"MM-DD-YYYY\")\n            author {\n              name\n            }\n          }\n        }\n      }\n    }\n  `).then(result => {\n    result.data.allWordpressPost.edges.forEach(({ node }) => {\n      createPage({\n        // Decide URL structure\n        path: node.slug,\n        // path to template\n        component: path.resolve(`./src/templates/blog-post.js`),\n        context: {\n          // This is the $slug variable\n          // passed to blog-post.js\n          slug: node.slug,\n        },\n      })\n    })\n  })\n}index.js\nimport React from \"react\"\nimport { Link, graphql } from \"gatsby\"\nimport Layout from \"../components/layout\"\nimport SEO from \"../components/seo\"\n\nexport default ({ data }) => {\n  return (\n    <Layout>\n      <SEO title=\"home\" />\n      <h1>My WordPress Blog</h1>\n      <h4>Posts</h4>\n      {data.allWordpressPost.edges.map(({ node }) => (\n        <div>\n          <Link to={node.slug}>\n            <p>{node.title}</p>\n          </Link>\n          <div dangerouslySetInnerHTML={{ __html: node.excerpt }} />\n        </div>\n      ))}\n    </Layout>\n  )\n}\n\nexport const pageQuery = graphql`\n  query {\n    allWordpressPost(sort: { fields: [date] }) {\n      edges {\n        node {\n          title\n          excerpt\n          slug\n        }\n      }\n    }\n  }`\nblog-posts.js\nimport React from \"react\"\nimport Layout from \"../components/layout\"\nimport { graphql } from \"gatsby\"\n\nexport default ({ data }) => {\n  const post = data.allWordpressPost.edges[0].node\n  console.log(post)\n  return (\n    <Layout>\n      <div>\n        <h1>{post.title}</h1>\n        <div dangerouslySetInnerHTML={{ __html: post.content }} />\n        <p> By: {post.author.name} </p>\n        <p> On: {post.date} </p>\n      </div>\n    </Layout>\n  )\n}\n\nexport const query = graphql`\n  query($slug: String!) {\n    allWordpressPost(filter: { slug: { eq: $slug } }) {\n      edges {\n        node {\n          title\n          content\n          slug\n          date(formatString: \"MM-DD-YYYY\")\n          author {\n            name\n          }\n        }\n      }\n    }\n  }`\n",
+      "created_at": "2023-05-24T19:00:28.994306",
+      "sequence_order": 8,
+      "parent_id": "8ec9253f-ab6c-4c2c-a2ea-15a40125ae5a",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "87e3c1d4-2fda-4a5e-a467-ca3ea9794a43",
+      "role": "assistant",
+      "content": "The error message `Cannot query field \"allWordpressPost\" on type \"Query\"` suggests that the GraphQL schema doesn't recognize the `allWordpressPost` field. This is likely because the `gatsby-source-wordpress` plugin has been updated to a new version (v4 or above), which changes how data is queried.\n\nIn the new version of the plugin, the way to query posts has changed from `allWordpressPost` to `allWpPost`. This change is part of a broader update that aligns the plugin more closely with the WPGraphQL plugin's schema.\n\nHere's how you can update your queries:\n\nIn your `gatsby-node.js` file:\n\n```javascript\nexports.createPages = ({ graphql, actions }) => {\n  const { createPage } = actions\n  return graphql(`\n    {\n      allWpPost(sort: {fields: [date]}) {\n        edges {\n          node {\n            title\n            excerpt\n            slug\n            date(formatString: \"MM-DD-YYYY\")\n            author {\n              node {\n                name\n              }\n            }\n          }\n        }\n      }\n    }\n  `).then(result => {\n    result.data.allWpPost.edges.forEach(({ node }) => {\n      createPage({\n        path: node.slug,\n        component: path.resolve(`./src/templates/blog-post.js`),\n        context: {\n          slug: node.slug,\n        },\n      })\n    })\n  })\n}\n```\n\nIn your `index.js` file:\n\n```javascript\nexport const pageQuery = graphql`\n  query {\n    allWpPost(sort: { fields: [date] }) {\n      edges {\n        node {\n          title\n          excerpt\n          slug\n        }\n      }\n    }\n  }`\n```\n\nIn your `blog-posts.js` file:\n\n```javascript\nexport const query = graphql`\n  query($slug: String!) {\n    allWpPost(filter: { slug: { eq: $slug } }) {\n      edges {\n        node {\n          title\n          content\n          slug\n          date(formatString: \"MM-DD-YYYY\")\n          author {\n            node {\n              name\n            }\n          }\n        }\n      }\n    }\n  }`\n```\n\nAfter making these changes, try running your Gatsby site again and see if the issue is resolved.",
+      "created_at": "2023-05-24T19:01:10.310348",
+      "sequence_order": 9,
+      "parent_id": "aaa29573-1b23-4a37-b58e-8505a88d454c",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

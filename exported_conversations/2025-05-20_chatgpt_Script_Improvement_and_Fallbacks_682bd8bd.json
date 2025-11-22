@@ -1,0 +1,102 @@
+{
+  "id": "682bd8bd-6c6c-8012-b4ce-354390cd41bd",
+  "source": "chatgpt",
+  "title": "Script Improvement and Fallbacks",
+  "created_at": "2025-05-20T03:19:57.677508",
+  "updated_at": "2025-05-20T03:21:15.395769",
+  "summary": null,
+  "message_count": 7,
+  "messages": [
+    {
+      "id": "e1171750-9c2b-4811-83be-6b25cda23788",
+      "role": "user",
+      "content": "",
+      "created_at": null,
+      "sequence_order": 0,
+      "parent_id": "fb2edc5a-5f69-4851-836c-7fadaffdea6d",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "528fd325-33c7-4f00-a21c-79824e00eca8",
+      "role": "user",
+      "content": "fix this error, and clean up the script while you're at it, it's not working well and i want gracefull fallbacks and llm repairs for the diagrams if they don't generate well \nretrieving the image. The provided image should be publicly accessible, within size limit, and in supported formats.\n(base) bilalghalib@Cruzer-2 makeslides % node make2.js  ./guides/day6.txt --title \"Day 6\" --reuse-json --json-path /Users/bilalghalib/Projects/scripts/makeslides/storage/1747701821550/slides-raw.json\n(node:39090) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n01:18:39 [INFO]: Created session directory: storage/1747703919598\n01:18:39 [INFO]: Starting local server at http://localhost:8080\n01:18:40 [INFO]: Ngrok tunnel started: https://cbd3-2a0d-e487-44e-d8d9-c827-820d-9551-1052.ngrok-free.app\n01:18:40 [INFO]: Authorizing with Google APIs\n01:18:40 [INFO]: Successfully authorized\n01:18:46 [ERROR]: Error: Invalid requests[5].createImage: There was a problem retrieving the image. The provided image should be publicly accessible, within size limit, and in supported formats.\n(base) bilalghalib@Cruzer-2 makeslides % \n\nThe code to improve[[[// makeslides-v6.js – spins up local server + ngrok, removes image if not available\n// CLI EXAMPLES\n//   node makeslides-v6.js guide.txt --title \"Day 6\"\n\nimport fs from 'fs/promises';\nimport * as fsSync from 'fs';\nimport path from 'path';\nimport { execSync, spawn } from 'child_process';\nimport { fileURLToPath } from 'url';\nimport 'dotenv/config.js';\nimport { Anthropic } from '@anthropic-ai/sdk';\nimport { google } from 'googleapis';\nimport crypto from 'crypto';\nimport fetch from 'node-fetch';\nimport ngrok from 'ngrok';\n\nconst argv = process.argv.slice(2);\nif (argv.length < 1) {\n  console.log('Usage: node makeslides-v6.js guide.txt --title \"Deck\" [--reuse-json --json-path file] [--verbose] [--dry-run]');\n  process.exit(1);\n}\n\nconst GUIDE_FILE = argv[0];\nconst TITLE     = argv.includes('--title')      ? argv[argv.indexOf('--title') + 1]      : path.basename(GUIDE_FILE, '.txt');\nconst REUSE     = argv.includes('--reuse-json');\nconst JSON_PATH = argv.includes('--json-path')  ? argv[argv.indexOf('--json-path') + 1]  : null;\nconst VERBOSE   = argv.includes('--verbose');\nconst DRY_RUN   = argv.includes('--dry-run');\n\nfunction log(level, msg) {\n  const ts = new Date().toISOString().split('T')[1].split('.')[0];\n  if (!VERBOSE && level === 'DEBUG') return;\n  console.log(`${ts} [${level}]: ${msg}`);\n}\n\nconst __filename = fileURLToPath(import.meta.url);\nconst __dirname  = path.dirname(__filename);\nconst PROMPT_PATH = path.join(__dirname, 'prompt-template.txt');\n\nconst RUN_ID = Date.now().toString();\nconst SESSION_DIR = path.join('storage', RUN_ID);\nconst IMAGE_DIR   = path.join('images');\nawait fs.mkdir(SESSION_DIR, { recursive: true });\nawait fs.mkdir(IMAGE_DIR, { recursive: true });\nlog('INFO', `Created session directory: ${SESSION_DIR}`);\n\nconst GOOGLE_SCOPES = [\n  'https://www.googleapis.com/auth/drive',\n  'https://www.googleapis.com/auth/presentations'\n];\n\nconst uploadCache = new Map();\n\nfunction startLocalServer(port = 8080) {\n  log('INFO', `Starting local server at http://localhost:${port}`);\n  return spawn('python3', ['-m', 'http.server', port.toString()], {\n    cwd: process.cwd(),\n    stdio: 'ignore',\n    detached: true\n  });\n}\n\nasync function startNgrokTunnel(port = 8080) {\n  const url = await ngrok.connect({ addr: port });\n  log('INFO', `Ngrok tunnel started: ${url}`);\n  return url;\n}\n\nasync function getSlides() {\n  const auth = new google.auth.GoogleAuth({ scopes: GOOGLE_SCOPES });\n  return google.slides({ version: 'v1', auth: await auth.getClient() });\n}\n\nconst headers = {};\nif (process.env.ANTHROPIC_BETA) headers['anthropic-beta'] = process.env.ANTHROPIC_BETA;\nconst anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, defaultHeaders: headers });\n\nasync function facilitatorGuideToJSON(text) {\n  const promptTemplate = await fs.readFile(PROMPT_PATH, 'utf8');\n  const prompt = promptTemplate.replace('{{content}}', text);\n  const stream = await anthropic.messages.stream({\n    model: 'claude-3-7-sonnet-20250219',\n    max_tokens: 20000,\n    messages: [{ role: 'user', content: prompt }],\n    stream: true\n  });\n  if (VERBOSE) log('INFO', 'Streaming Claude...');\n  let jsonText = '';\n  for await (const ev of stream) {\n    if (ev.type === 'content_block_delta' && ev.delta.type === 'text_delta') jsonText += ev.delta.text;\n  }\n  await fs.writeFile(path.join(SESSION_DIR, 'slides-raw.json'), jsonText);\n  if (!jsonText.startsWith('[')) jsonText = jsonText.slice(jsonText.indexOf('['));\n  return JSON.parse(jsonText.replace(/,\\s*([}\\]])/g, '$1'));\n}\n\nasync function renderDiagram(type, content) {\n  const mmd = path.join(SESSION_DIR, `dia-${Date.now()}.mmd`);\n  const png = mmd.replace('.mmd', '.png');\n  await fs.writeFile(mmd, `${type} ${content.startsWith(type) ? '' : content}`);\n  execSync(`mmdc -i \"${mmd}\" -o \"${png}\" -b transparent`);\n  const destPath = path.join(IMAGE_DIR, path.basename(png));\n  await fs.copyFile(png, destPath);\n  return destPath;\n}\n\nfunction chooseLayout(slide) {\n  if (slide.slide_number === 1) return 'TITLE';\n  if (slide.image_url || slide.diagram_type) return 'TITLE_AND_TWO_COLUMNS';\n  if (/activity|exercise|challenge/i.test(slide.title)) return 'SECTION_HEADER';\n  return 'TITLE_AND_BODY';\n}\n\nfunction layoutCoords(layout) {\n  if (layout === 'TITLE') return { title: [50, 150, 600, 80], body: null };\n  if (layout === 'SECTION_HEADER') return { title: [50, 100, 600, 100], body: null };\n  if (layout === 'TITLE_AND_TWO_COLUMNS') return { title: [50, 20, 600, 60], body: [50, 100, 300, 300] };\n  return { title: [50, 20, 600, 60], body: [50, 100, 600, 300] };\n}\n\nfunction textBoxRequests(id, pageId, [x, y, w, h], text) {\n  return [\n    {\n      createShape: {\n        objectId: id,\n        shapeType: 'TEXT_BOX',\n        elementProperties: {\n          pageObjectId: pageId,\n          size: { height: { magnitude: h, unit: 'PT' }, width: { magnitude: w, unit: 'PT' } },\n          transform: { scaleX: 1, scaleY: 1, translateX: x, translateY: y, unit: 'PT' }\n        }\n      }\n    },\n    { insertText: { objectId: id, insertionIndex: 0, text } }\n  ];\n}\n\nasync function createSlides() {\n  const localServer = startLocalServer(8080);\n  const NGROK_URL = await startNgrokTunnel(8080);\n\n  const slideData = REUSE ? JSON.parse(await fs.readFile(JSON_PATH, 'utf8'))\n                          : await facilitatorGuideToJSON(await fs.readFile(GUIDE_FILE, 'utf8'));\n\n  if (DRY_RUN) { log('INFO', 'Dry‑run complete. No Google API calls.'); return; }\n  log('INFO', 'Authorizing with Google APIs');\n  const slidesSvc = await getSlides();\n  log('INFO', 'Successfully authorized');\n  const { data: pres } = await slidesSvc.presentations.create({ requestBody: { title: TITLE } });\n\n  for (const s of slideData) {\n    log('DEBUG', `Processing slide ${s.slide_number}`);\n    const pageId = `slide${String(s.slide_number).padStart(3, '0')}`;\n    const layout = chooseLayout(s);\n    const coords = layoutCoords(layout);\n    const titleId = `${pageId}_title`;\n    const bodyId  = `${pageId}_body`;\n    const reqs = [\n      { createSlide: { objectId: pageId, slideLayoutReference: { predefinedLayout: layout } } },\n      ...textBoxRequests(titleId, pageId, coords.title, s.title)\n    ];\n\n    if (coords.body && s.content) reqs.push(...textBoxRequests(bodyId, pageId, coords.body, s.content));\n\n    if (s.diagram_type && s.diagram_content) {\n      try {\n        const localPath = await renderDiagram(s.diagram_type, s.diagram_content);\n        const publicUrl = `${NGROK_URL}/images/${path.basename(localPath)}`;\n        const response = await fetch(publicUrl);\n        if (!response.ok) throw new Error('Diagram not accessible');\n\n        reqs.push({\n          createImage: {\n            objectId: `${pageId}_img`,\n            url: publicUrl,\n            elementProperties: {\n              pageObjectId: pageId,\n              transform: { scaleX: 1, scaleY: 1, translateX: 400, translateY: 150, unit: 'PT' },\n              size: { height: { magnitude: 300, unit: 'PT' }, width: { magnitude: 400, unit: 'PT' } }\n            }\n          }\n        });\n      } catch (err) {\n        log('WARN', `Skipping diagram on slide ${s.slide_number}: ${err.message}`);\n      }\n    }\n\n    await slidesSvc.presentations.batchUpdate({ presentationId: pres.presentationId, requestBody: { requests: reqs } });\n  }\n\n  log('INFO', `Deck ready: https://docs.google.com/presentation/d/${pres.presentationId}/edit`);\n\n  process.on('exit', async () => {\n    log('INFO', 'Cleaning up local server and ngrok');\n    process.kill(-localServer.pid);\n    await ngrok.disconnect();\n    await ngrok.kill();\n  });\n}\n\ncreateSlides().catch(err => { log('ERROR', err.toString()); process.exit(1); });]]]",
+      "created_at": "2025-05-20T03:19:57.166000",
+      "sequence_order": 1,
+      "parent_id": "e1171750-9c2b-4811-83be-6b25cda23788",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "38fd7f4a-399f-4c0d-bbcb-3849d11c2fa2",
+      "role": "assistant",
+      "content": "",
+      "created_at": "2025-05-20T03:20:09.612583",
+      "sequence_order": 2,
+      "parent_id": "528fd325-33c7-4f00-a21c-79824e00eca8",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "18eacb5e-a997-43e8-81ba-c021d04fe57c",
+      "role": "assistant",
+      "content": "Here's your improved script with clear, robust error handling, graceful fallbacks, retry logic, and self-repair attempts using an LLM when Mermaid diagram rendering fails:",
+      "created_at": "2025-05-20T03:19:58.307140",
+      "sequence_order": 3,
+      "parent_id": "38fd7f4a-399f-4c0d-bbcb-3849d11c2fa2",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    },
+    {
+      "id": "88234afd-57a3-4769-9ca7-844ddf362bf5",
+      "role": "assistant",
+      "content": "",
+      "created_at": "2025-05-20T03:20:09.973326",
+      "sequence_order": 4,
+      "parent_id": "18eacb5e-a997-43e8-81ba-c021d04fe57c",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": false
+      }
+    },
+    {
+      "id": "c97e28c5-bf43-4bce-8563-f21fe2b2ff6e",
+      "role": "tool",
+      "content": "Successfully created text document 'Graceful Slide Gen' which will be referenced in all future messages with the unique identifier textdoc_id: '682bd8fdf2048191968fd7a0575ff39e'",
+      "created_at": "2025-05-20T03:21:06.221095",
+      "sequence_order": 5,
+      "parent_id": "88234afd-57a3-4769-9ca7-844ddf362bf5",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 0,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "555f292d-9577-4dd2-9840-24e36bf80ea9",
+      "role": "assistant",
+      "content": "### Improvements & Added Features:\n\n- **Robust Error Handling**:  \n  Captures Mermaid rendering errors, logs clearly, and attempts a graceful fallback.\n\n- **LLM-Assisted Repairs**:  \n  Automatically invokes Anthropic's Claude to attempt syntax repairs if Mermaid diagrams fail to render.\n\n- **Public URL Verification**:  \n  Checks the public URL (Ngrok) for accessibility before embedding images.\n\n- **Clean-up Routine**:  \n  Ensures local server and ngrok tunnels are properly closed upon script termination.\n\nYou can integrate this improved script directly into your workflow for a more reliable and graceful slide generation process.",
+      "created_at": "2025-05-20T03:21:02.227455",
+      "sequence_order": 6,
+      "parent_id": "c97e28c5-bf43-4bce-8563-f21fe2b2ff6e",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}

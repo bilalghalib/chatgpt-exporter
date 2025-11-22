@@ -1,0 +1,37 @@
+{
+  "id": "a508cd79-c523-46f1-9817-dc77b6c6b34a",
+  "source": "chatgpt",
+  "title": "Check if nodes connected - DFS",
+  "created_at": "2023-04-02T20:43:20.084035",
+  "updated_at": "2023-04-02T20:43:38",
+  "summary": null,
+  "message_count": 2,
+  "messages": [
+    {
+      "id": "4d903ee5-8373-4c2b-9f02-cfa69944283c",
+      "role": "user",
+      "content": "python code to find if two nodes of a graph is connected or not using DFS and the graph is in this format\n\n{'0-2': ['0-1'], '0-1': ['0-2', '0-3'], '0-3': ['0-1', '0-4'], '0-4': ['0-3'], '1-2': ['1-3'], '1-3': ['1-2'], '1-4': ['1-3'], '1-5': ['1-3']}\n\nfor example I want to find if '0-2' and '0-3' is connected or not",
+      "created_at": "2023-04-02T20:43:20.086252",
+      "sequence_order": 0,
+      "parent_id": "e8fc47db-5444-4785-ba9c-7c7323b746da",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": null
+      }
+    },
+    {
+      "id": "19b4ae99-b75d-4546-ae05-3c804e229c8e",
+      "role": "assistant",
+      "content": "Here is the Python code to find if two nodes of a graph are connected or not using DFS:\n\n```\ndef dfs(graph, start, end, visited=None):\n    if visited is None:\n        visited = set()\n    visited.add(start)\n    if start == end:\n        return True\n    for neighbor in graph[start]:\n        if neighbor not in visited:\n            if dfs(graph, neighbor, end, visited):\n                return True\n    return False\n\ngraph = {'0-2': ['0-1'], '0-1': ['0-2', '0-3'], '0-3': ['0-1', '0-4'], '0-4': ['0-3'], '1-2': ['1-3'], '1-3': ['1-2'], '1-4': ['1-3'], '1-5': ['1-3']}\nstart_node = '0-2'\nend_node = '0-3'\nif dfs(graph, start_node, end_node):\n    print(f\"{start_node} and {end_node} are connected\")\nelse:\n    print(f\"{start_node} and {end_node} are not connected\")\n```\n\nIn the above code, `dfs` function takes the `graph` dictionary, `start` node, `end` node, and an optional `visited` set as inputs. The `visited` set is used to keep track of already visited nodes to avoid infinite loops. Initially, `visited` is set to `None` and is created as an empty set inside the function.\n\nThe function starts by adding the `start` node to the `visited` set. If the `start` node is equal to the `end` node, it returns `True` indicating that they are connected. Otherwise, it checks each neighbor of the `start` node using a loop. If the neighbor is not already in the `visited` set, the function recursively calls itself with the neighbor as the new `start` node. If the recursive call returns `True`, the function also returns `True` indicating that the `start` and `end` nodes are connected.\n\nFinally, the main code block initializes the `graph` dictionary, sets the `start_node` and `end_node` variables, and calls the `dfs` function with these variables as inputs. If the `dfs` function returns `True`, it prints a message indicating that the nodes are connected, otherwise, it prints a message indicating that they are not connected.",
+      "created_at": "2023-04-02T20:43:38.905133",
+      "sequence_order": 1,
+      "parent_id": "4d903ee5-8373-4c2b-9f02-cfa69944283c",
+      "metadata": {
+        "status": "finished_successfully",
+        "weight": 1,
+        "end_turn": true
+      }
+    }
+  ]
+}
