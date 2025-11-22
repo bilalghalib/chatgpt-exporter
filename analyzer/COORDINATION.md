@@ -10,12 +10,12 @@
 **Status**: 🟢 ACTIVE
 **Direction**: Forward (chronological)
 **Range**: Conversations 1 → 1758 (first half)
-**Current Progress**: Batch 1 (conversations 1-50), analyzed 7/50
-**Last Checkpoint**: 2025-11-22
+**Current Progress**: Batch 1 (conversations 1-50), analyzed ~40/50
+**Last Checkpoint**: 2025-11-22 (committed conversations 8-42 analysis)
 **Next Checkpoint**: After conversation 50
 
 **Batches Assigned**: 1-36 (batches of 50 each)
-- Batch 1: Conversations 1-50 ✅ In Progress (7/50 done)
+- Batch 1: Conversations 1-50 ✅ In Progress (~40/50 done, 80% complete)
 - Batch 2: Conversations 51-100 ⏳ Pending
 - Batch 3: Conversations 101-150 ⏳ Pending
 - ... (continues to Batch 36: conversations 1751-1758)
@@ -70,6 +70,66 @@ Each instance updates this file after completing a batch:
 - Knowledge graph: `knowledge_graph_batch_[N]_reverse.json`
 - Extraction log: `extraction_batch_[N]_reverse.md`
 
+### **2a. Per-Conversation Metadata Files** ⭐ NEW
+
+**IMPORTANT**: In addition to batch-level aggregates, create rich metadata files for EACH conversation analyzed:
+
+**Format**: `[original_filename]_metadata.json`
+**Location**: Same directory as original conversation file (`exported_conversations/`)
+
+**Structure**:
+```json
+{
+  "conversation_id": "...",
+  "source_file": "2023-03-27_chatgpt_...json",
+  "analyzed_by": "instance_1_forward|instance_2_reverse|instance_3_middle",
+  "batch": "1|71|M0",
+  "analysis_date": "2025-11-22",
+
+  "conversation_metadata": {
+    "title": "...",
+    "created_at": "...",
+    "message_count": 0
+  },
+
+  "substantive_content": {
+    "user_questions": [{text: "...", sequence: 0}],
+    "user_statements": [{text: "...", word_count: 0}],
+    "self_reflections": [{text: "...", insight: "..."}],
+    "decisions_visible": [{choice: "...", evidence: "..."}]
+  },
+
+  "extracted_entities": {
+    "people": [{name: "...", relationship: "...", confidence: 0.9}],
+    "projects": [{name: "...", status: "...", context: "..."}],
+    "organizations": [...],
+    "concepts": [...]
+  },
+
+  "values_beliefs": {
+    "explicit_values": [{value: "...", quote: "...", confidence: 0.9}],
+    "implicit_beliefs": [{belief: "...", evidence: "..."}],
+    "tensions_visible": [{tension: "...", manifestation: "..."}]
+  },
+
+  "patterns": {
+    "caps_visible": ["...", "..."],
+    "iaps_visible": ["...", "..."],
+    "communication_style": "..."
+  },
+
+  "significance": "Why this conversation matters",
+  "cross_references": ["Related conversation IDs"]
+}
+```
+
+**Benefits**:
+- Preserves rich qualitative data that gets lost in aggregation
+- Enables per-conversation search and retrieval
+- Supports temporal analysis (conversation-level granularity)
+- Allows other instances to see detailed context
+
+**Update Frequency**: Create metadata file immediately after analyzing each conversation
 **Instance 3** (middle→outward):
 - Checkpoint files: `checkpoint_batch_M[N]-[B|F]_[direction].json`
 - Knowledge graph: `knowledge_graph_batch_M[N]-[B|F]_[direction].json`
@@ -318,11 +378,16 @@ Every 200 conversations, both instances should check:
 
 ### Instance 1 Updates:
 - **2025-11-22 19:30 UTC**: Batch 1 started (conversations 1-50)
-- **2025-11-22 20:15 UTC**: Batch 1 in progress - 7/50 conversations analyzed
+- **2025-11-22 20:15 UTC**: Batch 1 initial checkpoint - 7/50 conversations analyzed
   - Extracted: 16+ people, 10+ projects, 40+ relationships
   - Generated: Values Card #1 ("Curious Knowledge-Weaver", confidence 0.92)
   - Knowledge graph: `KNOWLEDGE_GRAPH_BATCH1_DATA.json` created
-- **NEXT UPDATE**: After completing Batch 1 (conversation 50)
+- **2025-11-22 22:45 UTC**: Batch 1 major progress - ~40/50 conversations analyzed (80% complete)
+  - Created: `KNOWLEDGE_GRAPH_BATCH1_UPDATE_C8-20.json` (NurCoop philosophy, Eric Wilhelm, Bloom LGA data, complete worldview manifesto)
+  - Created: `KNOWLEDGE_GRAPH_BATCH1_UPDATE_C21-42.json` (Master's degree, GEMSI history, All Hands Active, Impact Nexus, Character strengths, ethical sourcing)
+  - Major discoveries: Bilal's complete life narrative (age 37, Master's in Education 2021), post-traumatic growth thesis, critical stance on impact sector
+  - Committed and pushed to remote
+- **NEXT UPDATE**: After completing Batch 1 (conversations 43-50)
 
 ### Instance 2 Updates:
 - **2025-11-22 20:30 UTC**: Instance 2 ACTIVATED - Batch 71 starting (conversations 3517-3468)
