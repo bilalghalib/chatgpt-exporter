@@ -25,8 +25,18 @@ cat your_voice/HIGHLIGHTS.md
 ```
 
 ### 3. Build Theory of Mind (LLM-Based)
+
+**RECOMMENDED: Use Batch Processor (Incremental)**
 ```bash
-# Requires Anthropic API key
+# Process 50 conversations at a time (can stop/resume)
+python3 batch_processor.py YOUR_API_KEY 1 50
+
+# See BATCH_PROCESSOR_GUIDE.md for full documentation
+```
+
+**Alternative: One-shot Processing**
+```bash
+# Process all at once (not resumable)
 python3 build_llm_theory_of_mind.py YOUR_API_KEY 50
 
 # Process all conversations (costs ~$1,750)
@@ -156,7 +166,9 @@ See `PROCESS_DOCUMENTATION.md` Section "5 Critical Questions" and "5 Suggestions
 | `deep_theme_analyzer.py` | Multi-dimensional analysis | ✅ Ready |
 | `extract_your_voice.py` | Extract user messages | ✅ Ready |
 | `organize_conversations.py` | Create folder structure | ✅ Ready |
-| `build_llm_theory_of_mind.py` | SAREC belief extraction | ✅ Ready |
+| `batch_processor.py` | **Incremental LLM analysis** | ✅ **RECOMMENDED** |
+| `build_llm_theory_of_mind.py` | One-shot SAREC extraction | ✅ Ready |
+| `BATCH_PROCESSOR_GUIDE.md` | Batch processor documentation | ✅ Complete |
 | `PROCESS_DOCUMENTATION.md` | Complete pipeline docs | ✅ Complete |
 | `COMPREHENSIVE_THEME_ANALYSIS.md` | 40-page synthesis | ✅ Complete |
 | `ANALYSIS_COMPLETE.md` | Summary & next steps | ✅ Complete |
