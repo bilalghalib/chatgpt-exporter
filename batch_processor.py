@@ -86,7 +86,17 @@ class BatchSelector:
 
         if organized_meta.exists():
             with open(organized_meta, 'r') as f:
-                return json.load(f)
+                meta = json.load(f)
+                # Ensure required fields exist
+                if 'depth_score' not in meta:
+                    meta['depth_score'] = meta.get('message_count', 0) / 10
+                if 'file_path' not in meta:
+                    meta['file_path'] = str(conversation_file)
+                if 'id' not in meta:
+                    meta['id'] = conv_id
+                if 'date' not in meta:
+                    meta['date'] = conversation_file.name.split("_")[0]
+                return meta
 
         # Otherwise, calculate on the fly
         with open(conversation_file, 'r') as f:
@@ -103,7 +113,7 @@ class BatchSelector:
 
         return {
             "id": conv_id,
-            "date": parts[0],
+            "date": parts[0] if parts else "2023-01-01",
             "depth_score": message_count / 10,
             "file_path": str(conversation_file)
         }
