@@ -244,6 +244,37 @@ Click the button to perform the action you want.
 - **Delete** - Deletes the selected conversations.
 - **Export** - Exports the selected conversations in the format chosen using the format selector.
 
+## 🧠 AI-Powered Analysis (Desktop)
+
+**For large conversation collections (100+ conversations), use the desktop analyzer:**
+
+The standalone **Desktop Analyzer** uses Claude AI to extract insights from your exported conversations:
+
+```bash
+cd analyzer
+npm install
+
+node cli.js analyze \
+  --input ~/Downloads/conversations.json \
+  --api-key sk-ant-YOUR_ANTHROPIC_KEY \
+  --output knowledge-base.json
+```
+
+**Features:**
+- **Checkpoint/Resume**: Safely analyze thousands of conversations overnight
+- **User-Centric**: Prioritizes YOUR questions, insights, and creative prompts over generic LLM responses
+- **Cost-Effective**: ~$0.002 per conversation (~$5.60 for 2,800 conversations)
+- **Progress Tracking**: Real-time progress bar with cost estimates and ETA
+
+**What it extracts:**
+- Your substantive inputs (>100 words) with full text preserved
+- All your questions (reveals your learning journey)
+- Creative prompts and instructions you wrote
+- Your code examples and problem-solving approaches
+- Your domain expertise and decision-making patterns
+
+See `analyzer/README.md` and `QUICKSTART.md` for complete guide.
+
 ## 🤝 Contribution
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md)

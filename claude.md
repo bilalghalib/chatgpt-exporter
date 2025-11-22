@@ -506,6 +506,154 @@ Clear Memory → Continue...
 
 ---
 
+## Desktop Analyzer: AI-Powered Insights Extraction
+
+### Overview
+
+The **Desktop Analyzer** (`analyzer/cli.js`) is a standalone Node.js CLI tool that analyzes exported conversations using Claude Haiku 4.5 to extract structured insights and build a personal knowledge base.
+
+### Why Desktop Instead of Browser?
+
+**Problem:** Analyzing 2,800 conversations in browser = 6-8 hours of runtime, risk of crashes, no resume capability.
+
+**Solution:** Separate export (fast, browser) from analysis (slow, desktop with checkpoints).
+
+### Key Features
+
+1. **Checkpoint/Resume System**
+   - Saves progress every N conversations (configurable)
+   - Resume from `.analyzer-checkpoint.json` if interrupted
+   - Never lose progress on large batches
+
+2. **User-Centric Extraction Strategy** 🆕
+   - **Prioritizes YOUR content** over LLM responses
+   - Extracts large user inputs (>100 words) with full text
+   - Captures all user questions (reveals learning path)
+   - Preserves creative prompts and instructions you wrote
+   - De-prioritizes generic LLM explanations
+
+3. **Real-Time Progress**
+   - Progress bar with ETA and cost tracking
+   - Skip failed conversations without stopping
+   - Cost: ~$0.002/conversation (~$5.60 for 2,800 conversations)
+
+### Usage
+
+```bash
+# Install dependencies
+cd analyzer && npm install
+
+# Analyze conversations
+node cli.js analyze \
+  --input ~/Downloads/conversations.json \
+  --api-key sk-ant-YOUR_KEY \
+  --output knowledge-base.json
+
+# Resume from checkpoint
+node cli.js analyze \
+  --input ~/Downloads/conversations.json \
+  --api-key sk-ant-YOUR_KEY \
+  --resume
+
+# Check progress
+node cli.js stats
+```
+
+### Extraction Philosophy
+
+**Old Approach (Equal Weight):**
+- 50% extraction is generic LLM responses
+- User insights buried in noise
+- Hard to see YOUR evolving expertise
+
+**New Approach (User-Centric):**
+- 80% focus on YOUR content
+- YOUR questions reveal learning journey
+- YOUR prompts show communication skills
+- YOUR insights map YOUR expertise
+
+See `analyzer/EXTRACTION_STRATEGY.md` for complete methodology.
+
+### Architecture
+
+**File:** `analyzer/cli.js` (491 lines)
+
+**Key Components:**
+- `loadCheckpoint()` / `saveCheckpoint()` - Checkpoint management
+- `parseConversationTurns()` - Extract turns from ChatGPT format
+- `chunkConversation()` - Split into 10-turn chunks with 2-turn overlap
+- `analyzeChunk()` - Send to Claude API with extraction prompt
+- `analyzeConversation()` - Process all chunks for one conversation
+
+**Extraction Priorities:**
+1. 🥇 **Substantive user inputs** (>100 words) - Extract full text
+2. 🥈 **User questions** - All questions, even 1-liners
+3. 🥉 **User creative direction** - Prompts and instructions
+4. **User insights** - Aha moments, hypotheses, decisions
+5. **LLM responses** - ONLY if genuinely novel (confidence >0.9)
+
+**Event Types (User-Focused):**
+```typescript
+type UserEventType =
+  | "substantive_user_input"     // Full text preserved
+  | "user_question"                // Reveals intent
+  | "user_hypothesis"              // Your theories
+  | "user_prompt"                  // Your prompts
+  | "creative_direction"           // Your guidance
+  | "problem_framing"              // How you describe problems
+  | "user_code_example"            // Code YOU wrote
+  | "domain_expertise"             // Your specialized knowledge
+```
+
+### Output Structure
+
+```json
+{
+  "meta": {
+    "conversations_analyzed": 2800,
+    "total_entities": 8420,
+    "total_cost": 5.64
+  },
+  "entities": {
+    "evt_123_0_0": {
+      "type": "substantive_user_input",
+      "speaker": "user",
+      "full_text": "Complete user message preserved here...",
+      "word_count": 234,
+      "context": "User describing complex architecture problem",
+      "tags": ["react", "websocket", "architecture"],
+      "metadata": {
+        "user_expertise_signal": "intermediate",
+        "user_intent": "Solve state management for real-time data"
+      }
+    }
+  }
+}
+```
+
+### Documentation Files
+
+- `analyzer/README.md` - Quick start guide
+- `analyzer/EXTRACTION_STRATEGY.md` - Complete extraction philosophy
+- `analyzer/EXTRACT_INSTRUCTIONS.md` - LLM analyzer instructions
+- `QUICKSTART.md` - User guide for browser + desktop workflow
+
+### Performance
+
+| Conversations | Time    | Cost    | Memory  |
+|--------------|---------|---------|---------|
+| 100          | 30 min  | $0.20   | ~50 MB  |
+| 500          | 2.5 hrs | $1.00   | ~50 MB  |
+| 2,800        | 6-8 hrs | $5.60   | ~50 MB  |
+
+**Benefits:**
+- Constant memory usage (only holds chunk in memory)
+- Can run overnight safely
+- Resume from any point
+- Skip failed conversations without losing progress
+
+---
+
 ## Conclusion
 
 The main performance bottleneck is the **all-at-once processing** in the export functions. By implementing **chunked export processing**, we can:
@@ -517,3 +665,8 @@ The main performance bottleneck is the **all-at-once processing** in the export 
 5. ✅ Improve user experience
 
 The recommended approach is **Option A: Multiple ZIP Files** as it's the simplest and most reliable solution.
+
+For **analysis**, the desktop CLI analyzer provides:
+- Safe, resumable processing for thousands of conversations
+- User-centric extraction that prioritizes YOUR content
+- Structured knowledge base of YOUR expertise and thinking patterns
